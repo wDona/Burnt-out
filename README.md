@@ -11,7 +11,7 @@ Es mi proyecto intermodular para el Grado Superior de Desarrollo de Aplicaciones
 ## 🧠 Sobre Burn out
 Antes de  evaluar los riesgos, hay que saber de donde viene y por que se produce. He hecho una investigacion sobre que es, como acaba ocurriendo, como prevenirlo y/o tratarlo.
 
-[![Ver Informe](https://img.shields.io/badge/Ver%20Informe-📄-red?style=for-the-badge)](./[Burn't_Out_Anteproyecto.pdf](https://docs.google.com/document/d/18-xCaPPE7kGjMz0NHPk7Fg39yHhOqnHPIx9ZnB0ufzU/edit?usp=sharing)) 
+[![Ver Informe](https://img.shields.io/badge/Ver%20Informe-📄-blue?style=for-the-badge)](./[Burn't_Out_Anteproyecto.pdf](https://docs.google.com/document/d/18-xCaPPE7kGjMz0NHPk7Fg39yHhOqnHPIx9ZnB0ufzU/edit?usp=sharing)) 
 
 *Esta aplicacion no esta hecha ni consultada con profesionales en el ambito de la psicologia. Antes de tomar alguna decision basada en alguna informacion aportada, consulta con un profesional*
 
