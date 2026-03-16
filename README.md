@@ -8,6 +8,37 @@ Es mi proyecto intermodular para el Grado Superior de Desarrollo de Aplicaciones
 [![Ver Anteproyecto](https://img.shields.io/badge/Ver%20Anteproyecto-📄-red?style=for-the-badge)](./Burn't_Out_Anteproyecto.pdf) [![Descargar](https://img.shields.io/badge/Descargar-📄-green?style=for-the-badge)](https://github.com/wDona/Burnt-out/releases)
 
 ---
+## 🧠 Sobre Burn out
+Antes de  evaluar los riesgos, hay que saber de donde viene y por que se produce. He hecho una investigacion sobre que es, como acaba ocurriendo, como prevenirlo y/o tratarlo.
+
+[![Ver Informe](https://img.shields.io/badge/Ver%20Informe-📄-red?style=for-the-badge)](./[Burn't_Out_Anteproyecto.pdf](https://docs.google.com/document/d/18-xCaPPE7kGjMz0NHPk7Fg39yHhOqnHPIx9ZnB0ufzU/edit?usp=sharing)) 
+
+*Esta aplicacion no esta hecha ni consultada con profesionales en el ambito de la psicologia. Antes de tomar alguna decision basada en alguna informacion aportada, consulta con un profesional*
+
+---
+
+## 📊 Evaluar Riesgos
+El riesgo no se calcula como un promedio general, sino mediante el seguimiento de tres variables independientes. 
+
+| Dimensión | Variable | Ítems MBI (Ref) | Riesgo Bajo | Riesgo Medio | Riesgo Alto |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **Cansancio Emocional (CE)** | `exhaustion_score` | 1, 2, 3, 6, 8, 13, 14, 16, 20 | < 18 | 19 - 26 | **≥ 27** |
+| **Despersonalización (D)** | `cynicism_score` | 5, 10, 11, 15, 22 | < 5 | 6 - 9 | **≥ 10** |
+| **Realización Personal (RP)** | `efficacy_score` | 4, 7, 9, 12, 17, 18, 19, 21 | > 40 | 34 - 39 | **≤ 33** |
+
+> [!WARNING]
+> **Nota de Implementación:** La escala de **Realización Personal** es inversa. A menor puntaje, mayor es el riesgo detectado.
+
+---
+
+## 📅 Registro Diario (Micro-Check)
+Para evitar la fatiga de encuesta en el usuario, se recomienda un mapeo diario de 3 preguntas (escala Likert 0-6 o 1-5):
+
+1. **CE (Energía):** "¿Qué tan agotado te sientes hoy al terminar tu jornada?"
+2. **D (Actitud):** "¿Has sentido irritación o distancia hacia tus compañeros/clientes hoy?"
+3. **RP (Logro):** "¿Sientes que tus tareas de hoy han aportado valor real?"
+
+---
 
 ## 🌟 Características Principales
 
