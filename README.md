@@ -22,14 +22,13 @@ Y si lo has escuchado alguna vez, echale un vistazo, ya que puede que hayas sido
 ## 📊 Evaluar Riesgos
 El riesgo no se calcula como un promedio general, sino mediante el seguimiento de tres variables independientes. 
 
+[![Items MBI](https://img.shields.io/badge/Items%20MBI-📄-purple?style=for-the-badge)](https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiQUYVL7L37odkWwAdk7RaaJhwEGkSPPc59He11C60StwmHmWeRxuhFaa8pO1CBY8kWfGAfdaqx7prtYglhhskNa-gf0TqJo-gBKCcRLMj3t7gMFuvyyvctGuupEWA2Nv6SrxyWTXj3ttMd/s1600/eMBI_HSS.jpg) 
+
 | Dimensión | Ítems MBI (Ref) | Riesgo Bajo | Riesgo Medio | Riesgo Alto |
 | :--- | :--- | :--- | :--- | :--- |
 | **Cansancio Emocional (CE)** | 1, 2, 3, 6, 8, 13, 14, 16, 20 | < 18 | 19 - 26 | **≥ 27** |
 | **Despersonalización (D)** | 5, 10, 11, 15, 22 | < 5 | 6 - 9 | **≥ 10** |
 | **Realización Personal (RP)** | 4, 7, 9, 12, 17, 18, 19, 21 | > 40 | 34 - 39 | **≤ 33** |
-
-> [!WARNING]
-> **Nota de Implementación:** La escala de **Realización Personal** es inversa. A menor puntaje, mayor es el riesgo detectado.
 
 ---
 
@@ -42,7 +41,7 @@ Para evitar la fatiga de encuesta en el usuario, se recomienda un mapeo diario d
 
 ---
 
-## 🌟 Características Principales
+# 🌟 Características Principales sobre la App
 
 * **Gestión Visual:** Organización mediante tableros, tarjetas, tareas y subtareas
 * **Monitoreo de Bienestar:** Encuestas rápidas (menos de 15 segundos) y anónimas sobre estrés y ánimo
