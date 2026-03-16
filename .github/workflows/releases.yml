@@ -119,4 +119,4 @@ jobs:
           prerelease: ${{ startsWith(steps.vars.outputs.version, '1.') }}
           files: release-artifacts/*
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
