@@ -40,7 +40,7 @@ kotlin {
 }
 
 android {
-    namespace = "dev.wdona.burnt_out.shared"
+    namespace = "dev.wdona.burntout.shared"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
@@ -54,7 +54,7 @@ android {
 sqldelight {
     databases {
         create("AppDatabase") {
-            packageName.set("dev.wdona.burnt_out.shared.db")
+            packageName.set("dev.wdona.burntout.shared.db")
             verifyMigrations.set(false)
         }
     }

@@ -1,6 +1,0 @@
-package dev.wdona.burnt_out.shared.domain
-
-import kotlinx.serialization.Serializable
-
-@Serializable
-data class Equipo(val idEquipo: Long, val titulo: String, val puntuacion: Long?, val idOrganizacion: Long, val idMiembros: List<Long>) // Puntuacion anadida

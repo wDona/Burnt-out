@@ -63,11 +63,11 @@ kotlin {
 }
 
 android {
-    namespace = "dev.wdona.burnt_out"
+    namespace = "dev.wdona.burntout"
     compileSdkVersion(libs.versions.android.compileSdk.get().toInt())
 
     defaultConfig {
-        applicationId = "dev.wdona.burnt_out"
+        applicationId = "dev.wdona.burntout"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
         versionCode = 1
@@ -105,7 +105,7 @@ dependencies {
 
 compose.desktop {
     application {
-        mainClass = "dev.wdona.burnt_out.MainKt"
+        mainClass = "dev.wdona.burntout.MainKt"
 
         nativeDistributions {
             // WIN - DEB - ARCH

@@ -4,10 +4,10 @@ plugins {
     application
 }
 
-group = "dev.wdona.burnt_out"
+group = "dev.wdona.burntout"
 version = "1.0.0"
 application {
-    mainClass.set("dev.wdona.burnt_out.ApplicationKt")
+    mainClass.set("dev.wdona.burntout.ApplicationKt")
     
     val isDevelopment: Boolean = project.ext.has("development")
     applicationDefaultJvmArgs = listOf("-Dio.ktor.development=$isDevelopment")
