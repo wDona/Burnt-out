@@ -58,7 +58,8 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ steps.vars.outputs.version }}
-          name: Release ${{ steps.vars.outputs.version }}
+          name: Burn t out ${{ steps.vars.outputs.version }}
+          prerelease: ${{ startsWith(steps.vars.outputs.version, '1.') }}
           files: release-artifacts/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -104,6 +105,7 @@ jobs:
         with:
           tag_name: v${{ steps.vars.outputs.version }}
           name: Release ${{ steps.vars.outputs.version }}
+          prerelease: ${{ startsWith(steps.vars.outputs.version, '1.') }}
           files: release-artifacts/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
