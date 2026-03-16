@@ -3,7 +3,7 @@ package dev.wdona.burntout.data.dao
 import dev.wdona.burntout.shared.domain.Pregunta
 import dev.wdona.burntout.shared.domain.Respuesta
 
-interface PreguntaDao {
+interface PreguntaRespuestaDao {
     suspend fun getPreguntasByOrg(idOrg: Long): List<Pregunta>
     suspend fun crearPregunta(pregunta: Pregunta): Long
     suspend fun upsertPregunta(pregunta: Pregunta)

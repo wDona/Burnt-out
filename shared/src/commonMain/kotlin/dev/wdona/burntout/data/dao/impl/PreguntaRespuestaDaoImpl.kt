@@ -1,13 +1,12 @@
 package dev.wdona.burntout.data.dao.impl
 
-import dev.wdona.burntout.data.dao.PreguntaDao
+import dev.wdona.burntout.data.dao.PreguntaRespuestaDao
 import dev.wdona.burntout.data.datasource.mapper.PreguntaMapper
-import dev.wdona.burntout.data.datasource.mapper.RespuestaMapper
 import dev.wdona.burntout.shared.domain.Pregunta
 import dev.wdona.burntout.shared.domain.Respuesta
 import dev.wdona.burntout.shared.db.AppDatabase
 
-class PreguntaDaoImpl(appDatabase: AppDatabase) : PreguntaDao {
+class PreguntaRespuestaDaoImpl(appDatabase: AppDatabase) : PreguntaRespuestaDao {
     private val queries = appDatabase.appDatabaseQueries
 
     override suspend fun getPreguntasByOrg(idOrg: Long): List<Pregunta> {

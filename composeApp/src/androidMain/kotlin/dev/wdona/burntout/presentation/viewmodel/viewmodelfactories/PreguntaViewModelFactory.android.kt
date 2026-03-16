@@ -1,15 +1,15 @@
 package dev.wdona.burntout.presentation.viewmodel.viewmodelfactories
 
 import android.content.Context
-import dev.wdona.burntout.data.api.impl.PreguntaApiImpl
-import dev.wdona.burntout.data.dao.PreguntaRepository
+import dev.wdona.burntout.data.api.impl.PreguntaRespuestaApiImpl
+import dev.wdona.burntout.data.dao.PreguntaRespuestaRepository
 import dev.wdona.burntout.data.dao.impl.OperacionPendienteDaoImpl
-import dev.wdona.burntout.data.dao.impl.PreguntaDaoImpl
+import dev.wdona.burntout.data.dao.impl.PreguntaRespuestaDaoImpl
 import dev.wdona.burntout.data.datasource.local.impl.OperacionPendienteLocalDataSourceImpl
-import dev.wdona.burntout.data.datasource.local.impl.PreguntaLocalDataSourceImpl
-import dev.wdona.burntout.data.datasource.remote.impl.PreguntaRemoteDataSourceImpl
-import dev.wdona.burntout.data.repository.PreguntaRepositoryImpl
-import dev.wdona.burntout.presentation.viewmodel.viewmodels.PreguntaViewModel
+import dev.wdona.burntout.data.datasource.local.impl.PreguntaRespuestaLocalDataSourceImpl
+import dev.wdona.burntout.data.datasource.remote.impl.PreguntaRespuestaRemoteDataSourceImpl
+import dev.wdona.burntout.data.repository.PreguntaRespuestaRepositoryImpl
+import dev.wdona.burntout.presentation.viewmodel.viewmodels.FormularioViewModel
 import dev.wdona.burntout.shared.db.AppDatabase
 import dev.wdona.burntout.shared.db.DatabaseDriverFactory
 import java.io.Serializable
@@ -17,29 +17,29 @@ import kotlin.jvm.Transient
 
 actual class PreguntaViewModelFactory(@Transient private val context: Context) : Serializable {
 
-    actual fun create(): PreguntaViewModel {
+    actual fun create(): FormularioViewModel {
         val driverFactory = DatabaseDriverFactory(context)
         val database = AppDatabase(driverFactory.createDriver())
 
-        val dao = PreguntaDaoImpl(database)
-        val api = PreguntaApiImpl()
+        val dao = PreguntaRespuestaDaoImpl(database)
+        val api = PreguntaRespuestaApiImpl()
         val pendienteDao = OperacionPendienteDaoImpl(database)
 
-        val localDataSource = PreguntaLocalDataSourceImpl(dao)
-        val remoteDataSource = PreguntaRemoteDataSourceImpl(api)
+        val localDataSource = PreguntaRespuestaLocalDataSourceImpl(dao)
+        val remoteDataSource = PreguntaRespuestaRemoteDataSourceImpl(api)
         val pendienteDataSource = OperacionPendienteLocalDataSourceImpl(pendienteDao)
 
-        val repository = PreguntaRepositoryImpl(localDataSource, remoteDataSource, pendienteDataSource)
+        val repository = PreguntaRespuestaRepositoryImpl(localDataSource, remoteDataSource, pendienteDataSource)
 
         return getInstance(repository)
     }
 
     companion object {
-        private var instance: PreguntaViewModel? = null
+        private var instance: FormularioViewModel? = null
 
-        fun getInstance(repository: PreguntaRepository): PreguntaViewModel {
+        fun getInstance(repository: PreguntaRespuestaRepository): FormularioViewModel {
             if (instance == null) {
-                instance = PreguntaViewModel(repository)
+                instance = FormularioViewModel(repository)
             }
             return instance!!
         }

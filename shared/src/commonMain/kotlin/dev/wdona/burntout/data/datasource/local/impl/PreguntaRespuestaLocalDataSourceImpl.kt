@@ -1,11 +1,11 @@
 package dev.wdona.burntout.data.datasource.local.impl
 
-import dev.wdona.burntout.data.dao.PreguntaDao
-import dev.wdona.burntout.data.datasource.local.PreguntaLocalDataSource
+import dev.wdona.burntout.data.dao.PreguntaRespuestaDao
+import dev.wdona.burntout.data.datasource.local.PreguntaRespuestaLocalDataSource
 import dev.wdona.burntout.shared.domain.Pregunta
 import dev.wdona.burntout.shared.domain.Respuesta
 
-class PreguntaLocalDataSourceImpl(private val dao: PreguntaDao): PreguntaLocalDataSource {
+class PreguntaRespuestaLocalDataSourceImpl(private val dao: PreguntaRespuestaDao): PreguntaRespuestaLocalDataSource {
     override suspend fun getPreguntasByOrg(idOrg: Long): List<Pregunta> {
         return dao.getPreguntasByOrg(idOrg)
     }

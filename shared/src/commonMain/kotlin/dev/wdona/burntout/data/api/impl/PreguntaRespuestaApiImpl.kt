@@ -1,6 +1,6 @@
 package dev.wdona.burntout.data.api.impl
 
-import dev.wdona.burntout.data.api.PreguntaApi
+import dev.wdona.burntout.data.api.PreguntaRespuestaApi
 import dev.wdona.burntout.shared.domain.Pregunta
 import dev.wdona.burntout.shared.domain.Respuesta
 import dev.wdona.burntout.shared.network.ApiClient
@@ -10,7 +10,7 @@ import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.statement.HttpResponse
 
-class PreguntaApiImpl(private val client: HttpClient = ApiClient.client) : PreguntaApi {
+class PreguntaRespuestaApiImpl(private val client: HttpClient = ApiClient.client) : PreguntaRespuestaApi {
     override suspend fun getPreguntasByOrg(idOrg: Long): List<Pregunta> =
         client.get("/preguntas/organizacion=$idOrg").body()
 

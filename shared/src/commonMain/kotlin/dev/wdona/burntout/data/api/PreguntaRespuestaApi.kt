@@ -4,7 +4,7 @@ import dev.wdona.burntout.shared.domain.Pregunta
 import dev.wdona.burntout.shared.domain.Respuesta
 import io.ktor.client.statement.HttpResponse
 
-interface PreguntaApi {
+interface PreguntaRespuestaApi {
     suspend fun getPreguntasByOrg(idOrg: Long): List<Pregunta>
     suspend fun crearPregunta(pregunta: Pregunta): HttpResponse
     suspend fun actualizarPregunta(pregunta: Pregunta): HttpResponse

@@ -1,8 +1,8 @@
 package dev.wdona.burntout.presentation.viewmodel.viewmodelfactories
 
-import dev.wdona.burntout.presentation.viewmodel.viewmodels.PreguntaViewModel
+import dev.wdona.burntout.presentation.viewmodel.viewmodels.FormularioViewModel
 
 expect class PreguntaViewModelFactory {
-    fun create(): PreguntaViewModel
+    fun create(): FormularioViewModel
 }
 

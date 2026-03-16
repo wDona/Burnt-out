@@ -1,11 +1,11 @@
 package dev.wdona.burntout.data.repository
 
-import dev.wdona.burntout.data.dao.PreguntaRepository
+import dev.wdona.burntout.data.dao.PreguntaRespuestaRepository
 import dev.wdona.burntout.data.datasource.local.OperacionPendienteLocalDataSource
-import dev.wdona.burntout.data.datasource.local.PreguntaLocalDataSource
+import dev.wdona.burntout.data.datasource.local.PreguntaRespuestaLocalDataSource
 import dev.wdona.burntout.data.datasource.mapper.PreguntaMapper
 import dev.wdona.burntout.data.datasource.mapper.RespuestaMapper
-import dev.wdona.burntout.data.datasource.remote.PreguntaRemoteDataSource
+import dev.wdona.burntout.data.datasource.remote.PreguntaRespuestaRemoteDataSource
 import dev.wdona.burntout.domain.entity.Entity
 import dev.wdona.burntout.domain.model.TipoAccion
 import dev.wdona.burntout.shared.domain.Pregunta
@@ -15,11 +15,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class PreguntaRepositoryImpl(
-    private val local: PreguntaLocalDataSource,
-    private val remote: PreguntaRemoteDataSource,
+class PreguntaRespuestaRepositoryImpl(
+    private val local: PreguntaRespuestaLocalDataSource,
+    private val remote: PreguntaRespuestaRemoteDataSource,
     private val pendiente: OperacionPendienteLocalDataSource
-) : PreguntaRepository {
+) : PreguntaRespuestaRepository {
 
     private val repositoryScope = CoroutineScope(Dispatchers.Default)
 

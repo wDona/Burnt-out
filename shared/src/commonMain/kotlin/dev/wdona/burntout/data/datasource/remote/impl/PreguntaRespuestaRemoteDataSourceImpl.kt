@@ -1,11 +1,11 @@
 package dev.wdona.burntout.data.datasource.remote.impl
 
-import dev.wdona.burntout.data.api.PreguntaApi
-import dev.wdona.burntout.data.datasource.remote.PreguntaRemoteDataSource
+import dev.wdona.burntout.data.api.PreguntaRespuestaApi
+import dev.wdona.burntout.data.datasource.remote.PreguntaRespuestaRemoteDataSource
 import dev.wdona.burntout.shared.domain.Pregunta
 import dev.wdona.burntout.shared.domain.Respuesta
 
-class PreguntaRemoteDataSourceImpl(private val api: PreguntaApi): PreguntaRemoteDataSource {
+class PreguntaRespuestaRemoteDataSourceImpl(private val api: PreguntaRespuestaApi): PreguntaRespuestaRemoteDataSource {
     override suspend fun getPreguntasByOrg(idOrg: Long): List<Pregunta> {
         return api.getPreguntasByOrg(idOrg)
     }
