@@ -1,28 +1,35 @@
-# Burn't out
+# Burn't Out: Gestión de Proyectos y Prevención de Agotamiento
 
-**Burn't out** es una plataforma de gestión de tareas y proyectos diseñada para equilibrar la productividad con el bienestar mental. 
-Inspirada en herramientas como Trello, su objetivo principal es prevenir el síndrome de Burnout en entornos corporativos mediante el monitoreo saludable del estado de ánimo y la carga de trabajo.
+**Burn't Out** es una plataforma de gestión de tareas y proyectos diseñada para equilibrar la productividad con el bienestar mental. Inspirada en metodologías visuales como Kanban, su objetivo principal es prevenir el síndrome de Burnout en entornos corporativos mediante el monitoreo de la carga de trabajo y el estado anímico del usuario.
 
-Es mi proyecto intermodular para el Grado Superior de Desarrollo de Aplicaciones Multiplataforma.
-
-[![Ver Anteproyecto](https://img.shields.io/badge/Ver%20Anteproyecto-📄-red?style=for-the-badge)](./Burn't_Out_Anteproyecto.pdf) [![Descargar](https://img.shields.io/badge/Descargar-📄-green?style=for-the-badge)](https://github.com/wDona/Burnt-out/releases)
-
----
-## 🧠 Sobre Burn out
-Si no lo has escuchado nunca, puede que te preguntes que es este sindrome. He hecho una investigacion que responde a esa pregunta y a varias mas con datos sobre como afecta a España en varios sectores. 
-
-Y si lo has escuchado alguna vez, echale un vistazo, ya que puede que hayas sido victima de este sindrome alguna vez (o lo estes siendo) y no lo sepas.
-
-[![Ver Informe](https://img.shields.io/badge/Ver%20Informe-📄-blue?style=for-the-badge)](https://docs.google.com/document/d/18-xCaPPE7kGjMz0NHPk7Fg39yHhOqnHPIx9ZnB0ufzU/edit?usp=sharing) 
-
-*Esta aplicacion no esta hecha ni consultada con profesionales del ambito de la psicologia. Antes de tomar alguna decision basada en alguna informacion aportada, consulta con un profesional. La informacion esta sacada de internet y papers publicos que todo el mundo puede consultar.*
+Este proyecto constituye el trabajo intermodular para el Grado Superior de Desarrollo de Aplicaciones Multiplataforma (DAM).
 
 ---
 
-## 📊 Evaluar Riesgos
-El riesgo no se calcula como un promedio general, sino mediante el seguimiento de tres variables independientes. 
+### Documentación del Proyecto
 
-[![Items MBI](https://img.shields.io/badge/Items%20MBI-📄-purple?style=for-the-badge)](https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiQUYVL7L37odkWwAdk7RaaJhwEGkSPPc59He11C60StwmHmWeRxuhFaa8pO1CBY8kWfGAfdaqx7prtYglhhskNa-gf0TqJo-gBKCcRLMj3t7gMFuvyyvctGuupEWA2Nv6SrxyWTXj3ttMd/s1600/eMBI_HSS.jpg) 
+| Recurso | Enlace |
+| :--- | :--- |
+| **Anteproyecto Técnico** | [Ver Anteproyecto (PDF)](./Burn't_Out_Anteproyecto.pdf) |
+| **Repositorio de Versiones** | [Descargar Releases](https://github.com/wDona/Burnt-out/releases) |
+
+---
+
+## 🧠 Marco Teórico: El Síndrome de Burnout
+
+El síndrome de burnout es un fenómeno derivado del estrés crónico en el lugar de trabajo que no ha sido gestionado con éxito. He realizado una investigación detallada sobre su incidencia en diversos sectores profesionales en España, disponible en el siguiente enlace:
+
+[**Acceder al Informe de Investigación**](https://docs.google.com/document/d/18-xCaPPE7kGjMz0NHPk7Fg39yHhOqnHPIx9ZnB0ufzU/edit?usp=sharing)
+
+> **Nota de exención de responsabilidad:** Esta aplicación no ha sido desarrollada ni supervisada por profesionales de la psicología. La información contenida se basa en estudios públicos y literatura técnica disponible en internet. Ante cualquier síntoma, se recomienda encarecidamente consultar con un profesional colegiado.
+
+---
+
+## 📊 Evaluación de Riesgos (Modelo MBI)
+
+El riesgo no se calcula como un promedio general, sino mediante el seguimiento de tres variables independientes según el Inventario de Burnout de Maslach (MBI).
+
+[**Referencia de Items MBI**](https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiQUYVL7L37odkWwAdk7RaaJhwEGkSPPc59He11C60StwmHmWeRxuhFaa8pO1CBY8kWfGAfdaqx7prtYglhhskNa-gf0TqJo-gBKCcRLMj3t7gMFuvyyvctGuupEWA2Nv6SrxyWTXj3ttMd/s1600/eMBI_HSS.jpg)
 
 | Dimensión | Ítems MBI (Ref) | Riesgo Bajo | Riesgo Medio | Riesgo Alto |
 | :--- | :--- | :--- | :--- | :--- |
@@ -30,68 +37,54 @@ El riesgo no se calcula como un promedio general, sino mediante el seguimiento d
 | **Despersonalización (D)** | 5, 10, 11, 15, 22 | < 5 | 6 - 9 | **≥ 10** |
 | **Realización Personal (RP)** | 4, 7, 9, 12, 17, 18, 19, 21 | > 40 | 34 - 39 | **≤ 33** |
 
----
+### Registro Diario (Micro-Check)
+Para optimizar la experiencia de usuario y evitar la fatiga de encuesta, se implementa un mapeo diario basado en tres cuestiones clave (Escala Likert):
 
-## 📅 Registro Diario (Micro-Check)
-Para evitar la fatiga de encuesta en el usuario, se recomienda un mapeo diario de 3 preguntas (escala Likert 0-6 o 1-5):
-
-1. **CE (Energía):** "¿Qué tan agotado te sientes hoy al terminar tu jornada?"
-2. **D (Actitud):** "¿Has sentido irritación o distancia hacia tus compañeros/clientes hoy?"
-3. **RP (Logro):** "¿Sientes que tus tareas de hoy han aportado valor real?"
+1. **CE (Energía):** Grado de agotamiento al finalizar la jornada laboral.
+2. **D (Actitud):** Nivel de distanciamiento o irritabilidad hacia el entorno profesional.
+3. **RP (Logro):** Percepción del valor aportado mediante las tareas realizadas.
 
 ---
 
-# 🌟 Características Principales sobre la App
+## 🛠️ Especificaciones Técnicas
 
-* **Gestión Visual:** Organización mediante tableros, tarjetas, tareas y subtareas
-* **Monitoreo de Bienestar:** Encuestas rápidas (menos de 15 segundos) y anónimas sobre estrés y ánimo
-* **Prevención Activa:** La app evalúa el riesgo de agotamiento, genera alertas y puede limitar la asignación de tareas si el riesgo es alto.
-* **Cooperación y Gamificación:** Sistema de recompensas y tablas de clasificación para fomentar el trabajo en equipo y las pausas necesarias.
-* **Modo Offline:** Capacidad de trabajar sin conexión, priorizando la sincronización de cambios al recuperar el acceso a internet.
+El proyecto emplea **Kotlin Multiplatform (KMP)** para la lógica compartida y **Compose** para la interfaz de usuario.
 
----
+### Stack Tecnológico
+* **Arquitectura:** Kotlin Multiplatform (Android y Desktop JVM).
+* **Interfaz:** Compose Multiplatform.
+* **Backend:** API REST desarrollada con Ktor.
+* **Persistencia de Datos:**
+    * Local: SQLite con SQLDelight.
+    * Remota: MariaDB / PostgreSQL.
+* **Seguridad:** Cifrado TLS, hashing de credenciales y autenticación basada en JWT.
 
-## 🛠️ Stack Tecnológico
-
-El proyecto utiliza **Kotlin Multiplatform (KMP)** para compartir lógica entre plataformas 
-y **Compose** para la interfaz de usuario.
-
-* **Cliente:** Android y Desktop.
-* **Servidor:** API construida con Ktor.
-* **Base de Datos:** 
-  * **Local:** SQLite con SQLDelight.
-  * **Nube:** MariaDB / PostgreSQL.
-* **Seguridad:** Cifrado TLS, hashing de contraseñas y autenticación mediante JWT.
+### Funcionalidades Destacadas
+* **Gestión Visual:** Tableros, tarjetas y desglose de subtareas.
+* **Prevención Activa:** Evaluación automática del riesgo con limitación opcional de asignación de tareas.
+* **Resiliencia:** Soporte para trabajo offline con sincronización posterior.
+* **Dinámicas de Equipo:** Sistemas de gamificación y fomento de pausas activas.
 
 ---
 
-## 🚀 Guía de Build y Ejecución en Desarrollo
+## 🚀 Instrucciones de Ejecución
 
 ### Requisitos Previos
-* JDK 11 o superior.
-* Android Studio o IntelliJ IDEA (con el plugin KMP).
+* Java Development Kit (JDK) 11 o superior.
+* Entorno de desarrollo compatible (Android Studio o IntelliJ IDEA con plugin KMP).
 
-### 🖥️ Escritorio (Desktop JVM)
-Para compilar y ejecutar la versión de escritorio:
-- **macOS/Linux:** `./gradlew :composeApp:run`
-- **Windows:** `.\gradlew.bat :composeApp:run`
-
-### 📱 Android
-Para instalar la aplicación en un dispositivo o emulador:
-- **macOS/Linux:** `./gradlew :composeApp:installDebug`
-- **Windows:** `.\gradlew.bat :composeApp:installDebug`
-
-### 🌐 Servidor
-Para iniciar la API del servidor:
-- **macOS/Linux:** `./gradlew :server:run`
-- **Windows:** `.\gradlew.bat :server:run`
+| Entorno | Comando (macOS/Linux) | Comando (Windows) |
+| :--- | :--- | :--- |
+| **Desktop** | `./gradlew :composeApp:run` | `.\gradlew.bat :composeApp:run` |
+| **Android** | `./gradlew :composeApp:installDebug` | `.\gradlew.bat :composeApp:installDebug` |
+| **Servidor** | `./gradlew :server:run` | `.\gradlew.bat :server:run` |
 
 ---
 
 ## 🛡️ Privacidad y Seguridad
-* **Anonimato:** Configurable por el usuario para las encuestas de bienestar.
-* **Protección de Datos:** Los logs no contienen información personal sensible.
-* **Consentimiento:** Se requiere aceptación explícita antes del tratamiento de datos.
+* **Anonimato:** Las encuestas de bienestar permiten configuración de anonimato total.
+* **Integridad:** Los registros de sistema (logs) excluyen información personal sensible.
+* **Consentimiento:** Tratamiento de datos sujeto a la aceptación explícita de términos.
 
 ---
-*Desarrollado por wDona*. *He usado [Material Theme Builder](https://material-foundation.github.io/material-theme-builder/)*
+*Desarrollado por wDona. Identidad visual generada con Material Theme Builder.*
