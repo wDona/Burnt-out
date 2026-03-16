@@ -5,7 +5,7 @@ Inspirada en herramientas como Trello, su objetivo principal es prevenir el sín
 
 Es mi proyecto intermodular para el Grado Superior de Desarrollo de Aplicaciones Multiplataforma que estoy haciendo.
 
-[![Ver Anteproyecto](https://img.shields.io/badge/Ver%20Anteproyecto-📄-red?style=for-the-badge)](./Burn't_Out_Anteproyecto.pdf)
+[![Ver Anteproyecto](https://img.shields.io/badge/Ver%20Anteproyecto-📄-red?style=for-the-badge)](./Burn't_Out_Anteproyecto.pdf) [![Descargar](https://img.shields.io/badge/Descargar-📄-green?style=for-the-badge)](https://github.com/wDona/Burnt-out/releases)
 
 ---
 
