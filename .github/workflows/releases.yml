@@ -33,7 +33,9 @@ jobs:
           cache: 'gradle'
 
       - name: Build Android & Linux
-        run: ./gradlew :composeApp:assembleDebug :composeApp:packageDeb
+        run: | 
+            chmod +x gradlew
+            ./gradlew :composeApp:assembleDebug :composeApp:packageDeb
 
       - name: Find .deb file
         id: deb
