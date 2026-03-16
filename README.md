@@ -9,22 +9,24 @@ Es mi proyecto intermodular para el Grado Superior de Desarrollo de Aplicaciones
 
 ---
 ## 🧠 Sobre Burn out
-Antes de  evaluar los riesgos, hay que saber de donde viene y por que se produce. He hecho una investigacion sobre que es, como acaba ocurriendo, como prevenirlo y/o tratarlo.
+Si no lo has escuchado nunca, puede que te preguntes que es este sindrome. He hecho una investigacion que responde a esa pregunta y a varias mas con datos sobre como afecta a España en varios sectores. 
 
-[![Ver Informe](https://img.shields.io/badge/Ver%20Informe-📄-blue?style=for-the-badge)](./[Burn't_Out_Anteproyecto.pdf](https://docs.google.com/document/d/18-xCaPPE7kGjMz0NHPk7Fg39yHhOqnHPIx9ZnB0ufzU/edit?usp=sharing)) 
+Y si lo has escuchado alguna vez, echale un vistazo, ya que puede que hayas sido victima de este sindrome alguna vez (o lo estes siendo) y no lo sepas.
 
-*Esta aplicacion no esta hecha ni consultada con profesionales en el ambito de la psicologia. Antes de tomar alguna decision basada en alguna informacion aportada, consulta con un profesional*
+[![Ver Informe](https://img.shields.io/badge/Ver%20Informe-📄-blue?style=for-the-badge)](https://docs.google.com/document/d/18-xCaPPE7kGjMz0NHPk7Fg39yHhOqnHPIx9ZnB0ufzU/edit?usp=sharing) 
+
+*Esta aplicacion no esta hecha ni consultada con profesionales del ambito de la psicologia. Antes de tomar alguna decision basada en alguna informacion aportada, consulta con un profesional. La informacion esta sacada de internet y papers publicos que todo el mundo puede consultar.*
 
 ---
 
 ## 📊 Evaluar Riesgos
 El riesgo no se calcula como un promedio general, sino mediante el seguimiento de tres variables independientes. 
 
-| Dimensión | Variable | Ítems MBI (Ref) | Riesgo Bajo | Riesgo Medio | Riesgo Alto |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **Cansancio Emocional (CE)** | `exhaustion_score` | 1, 2, 3, 6, 8, 13, 14, 16, 20 | < 18 | 19 - 26 | **≥ 27** |
-| **Despersonalización (D)** | `cynicism_score` | 5, 10, 11, 15, 22 | < 5 | 6 - 9 | **≥ 10** |
-| **Realización Personal (RP)** | `efficacy_score` | 4, 7, 9, 12, 17, 18, 19, 21 | > 40 | 34 - 39 | **≤ 33** |
+| Dimensión | Ítems MBI (Ref) | Riesgo Bajo | Riesgo Medio | Riesgo Alto |
+| :--- | :--- | :--- | :--- | :--- |
+| **Cansancio Emocional (CE)** | 1, 2, 3, 6, 8, 13, 14, 16, 20 | < 18 | 19 - 26 | **≥ 27** |
+| **Despersonalización (D)** | 5, 10, 11, 15, 22 | < 5 | 6 - 9 | **≥ 10** |
+| **Realización Personal (RP)** | 4, 7, 9, 12, 17, 18, 19, 21 | > 40 | 34 - 39 | **≤ 33** |
 
 > [!WARNING]
 > **Nota de Implementación:** La escala de **Realización Personal** es inversa. A menor puntaje, mayor es el riesgo detectado.
@@ -64,7 +66,7 @@ y **Compose** para la interfaz de usuario.
 
 ---
 
-## 🚀 Guía de Build y Ejecución
+## 🚀 Guía de Build y Ejecución en Desarrollo
 
 ### Requisitos Previos
 * JDK 11 o superior.
