@@ -1,10 +1,13 @@
 name: Parallel Multiplatform Release
 
 on:
-  workflow_dispatch:
+  push:
+    branches:
+      - main
 
 jobs:
   build-unix:
+    if: contains(github.event.head_commit.message, 'RELEASE')
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -47,6 +50,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   build-windows:
+    if: contains(github.event.head_commit.message, 'RELEASE')
     runs-on: windows-latest
     permissions:
       contents: write
