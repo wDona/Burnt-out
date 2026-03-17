@@ -47,25 +47,25 @@ Las preguntas están almacenadas en base de datos y son comunes a todos los usua
 1. Debido a mi trabajo me siento emocionalmente agotado.
 2. Al final de la jornada me siento agotado.
 3. Me encuentro cansado cuando me levanto por las mañanas y tengo que enfrentarme a otro día de trabajo.
-4. Puedo entender con facilidad lo que piensan mis alumnos.
-5. Creo que trato a algunos alumnos con indiferencia.
-6. Trabajar con alumnos todos los días es una tensión para mí.
-7. Me enfrento muy bien con los problemas que me presentan mis alumnos.
-8. Me siento agotado por el trabajo.
+4. Puedo comprender facilmente como se sienten las personas que tengo que atender.
+5. Creo que trato a algunas personas con indiferencia, como si fueran objetos impersonales.
+6. Trabajar con personas todos los días es estresante/tenso para mí.
+7. Me enfrento muy bien a los problemas que me presentan las personas que tengo que atender.
+8. Me siento siento que mi trabajo me esta desgastando.
 9. Siento que mediante mi trabajo estoy influyendo positivamente en la vida de otros.
 10. Creo que me comporto de manera más insensible con la gente desde que hago este trabajo.
 11. Me preocupa que este trabajo me esté endureciendo emocionalmente.
-12. Me encuentro con mucha vitalidad.
+12. Me encuentro con mucha vitalidad/energetico.
 13. Me siento frustrado por mi trabajo.
-14. Siento que estoy haciendo un trabajo demasiado duro.
-15. Realmente no me importa lo que les ocurrirá a algunos de los alumnos a los que tengo a mi cargo en el colegio.
-16. Trabajar en contacto directo con los alumnos me produce bastante estrés.
-17. Tengo facilidad para crear una atmósfera relajada a mis alumnos.
-18. Me encuentro animado después de trabajar junto con mis alumnos.
-19. He realizado muchas cosas que valen la pena en este trabajo.
-20. En el trabajo siento que he llegado al límite de mis posibilidades.
-21. Siento que se tratar de forma adecuada los conflictos emocionales en el trabajo.
-22. Siento que los alumnos me culpan de algunos de sus problemas.
+14. Siento que estoy haciendo un trabajo demasiado duro/trabajando demasiado.
+15. Realmente no me importa lo que les ocurre a algunas personas a las que doy servicio.
+16. Trabajar en contacto directo con personas me produce estrés.
+17. Tengo facilidad para crear un clima agradable en mi trabajo.
+18. Me siento estimulado después de trabajar en contacto con personas.
+19. He realizado muchas cosas valiosas en este trabajo.
+20. Me siento que he llegado al límite de mis posibilidades.
+21. Siento que se tratar con calma los conflictos emocionales en el trabajo.
+22. Siento que las personas que atiendo me culpan de sus problemas.
 
 ### Algoritmo de cálculo
 
