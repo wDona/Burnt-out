@@ -51,6 +51,34 @@ class PreguntaRespuestaRepositoryImpl(
         local.getRespuestasByPregunta(idPregunta)
     }
 
+    override suspend fun getRespuestasByUser(idUser: Long): List<Respuesta> = withContext(Dispatchers.IO) {
+        repositoryScope.launch {
+            try {
+                val remoteList = remote.getRespuestasByUser(idUser)
+                remoteList.forEach {
+                    local.responderPregunta(it)
+                }
+            } catch (e: Exception) {
+                println("Servidor offline (getRespuestasByUser): ${e.message}")
+            }
+        }
+        local.getRespuestasByUser(idUser)
+    }
+
+    override suspend fun getRespuestasByUserAndDate(idUser: Long, date: Long): List<Respuesta> = withContext(Dispatchers.IO) {
+        repositoryScope.launch {
+            try {
+                val remoteList = remote.getRespuestasByUserAndDate(idUser, date)
+                remoteList.forEach {
+                    local.responderPregunta(it)
+                }
+            } catch (e: Exception) {
+                println("Servidor offline (getRespuestasByUserAndDate): ${e.message}")
+            }
+        }
+        local.getRespuestasByUserAndDate(idUser, date)
+    }
+
     override suspend fun crearPregunta(pregunta: Pregunta) {
         withContext(Dispatchers.IO) {
             try {

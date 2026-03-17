@@ -10,4 +10,6 @@ interface PreguntaRespuestaRepository {
     suspend fun actualizarPregunta(pregunta: Pregunta)
     suspend fun eliminarPregunta(idPregunta: Long)
     suspend fun responderPregunta(respuesta: Respuesta)
+    suspend fun getRespuestasByUser(idUser: Long): List<Respuesta>
+    suspend fun getRespuestasByUserAndDate(idUser: Long, date: Long): List<Respuesta>
 }

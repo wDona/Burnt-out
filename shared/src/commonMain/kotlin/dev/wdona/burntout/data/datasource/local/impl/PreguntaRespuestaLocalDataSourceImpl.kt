@@ -33,4 +33,12 @@ class PreguntaRespuestaLocalDataSourceImpl(private val dao: PreguntaRespuestaDao
     override suspend fun getRespuestasByPregunta(idPregunta: Long): List<Respuesta> {
         return dao.getRespuestasByPregunta(idPregunta)
     }
+
+    override suspend fun getRespuestasByUser(idUser: Long): List<Respuesta> {
+        return dao.getRespuestasByUser(idUser)
+    }
+
+    override suspend fun getRespuestasByUserAndDate(idUser: Long, date: Long): List<Respuesta> {
+        return dao.getRespuestasByUserAndDate(idUser, date)
+    }
 }

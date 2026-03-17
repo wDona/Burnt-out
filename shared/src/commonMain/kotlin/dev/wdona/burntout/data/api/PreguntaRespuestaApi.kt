@@ -11,4 +11,6 @@ interface PreguntaRespuestaApi {
     suspend fun eliminarPregunta(idPregunta: Long): HttpResponse
     suspend fun responderPregunta(respuesta: Respuesta): HttpResponse
     suspend fun getRespuestasByPregunta(idPregunta: Long): List<Respuesta>
+    suspend fun getRespuestasByUser(idUser: Long): List<Respuesta>
+    suspend fun getRespuestasByUserAndDate(idUser: Long, date: Long): List<Respuesta>
 }

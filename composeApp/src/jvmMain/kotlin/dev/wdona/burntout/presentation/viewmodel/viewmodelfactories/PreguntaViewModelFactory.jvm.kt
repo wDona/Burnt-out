@@ -11,7 +11,7 @@ import dev.wdona.burntout.data.repository.PreguntaRespuestaRepositoryImpl
 import dev.wdona.burntout.presentation.viewmodel.viewmodels.FormularioViewModel
 import dev.wdona.burntout.shared.db.DatabaseInit
 
-actual class PreguntaViewModelFactory {
+actual class FormularioViewModelFactory {
     actual fun create(): FormularioViewModel {
         val database = DatabaseInit.getDatabase()
 

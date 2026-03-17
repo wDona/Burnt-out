@@ -24,10 +24,26 @@ class FormularioViewModel(private val repository: PreguntaRespuestaRepository) :
         }
     }
 
-    fun cargarRespuestas(idPregunta: Long) {
+    fun cargarRespuesta(idPregunta: Long) {
         screenModelScope.launch {
             _respuestas.value = repository.getRespuestasByPregunta(idPregunta)
         }
+    }
+
+    fun cargarRespuestasByIdUsuario(idUsuario: Long) {
+        screenModelScope.launch {
+            _respuestas.value = repository.getRespuestasByUser(idUsuario)
+        }
+    }
+
+    fun cargarRespuestasByIdUsuario(idUsuario: Long, date: Long) {
+        screenModelScope.launch {
+            _respuestas.value = repository.getRespuestasByUserAndDate(idUsuario, date)
+        }
+    }
+
+    fun cargarRespuestas() {
+        // TODO
     }
 
     fun crearPregunta(pregunta: Pregunta) {
@@ -54,8 +70,7 @@ class FormularioViewModel(private val repository: PreguntaRespuestaRepository) :
     fun responderPregunta(respuesta: Respuesta) {
         screenModelScope.launch {
             repository.responderPregunta(respuesta)
-            cargarRespuestas(respuesta.idPregunta)
+            cargarRespuesta(respuesta.idPregunta)
         }
     }
 }
-

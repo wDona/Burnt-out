@@ -37,4 +37,12 @@ class PreguntaRespuestaRemoteDataSourceImpl(private val api: PreguntaRespuestaAp
     override suspend fun getRespuestasByPregunta(idPregunta: Long): List<Respuesta> {
         return api.getRespuestasByPregunta(idPregunta)
     }
+
+    override suspend fun getRespuestasByUser(idUser: Long): List<Respuesta> {
+        return api.getRespuestasByUser(idUser)
+    }
+
+    override suspend fun getRespuestasByUserAndDate(idUser: Long, date: Long): List<Respuesta> {
+        return api.getRespuestasByUserAndDate(idUser, date)
+    }
 }

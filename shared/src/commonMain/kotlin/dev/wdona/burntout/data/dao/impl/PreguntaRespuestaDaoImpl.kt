@@ -54,15 +54,42 @@ class PreguntaRespuestaDaoImpl(appDatabase: AppDatabase) : PreguntaRespuestaDao 
     }
 
     override suspend fun getRespuestasByPregunta(idPregunta: Long): List<Respuesta> {
-        val rows = queries.getRespuestasByPregunta(idPregunta).executeAsList()
-        // Note: The new query returns a specific projection matching mapped fields
-        return rows.map { row ->
+        val filas = queries.getRespuestasByPregunta(idPregunta).executeAsList()
+        return filas.map { row ->
             Respuesta(
                 idUsuario = row.ID_Usuario,
                 idPregunta = row.ID_Pregunta,
                 anonimo = row.Anonimo == 1L,
                 respuesta = row.Respuesta,
                 nombreUsuario = row.Nombre
+            )
+        }
+    }
+
+    override suspend fun getRespuestasByUser(idUser: Long): List<Respuesta> {
+        val filas = queries.getRespuestasByUser(idUser).executeAsList()
+        return filas.map { row ->
+            Respuesta(
+                idUsuario = row.ID_Usuario,
+                idPregunta = row.ID_Pregunta,
+                anonimo = row.Anonimo == 1L,
+                respuesta = row.Respuesta,
+                nombreUsuario = null,
+                fecha = row.Fecha
+            )
+        }
+    }
+
+    override suspend fun getRespuestasByUserAndDate(idUser: Long, date: Long): List<Respuesta> {
+        val filas = queries.getRespuestasByUserAndDate(idUser, date).executeAsList()
+        return filas.map { row ->
+            Respuesta(
+                idUsuario = row.ID_Usuario,
+                idPregunta = row.ID_Pregunta,
+                anonimo = row.Anonimo == 1L,
+                respuesta = row.Respuesta,
+                nombreUsuario = null,
+                fecha = row.Fecha
             )
         }
     }

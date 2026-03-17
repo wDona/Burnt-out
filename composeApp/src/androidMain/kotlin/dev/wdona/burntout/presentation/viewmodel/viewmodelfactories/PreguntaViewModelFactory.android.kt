@@ -15,7 +15,7 @@ import dev.wdona.burntout.shared.db.DatabaseDriverFactory
 import java.io.Serializable
 import kotlin.jvm.Transient
 
-actual class PreguntaViewModelFactory(@Transient private val context: Context) : Serializable {
+actual class FormularioViewModelFactory(@Transient private val context: Context) : Serializable {
 
     actual fun create(): FormularioViewModel {
         val driverFactory = DatabaseDriverFactory(context)

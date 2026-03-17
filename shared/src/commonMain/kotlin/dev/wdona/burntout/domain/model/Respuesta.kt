@@ -8,5 +8,6 @@ data class Respuesta(
     val idPregunta: Long,
     val anonimo: Boolean,
     val respuesta: String,
-    val nombreUsuario: String? = null
+    val nombreUsuario: String? = null,
+    val fecha: Long? = null
 )

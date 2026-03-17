@@ -6,6 +6,8 @@ import dev.wdona.burntout.shared.db.AppDatabase
 import java.io.File
 
 actual class DatabaseDriverFactory {
+
+    // TODO: coger si es la primera ejecucion o no
     actual fun createDriver(): SqlDriver {
         val userHome = System.getProperty("user.home")
         val appDataDir = File(userHome, ".burnt_out_app")
@@ -33,5 +35,6 @@ actual class DatabaseDriverFactory {
         database.appDatabaseQueries.insertOrgbase()
         database.appDatabaseQueries.insertEquipoBase()
         database.appDatabaseQueries.insertUsuarioBase()
+        database.appDatabaseQueries.insertPreguntasBase()
     }
 }

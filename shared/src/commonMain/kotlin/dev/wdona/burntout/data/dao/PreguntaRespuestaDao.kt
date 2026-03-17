@@ -12,4 +12,6 @@ interface PreguntaRespuestaDao {
     
     suspend fun responderPregunta(respuesta: Respuesta)
     suspend fun getRespuestasByPregunta(idPregunta: Long): List<Respuesta>
+    suspend fun getRespuestasByUser(idUser: Long): List<Respuesta>
+    suspend fun getRespuestasByUserAndDate(idUser: Long, date: Long): List<Respuesta>
 }

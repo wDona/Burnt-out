@@ -3,6 +3,7 @@ package dev.wdona.burntout.shared.utils
 import com.russhwolf.settings.Settings
 
 object SettingsManager {
+    // TODO: Hardcodear usuario offline
     private val settings = Settings()
     private const val KEY_PRIMERA_EJECUCION = "es_primera_ejecucion"
     private const val KEY_ID_USUARIO_ACTUAL = "id_usuario_actual"

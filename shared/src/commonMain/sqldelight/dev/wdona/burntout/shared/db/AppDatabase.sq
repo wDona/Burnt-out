@@ -1,4 +1,3 @@
-
 CREATE TABLE OrganizacionEntity (
     ID_Org INTEGER NOT NULL PRIMARY KEY,
     Org_Name TEXT NOT NULL
@@ -82,9 +81,10 @@ CREATE TABLE Ajuste_UserEntity (
 CREATE TABLE ResponderEntity (
     ID_Usuario INTEGER NOT NULL,
     ID_Pregunta INTEGER NOT NULL,
+    Fecha INTEGER NOT NULL DEFAULT (strftime('%s', 'now')),
     Anonimo INTEGER NOT NULL,
     Respuesta TEXT NOT NULL,
-    PRIMARY KEY (ID_Usuario, ID_Pregunta),
+    PRIMARY KEY (ID_Usuario, ID_Pregunta, Fecha),
     FOREIGN KEY(ID_Usuario) REFERENCES UsuarioEntity(ID_Usuario),
     FOREIGN KEY(ID_Pregunta) REFERENCES PreguntaEntity(ID_Pregunta)
 );
@@ -104,7 +104,11 @@ CREATE INDEX idx_sync_log_tabla ON OperacionPendienteEntity(tabla_afectada);
 CREATE INDEX idx_sync_log_timestamp ON OperacionPendienteEntity(timestamp_creacion);
 
 -- ======= QUERIES =======
-
+-- TODO: QUITAR HARDCODEO DE ID -9223372036854775808 (MIN LONG) AL DE CREAR LOS REGISTROS
+-- TODO         PREDETERMINADOS EN LA BASE DE DATOS VACÍA, SOLO SE USA PARA ASEGURAR QUE EXISTAN
+-- TODO         LOS REGISTROS PREDETERMINADOS PARA FUNCIONAMIENTO OFFLINE, PERO NO DEBERÍA USARSE EN
+-- TODO         CONDICIONES NORMALES DE OPERACIÓN
+-- ======= BASE =======
 lastInsertRowId:
 SELECT last_insert_rowid();
 
@@ -117,6 +121,32 @@ INSERT OR IGNORE INTO EquipoEntity(ID_Equipo, Titulo, FK_ID_Org) VALUES(-9223372
 insertUsuarioBase:
 INSERT OR IGNORE INTO UsuarioEntity(ID_Usuario, Username, Contrasena, Nombre, FK_ID_Organizacion) VALUES(-9223372036854775808, 'Offline', '********', 'Usuario offline', -9223372036854775808);
 INSERT OR IGNORE INTO User_TeamEntity(ID_Usuario, ID_Equipo) VALUES(-9223372036854775808, -9223372036854775808);
+
+-- BASADAS EN EL MBI (Maslach Burnout Inventory)
+insertPreguntasBase:
+INSERT OR IGNORE INTO PreguntaEntity(ID_Pregunta, Pregunta, FK_ID_Org) VALUES
+(1, 'Debido a mi trabajo me siento emocionalmente agotado', -9223372036854775808),
+(2, 'Al final de la jornada me siento agotado.', -9223372036854775808),
+(3, 'Me encuentro cansado cuando me levanto por las mañanas y tengo que enfrentarme a otro día de trabajo.', -9223372036854775808),
+(4, 'Puedo comprender facilmente como se sienten las personas que tengo que atender.', -9223372036854775808),
+(5, 'Creo que trato a algunas personas con indiferencia, como si fueran objetos impersonales.', -9223372036854775808),
+(6, 'Trabajar con personas todos los días es estresante/tenso para mí.', -9223372036854775808),
+(7, 'Me enfrento muy bien a los problemas que me presentan las personas que tengo que atender.', -9223372036854775808),
+(8, 'Siento siento que mi trabajo me esta desgastando.', -9223372036854775808),
+(9, 'Siento que mediante mi trabajo estoy influyendo positivamente en la vida de otros.', -9223372036854775808),
+(10, 'Creo que me comporto de manera más insensible con la gente desde que hago este trabajo.', -9223372036854775808),
+(11, 'Me preocupa que este trabajo me esté endureciendo emocionalmente.', -9223372036854775808),
+(12, 'Me encuentro con mucha vitalidad/energetico.', -9223372036854775808),
+(13, 'Me siento frustrado por mi trabajo.', -9223372036854775808),
+(14, 'Siento que estoy haciendo un trabajo demasiado duro/trabajando demasiado.', -9223372036854775808),
+(15, 'Realmente no me importa lo que les ocurre a algunas personas a las que doy servicio.', -9223372036854775808),
+(16, 'Trabajar en contacto directo con personas me produce estrés.', -9223372036854775808),
+(17, 'Tengo facilidad para crear un clima agradable en mi trabajo.', -9223372036854775808),
+(18, 'Me siento estimulado después de trabajar junto con mis alumnos.', -9223372036854775808),
+(19, 'He realizado muchas cosas valiosas en este trabajo.', -9223372036854775808),
+(20, 'Siento que he llegado al límite de mis posibilidades.', -9223372036854775808),
+(21, 'Siento que se tratar con calma los conflictos emocionales en el trabajo.', -9223372036854775808),
+(22, 'Siento que las personas que atiendo culpan de sus problemas.', -9223372036854775808);
 
 -- ====== TAREAS ======
 
@@ -302,6 +332,11 @@ WHERE r.ID_Pregunta = ?;
 
 getRespuestasByUser:
 SELECT * FROM ResponderEntity WHERE ID_Usuario = ?;
+
+getRespuestasByUserAndDate:
+SELECT * FROM ResponderEntity
+WHERE ID_Usuario = ?
+AND date(Fecha, 'unixepoch', 'localtime') = date(?, 'unixepoch', 'localtime');
 
 -- ====== AJUSTES USUARIO ======
 insertOrUpdateAjusteUser:

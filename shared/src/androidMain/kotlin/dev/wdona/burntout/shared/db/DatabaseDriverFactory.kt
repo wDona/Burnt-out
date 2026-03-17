@@ -25,5 +25,6 @@ actual class DatabaseDriverFactory(private val context: Context) {
         database.appDatabaseQueries.insertOrgbase()
         database.appDatabaseQueries.insertEquipoBase()
         database.appDatabaseQueries.insertUsuarioBase()
+        database.appDatabaseQueries.insertPreguntasBase()
     }
 }
