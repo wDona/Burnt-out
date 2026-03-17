@@ -30,12 +30,87 @@ El riesgo no se calcula como un promedio general, sino mediante el seguimiento d
 | **Despersonalización (D)** | 5, 10, 11, 15, 22 | < 5 | 6 - 9 | **≥ 10** |
 | **Realización Personal (RP)** | 4, 7, 9, 12, 17, 18, 19, 21 | > 40 | 34 - 39 | **≤ 33** |
 
+### Las 22 preguntas del MBI
+
+Las preguntas están almacenadas en base de datos y son comunes a todos los usuarios. Las respuestas se recogen en una escala de frecuencia de 0 a 6:
+
+| Valor | Frecuencia |
+|:---:|:---|
+| 0 | Nunca / Ninguna vez |
+| 1 | Casi nunca / Pocas veces al año |
+| 2 | Algunas veces / Una vez al mes o menos |
+| 3 | Regularmente / Pocas veces al mes |
+| 4 | Bastantes veces / Una vez por semana |
+| 5 | Casi siempre / Pocas veces por semana |
+| 6 | Siempre / Todos los días |
+
+1. Debido a mi trabajo me siento emocionalmente agotado.
+2. Al final de la jornada me siento agotado.
+3. Me encuentro cansado cuando me levanto por las mañanas y tengo que enfrentarme a otro día de trabajo.
+4. Puedo entender con facilidad lo que piensan mis alumnos.
+5. Creo que trato a algunos alumnos con indiferencia.
+6. Trabajar con alumnos todos los días es una tensión para mí.
+7. Me enfrento muy bien con los problemas que me presentan mis alumnos.
+8. Me siento agotado por el trabajo.
+9. Siento que mediante mi trabajo estoy influyendo positivamente en la vida de otros.
+10. Creo que me comporto de manera más insensible con la gente desde que hago este trabajo.
+11. Me preocupa que este trabajo me esté endureciendo emocionalmente.
+12. Me encuentro con mucha vitalidad.
+13. Me siento frustrado por mi trabajo.
+14. Siento que estoy haciendo un trabajo demasiado duro.
+15. Realmente no me importa lo que les ocurrirá a algunos de los alumnos a los que tengo a mi cargo en el colegio.
+16. Trabajar en contacto directo con los alumnos me produce bastante estrés.
+17. Tengo facilidad para crear una atmósfera relajada a mis alumnos.
+18. Me encuentro animado después de trabajar junto con mis alumnos.
+19. He realizado muchas cosas que valen la pena en este trabajo.
+20. En el trabajo siento que he llegado al límite de mis posibilidades.
+21. Siento que se tratar de forma adecuada los conflictos emocionales en el trabajo.
+22. Siento que los alumnos me culpan de algunos de sus problemas.
+
+### Algoritmo de cálculo
+
+El resultado se expone como un `Double` entre `0.0` y `1.0` almacenado en `RiesgoBurnout`, junto con el nivel individual de cada subescala. El cálculo se implementa en un `CalcularRiesgoBurnout` dentro de la capa `domain`, siguiendo la arquitectura Clean Architecture + MVVM.
+
+```kotlin
+data class ResultadoBurnout(
+    val nivelCE: Int,        // 0 = bajo, 1 = medio, 2 = alto
+    val nivelD: Int,         // 0 = bajo, 1 = medio, 2 = alto
+    val nivelRP: Int,        // 0 = bajo, 1 = medio, 2 = alto
+    val riesgoGlobal: Float  // 0.0 - 1.0
+)
+```
+
+> ⚠️ **La subescala RP es inversa**: una puntuación baja indica riesgo alto.
+
+### Flujo de encuesta
+
+- **Onboarding:** el usuario responde las 22 preguntas completas la primera vez, estableciendo su riesgo base. La encuesta se presenta una pregunta por pantalla para optimizar la experiencia en dispositivos móviles.
+- **Encuesta periódica:** se repite la encuesta completa de forma semanal o quincenal, manteniendo la integridad de la informacion.
+- **Frescura del dato:** si el usuario lleva más de un número determinado de días sin responder, el riesgo se muestra como desactualizado en la UI. No se obliga al usuario a responder, pero se le indica que el dato puede no ser preciso. Cada respuesta almacena un timestamp Unix para permitir este seguimiento.
+
 ### Registro Diario (Micro-Check)
-Para optimizar la experiencia de usuario y evitar la fatiga de encuesta, se recomienda un mapeo diario de 3 preguntas (escala Likert):
+
+Para optimizar la experiencia de usuario y evitar la fatiga de encuesta, se hace un mapeo diario de 3 preguntas (escala Likert):
 
 1. **CE (Energía):** Grado de agotamiento al finalizar la jornada laboral.
 2. **D (Actitud):** Nivel de distanciamiento o irritabilidad percibida hacia el entorno.
 3. **RP (Logro):** Percepción del valor real aportado por las tareas completadas.
+
+### Integración con la gestión de tareas
+
+El nivel de burnout de cada usuario influye directamente en la asignación de tareas dentro del tablero:
+
+| Nivel de riesgo | Comportamiento al asignar tarea |
+|:---|:---|
+| **Bajo** | Sin restricciones |
+| **Medio** | Aviso informativo al manager |
+| **Alto** | Confirmación obligatoria alarmante antes de asignar |
+
+Adicionalmente, las tarjetas deben mostrar un indicador visual junto al avatar del usuario asignado según su nivel de riesgo, y al asignar tareas los usuarios se ordenan priorizando los de menor riesgo.
+
+### Limitaciones conocidas y trabajo futuro
+
+- El MBI estándar incluye preguntas orientadas a perfiles que trabajan directamente con personas. Usuarios con perfiles distintos pueden encontrar algunas preguntas poco aplicables. Esta limitación se documenta y se contempla como mejora futura.
 
 ---
 
@@ -80,4 +155,4 @@ El proyecto emplea **Kotlin Multiplatform (KMP)** para compartir la lógica de n
 * **Consentimiento:** Tratamiento de datos sujeto a la aceptación explícita de términos.
 
 ---
-*Desarrollado por wDona. Diseño basado en Material Theme Builder.*
+*Desarrollado por wDona. Diseño usando Material Theme Builder.*
