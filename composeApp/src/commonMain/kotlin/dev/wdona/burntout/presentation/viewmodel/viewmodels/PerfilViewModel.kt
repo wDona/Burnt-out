@@ -2,8 +2,10 @@ package dev.wdona.burntout.presentation.viewmodel.viewmodels
 
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
+import dev.wdona.burntout.domain.model.ResultadoBurnout
 import dev.wdona.burntout.domain.repository.UsuarioRepository
 import dev.wdona.burntout.shared.domain.Usuario
+import dev.wdona.burntout.shared.utils.SettingsManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -12,8 +14,14 @@ import kotlinx.coroutines.launch
 
 
 class PerfilViewModel(private val repository: UsuarioRepository) : ScreenModel {
-    private val _uiState = MutableStateFlow<Usuario?>(null)
-    val uiState: StateFlow<Usuario?> = _uiState.asStateFlow()
+    private val _usuarioActual = MutableStateFlow<Usuario?>(null)
+    val usuarioActual: StateFlow<Usuario?> = _usuarioActual.asStateFlow()
+
+    val riesgoBurnoutCE = SettingsManager.getRiesgoCEUsuarioActual()
+    val riesgoBurnoutD = SettingsManager.getRiesgoDUsuarioActual()
+    val riesgoBurnoutRP = SettingsManager.getRiesgoRPUsuarioActual()
+
+    private val resultadoBurnout = ResultadoBurnout(riesgoBurnoutCE, riesgoBurnoutD, riesgoBurnoutRP)
 
     private val _listaUsuarios = MutableStateFlow<List<Usuario>>(emptyList())
     val listaUsuarios: StateFlow<List<Usuario>> = _listaUsuarios.asStateFlow()
@@ -21,7 +29,7 @@ class PerfilViewModel(private val repository: UsuarioRepository) : ScreenModel {
     fun cargarUsuario(idUsuario: Long) {
         screenModelScope.launch {
             try {
-                _uiState.value = repository.getUserById(idUsuario)
+                _usuarioActual.value = repository.getUserById(idUsuario)
             } catch (e: Exception) {
                 println("Error al cargar usuario: ${e.message}")
             }
@@ -37,14 +45,14 @@ class PerfilViewModel(private val repository: UsuarioRepository) : ScreenModel {
     fun actualizarPerfil(usuario: Usuario) {
         screenModelScope.launch {
             repository.actualizarUsuario(usuario)
-            _uiState.value = usuario
+            _usuarioActual.value = usuario
         }
     }
 
     fun eliminarPerfil(idUsuario: Long) {
         screenModelScope.launch {
             repository.eliminarUsuario(idUsuario)
-            _uiState.value = null
+            _usuarioActual.value = null
         }
     }
 
@@ -52,7 +60,7 @@ class PerfilViewModel(private val repository: UsuarioRepository) : ScreenModel {
         screenModelScope.launch {
             try {
                 val user = repository.login(username, contrasena)
-                _uiState.value = user
+                _usuarioActual.value = user
                 onResult(true)
             } catch (e: Exception) {
                 println("Error en login: ${e.message}")
@@ -61,9 +69,9 @@ class PerfilViewModel(private val repository: UsuarioRepository) : ScreenModel {
         }
     }
 
-    fun actualizarRiesgo(idUsuario: Long, riesgo: Double) {
+    fun actualizarRiesgo(idUsuario: Long) {
         screenModelScope.launch {
-            repository.updateRiesgoBurnout(idUsuario, riesgo)
+            repository.updateRiesgoBurnout(idUsuario, resultadoBurnout.riesgoTotal)
             cargarUsuario(idUsuario)
         }
     }

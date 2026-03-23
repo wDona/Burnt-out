@@ -1,7 +1,7 @@
 package dev.wdona.burntout.domain.usecase
 
 import dev.wdona.burntout.domain.model.ResultadoBurnout
-import dev.wdona.burntout.shared.domain.Respuesta
+import dev.wdona.burntout.domain.model.Respuesta
 
 class CalcularRiesgoBurnout {
     operator fun invoke(respuestas: List<Respuesta>): ResultadoBurnout {
@@ -15,23 +15,23 @@ class CalcularRiesgoBurnout {
 
         // Cansancio emocional
         val nivelCE = when {
-            sumCE >= 27 -> 2
-            sumCE >= 19 -> 1
-            else -> 0
+            sumCE >= 27 -> 2.0
+            sumCE >= 19 -> 1.0
+            else -> 0.0
         }
 
         // Despersonalización
         val nivelD = when {
-            sumD >= 10 -> 2
-            sumD >= 6 -> 1
-            else -> 0
+            sumD >= 10 -> 2.0
+            sumD >= 6 -> 1.0
+            else -> 0.0
         }
 
         // Realizacion personal
         val nivelRP = when {
-            sumRP <= 33 -> 2
-            sumRP <= 39 -> 1
-            else -> 0
+            sumRP <= 33 -> 2.0
+            sumRP <= 39 -> 1.0
+            else -> 0.0
         }
 
         return ResultadoBurnout(nivelCE, nivelD, nivelRP)

@@ -9,7 +9,7 @@ import java.io.File
 
 actual class DatabaseDriverFactory(private val context: Context) {
     actual fun createDriver(): SqlDriver {
-        val databasePath = "burnt_out.db"
+        val databasePath = "burntout.db"
         val dbFile = File(databasePath)
         val driver: SqlDriver = AndroidSqliteDriver(AppDatabase.Schema, context, databasePath)
 

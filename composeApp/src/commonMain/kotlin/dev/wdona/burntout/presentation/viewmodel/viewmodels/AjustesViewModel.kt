@@ -2,6 +2,7 @@ package dev.wdona.burntout.presentation.viewmodel.viewmodels
 
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
+import dev.wdona.burntout.AppInfo
 import dev.wdona.burntout.domain.model.Ajuste
 import dev.wdona.burntout.domain.repository.AjusteRepository
 import dev.wdona.burntout.shared.domain.Usuario
@@ -17,7 +18,7 @@ data class AjustesUiState(
     val idOrganizacion: Long = Long.MIN_VALUE,
     val idEquipo: Long = Long.MIN_VALUE,
     val nombreUsuario: String = "Offline",
-    val versionApp: String = "1.1.13",
+    val versionApp: String = AppInfo.version,
     // w.x.yz -> w. major version, x. centena de commits, yz. -> decena/ud de commit
 )
 
@@ -62,4 +63,3 @@ class AjustesViewModel(private val repository: AjusteRepository) : ScreenModel {
         _ajustesUiState.value = _ajustesUiState.value.copy(esPrimeraEjecucion = nuevoValor)
     }
 }
-

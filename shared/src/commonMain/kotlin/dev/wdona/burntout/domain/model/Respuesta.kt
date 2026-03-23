@@ -1,4 +1,4 @@
-package dev.wdona.burntout.shared.domain
+package dev.wdona.burntout.domain.model
 
 import kotlinx.serialization.Serializable
 
@@ -7,7 +7,7 @@ data class Respuesta(
     val idUsuario: Long,
     val idPregunta: Long,
     val anonimo: Boolean,
-    val respuesta: String,
+    val respuesta: Long,
     val nombreUsuario: String? = null,
     val fecha: Long? = null
 )

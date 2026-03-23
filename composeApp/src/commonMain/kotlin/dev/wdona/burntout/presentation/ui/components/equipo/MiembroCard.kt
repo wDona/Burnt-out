@@ -19,6 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import dev.wdona.burntout.presentation.ui.theme.BurntOutMaterialTheme
 import dev.wdona.burntout.shared.domain.Usuario
 
 @Composable
@@ -26,7 +27,7 @@ fun MiembroCard(miembro: Usuario, onClick: () -> Unit) {
     val id = if (miembro.idUsuario == Long.MIN_VALUE) {
         ""
     } else {
-        miembro.idUsuario.toString() + ""
+        miembro.idUsuario.toString()
     }
 
     Row (
@@ -38,14 +39,26 @@ fun MiembroCard(miembro: Usuario, onClick: () -> Unit) {
 
         verticalAlignment = Alignment.CenterVertically
     ){
-        Icon(
-            imageVector = Icons.Default.Person4,
-            contentDescription = "Icono de usuario",
-            modifier = Modifier.padding(start = 16.dp, end = 8.dp)
-        )
-        Text(
-            text = "$id ${miembro.nombre}",
-            style = MaterialTheme.typography.titleMedium
-        )
+        val tint: androidx.compose.ui.graphics.Color
+        miembro.riesgoBurnout?.let {
+            tint = if (it < 0.33) {
+                BurntOutMaterialTheme.getSuccessColor()
+            } else if (it in 0.33..0.66) {
+                BurntOutMaterialTheme.getWarningColor()
+            } else {
+                BurntOutMaterialTheme.getErrorColor()
+            }
+            Icon(
+                imageVector = Icons.Default.Person,
+                contentDescription = "Icono de usuario",
+                modifier = Modifier.padding(start = 16.dp, end = 8.dp),
+                tint = tint
+            )
+            Text(
+                text = "$id ${miembro.nombre}",
+                style = MaterialTheme.typography.titleMedium,
+                color = tint
+            )
+        }
     }
 }

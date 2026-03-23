@@ -1,8 +1,8 @@
 package dev.wdona.burntout.domain.model
 
 data class ResultadoBurnout(
-    val nivelCE: Int,
-    val nivelD: Int,
-    val nivelRP: Int,
+    val nivelCE: Double,
+    val nivelD: Double,
+    val nivelRP: Double,
     val riesgoTotal: Double = (nivelCE + nivelD + nivelRP) / 6.0
 )

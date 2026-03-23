@@ -66,7 +66,7 @@ class PerfilScreen(val factory: MiPerfilViewModelFactory, val ajustesFactory: Aj
 @Composable
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 fun PerfilContent(viewModel: PerfilViewModel, onAjustes: () -> Unit, onVolver: (() -> Unit)? = null) {
-    val usuario by viewModel.uiState.collectAsStateWithLifecycle()
+    val usuario by viewModel.usuarioActual.collectAsStateWithLifecycle()
 
     val titleIcon = @Composable {
         if (usuario != null) {
@@ -124,38 +124,45 @@ fun PerfilContent(viewModel: PerfilViewModel, onAjustes: () -> Unit, onVolver: (
                         Text("Volver")
                     }
                 } else {
-                    Text("ID: ${usuario!!.idUsuario}", style = MaterialTheme.typography.titleMedium)
-                    Text(usuario!!.username, style = MaterialTheme.typography.titleMedium)
-                    Text(usuario!!.descripcion ?: "Sin descripcion", style = MaterialTheme.typography.titleMedium)
                     Text(
-                        text = if ((usuario!!.riesgoBurnout ?: 0.0) > 33.0) "Riesgo de Burnout" else "Sin riesgo aparente",
-                        color = if ((usuario!!.riesgoBurnout ?: 0.0) > 33.0) BurntOutMaterialTheme.getWarningColor() else BurntOutMaterialTheme.getSuccessColor(),
+                        text =
+                            if ((usuario!!.riesgoBurnout ?: 0.0) < 0.33) "Riesgo de Burnout Bajo"
+                            else if ((usuario!!.riesgoBurnout ?: 0.0) in 0.33..<0.66) "Riesgo de Burnout Medio"
+                            else "Riesgo de Burnout Alto",
+                        style = MaterialTheme.typography.titleMedium,
+                        color =
+                            if ((usuario!!.riesgoBurnout ?: 0.0) < 0.33) BurntOutMaterialTheme.getSuccessColor()
+                            else if ((usuario!!.riesgoBurnout ?: 0.0) in 0.33..<0.66) BurntOutMaterialTheme.getWarningColor()
+                            else BurntOutMaterialTheme.getErrorColor()
                     )
+//                    Text("ID: ${usuario!!.idUsuario}", style = MaterialTheme.typography.titleMedium)
+                    Text(usuario!!.username, style = MaterialTheme.typography.titleMedium)
+                    Text(usuario!!.descripcion ?: "-", style = MaterialTheme.typography.titleMedium)
 
-                    if (usuario!!.idUsuario == SettingsManager.getIdUsuarioActual()) {
-                        OutlinedButton(
-                            onClick = {
-//                                TODO: ELIMINAR DATOS DE SESION DE SETTINGS Y POP UNTIL ROOT
-                            },
-                            modifier = Modifier
-                                .padding(top = 32.dp)
-                                .fillMaxWidth()
-                                .padding(horizontal = 32.dp)
-                                .height(56.dp),
-                            shape = RoundedCornerShape(28.dp),
-                            border = BorderStroke(1.dp, BurntOutMaterialTheme.getColorScheme().error),
-                            colors = ButtonDefaults.outlinedButtonColors(
-                                contentColor = BurntOutMaterialTheme.getColorScheme().error
-                            )
-                        ) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.ExitToApp,
-                                contentDescription = "Cerrar sesion",
-                                modifier = Modifier.padding(end = 8.dp)
-                            )
-                            Text("Cerrar sesion")
-                        }
-                    }
+//                    if (usuario!!.idUsuario == SettingsManager.getIdUsuarioActual()) {
+//                        OutlinedButton(
+//                            onClick = {
+////                                TODO: ELIMINAR DATOS DE SESION DE SETTINGS Y POP UNTIL ROOT
+//                            },
+//                            modifier = Modifier
+//                                .padding(top = 32.dp)
+//                                .fillMaxWidth()
+//                                .padding(horizontal = 32.dp)
+//                                .height(56.dp),
+//                            shape = RoundedCornerShape(28.dp),
+//                            border = BorderStroke(1.dp, BurntOutMaterialTheme.getColorScheme().error),
+//                            colors = ButtonDefaults.outlinedButtonColors(
+//                                contentColor = BurntOutMaterialTheme.getColorScheme().error
+//                            )
+//                        ) {
+//                            Icon(
+//                                imageVector = Icons.AutoMirrored.Filled.ExitToApp,
+//                                contentDescription = "Cerrar sesion",
+//                                modifier = Modifier.padding(end = 8.dp)
+//                            )
+//                            Text("Cerrar sesion")
+//                        }
+//                    }
                 }
             }
         }

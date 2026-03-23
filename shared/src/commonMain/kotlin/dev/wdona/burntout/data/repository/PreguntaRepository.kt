@@ -9,7 +9,7 @@ import dev.wdona.burntout.data.datasource.remote.PreguntaRespuestaRemoteDataSour
 import dev.wdona.burntout.domain.entity.Entity
 import dev.wdona.burntout.domain.model.TipoAccion
 import dev.wdona.burntout.shared.domain.Pregunta
-import dev.wdona.burntout.shared.domain.Respuesta
+import dev.wdona.burntout.domain.model.Respuesta
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -51,32 +51,39 @@ class PreguntaRespuestaRepositoryImpl(
         local.getRespuestasByPregunta(idPregunta)
     }
 
-    override suspend fun getRespuestasByUser(idUser: Long): List<Respuesta> = withContext(Dispatchers.IO) {
+    override suspend fun getRespuestasByIdUsuario(idUser: Long): List<Respuesta> = withContext(Dispatchers.IO) {
         repositoryScope.launch {
             try {
-                val remoteList = remote.getRespuestasByUser(idUser)
+                val remoteList = remote.getRespuestasByIdUsuario(idUser)
                 remoteList.forEach {
                     local.responderPregunta(it)
                 }
             } catch (e: Exception) {
-                println("Servidor offline (getRespuestasByUser): ${e.message}")
+                println("Servidor offline (getRespuestasByIdUsuario): ${e.message}")
             }
         }
-        local.getRespuestasByUser(idUser)
+        local.getRespuestasByIdUsuario(idUser)
     }
 
-    override suspend fun getRespuestasByUserAndDate(idUser: Long, date: Long): List<Respuesta> = withContext(Dispatchers.IO) {
+    override suspend fun getLastRespuestasByIdUsuario(idUser: Long): List<Respuesta> = withContext(Dispatchers.IO) {
+        // En este caso priorizamos la base de datos local que ya tiene el histórico,
+        // opcionalmente podríamos pedir al server las "últimas" si el endpoint existiera.
+        // Dado que syncronizamos en otros puntos, confiamos en lo local.
+        local.getLastRespuestasByIdUsuario(idUser)
+    }
+
+    override suspend fun getRespuestasByIdUsuarioAndDate(idUser: Long, date: Long): List<Respuesta> = withContext(Dispatchers.IO) {
         repositoryScope.launch {
             try {
-                val remoteList = remote.getRespuestasByUserAndDate(idUser, date)
+                val remoteList = remote.getRespuestasByIdUsuarioAndDate(idUser, date)
                 remoteList.forEach {
                     local.responderPregunta(it)
                 }
             } catch (e: Exception) {
-                println("Servidor offline (getRespuestasByUserAndDate): ${e.message}")
+                println("Servidor offline (getRespuestasByIdUsuarioAndDate): ${e.message}")
             }
         }
-        local.getRespuestasByUserAndDate(idUser, date)
+        local.getRespuestasByIdUsuarioAndDate(idUser, date)
     }
 
     override suspend fun crearPregunta(pregunta: Pregunta) {

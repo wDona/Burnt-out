@@ -3,7 +3,7 @@ package dev.wdona.burntout.data.datasource.local.impl
 import dev.wdona.burntout.data.dao.PreguntaRespuestaDao
 import dev.wdona.burntout.data.datasource.local.PreguntaRespuestaLocalDataSource
 import dev.wdona.burntout.shared.domain.Pregunta
-import dev.wdona.burntout.shared.domain.Respuesta
+import dev.wdona.burntout.domain.model.Respuesta
 
 class PreguntaRespuestaLocalDataSourceImpl(private val dao: PreguntaRespuestaDao): PreguntaRespuestaLocalDataSource {
     override suspend fun getPreguntasByOrg(idOrg: Long): List<Pregunta> {
@@ -34,11 +34,15 @@ class PreguntaRespuestaLocalDataSourceImpl(private val dao: PreguntaRespuestaDao
         return dao.getRespuestasByPregunta(idPregunta)
     }
 
-    override suspend fun getRespuestasByUser(idUser: Long): List<Respuesta> {
-        return dao.getRespuestasByUser(idUser)
+    override suspend fun getRespuestasByIdUsuario(idUser: Long): List<Respuesta> {
+        return dao.getRespuestasByIdUsuario(idUser)
     }
 
-    override suspend fun getRespuestasByUserAndDate(idUser: Long, date: Long): List<Respuesta> {
-        return dao.getRespuestasByUserAndDate(idUser, date)
+    override suspend fun getLastRespuestasByIdUsuario(idUser: Long): List<Respuesta> {
+        return dao.getLastRespuestasByIdUsuario(idUser)
+    }
+
+    override suspend fun getRespuestasByIdUsuarioAndDate(idUser: Long, date: Long): List<Respuesta> {
+        return dao.getRespuestasByIdUsuarioAndDate(idUser, date)
     }
 }

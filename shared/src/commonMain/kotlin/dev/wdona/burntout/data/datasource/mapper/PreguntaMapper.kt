@@ -1,12 +1,8 @@
 package dev.wdona.burntout.data.datasource.mapper
 
 import dev.wdona.burntout.domain.json.PreguntaJsonFields
-import dev.wdona.burntout.domain.json.RespuestaJsonFields
-
-import dev.wdona.burntout.shared.domain.Pregunta
-import dev.wdona.burntout.shared.domain.Respuesta
 import dev.wdona.burntout.shared.db.PreguntaEntity
-import dev.wdona.burntout.shared.db.ResponderEntity
+import dev.wdona.burntout.shared.domain.Pregunta
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
 
@@ -16,7 +12,8 @@ class PreguntaMapper {
             return Pregunta(
                 idPregunta = entity.ID_Pregunta,
                 pregunta = entity.Pregunta,
-                idOrganizacion = entity.FK_ID_Org
+                idOrganizacion = entity.FK_ID_Org,
+                categoria = entity.Categoria
             )
         }
 
@@ -29,6 +26,7 @@ class PreguntaMapper {
                 put(PreguntaJsonFields.ID_PREGUNTA.nombreCampo, JsonPrimitive(pregunta.idPregunta))
                 put(PreguntaJsonFields.PREGUNTA.nombreCampo, JsonPrimitive(pregunta.pregunta))
                 put(PreguntaJsonFields.ID_ORGANIZACION.nombreCampo, JsonPrimitive(pregunta.idOrganizacion))
+                put("categoria", JsonPrimitive(pregunta.categoria))
             }.toString()
         }
     }

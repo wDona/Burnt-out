@@ -22,7 +22,8 @@ fun App(
     miPerfilViewModelFactory: MiPerfilViewModelFactory,
     tablerosViewModelFactory: TablerosViewModelFactory,
     leaderboardViewModelFactory: LeaderboardViewModelFactory,
-    ajustesViewModelFactory: AjustesViewModelFactory
+    ajustesViewModelFactory: AjustesViewModelFactory,
+    formularioViewModelFactory: FormularioViewModelFactory
 ) {
     BurntOutMaterialTheme {
         Surface(
@@ -36,6 +37,7 @@ fun App(
                     perfilFactory = miPerfilViewModelFactory,
                     tableroFactory = tablerosViewModelFactory,
                     leaderboardFactory = leaderboardViewModelFactory,
+                    formularioFactory = formularioViewModelFactory,
                     ajustesFactory = ajustesViewModelFactory
                 )
             ) { navigator ->

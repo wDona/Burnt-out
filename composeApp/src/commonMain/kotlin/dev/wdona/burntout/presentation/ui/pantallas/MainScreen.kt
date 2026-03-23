@@ -8,6 +8,7 @@ import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Groups
+import androidx.compose.material.icons.filled.QuestionAnswer
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
@@ -20,6 +21,7 @@ import cafe.adriel.voyager.navigator.tab.*
 import cafe.adriel.voyager.transitions.SlideTransition
 import dev.wdona.burntout.presentation.ui.pantallas.equipo.EquipoScreen
 import dev.wdona.burntout.presentation.ui.pantallas.equipo.LeaderboardScreen
+import dev.wdona.burntout.presentation.ui.pantallas.formulario.PreguntaScreen
 import dev.wdona.burntout.presentation.ui.pantallas.perfil.PerfilScreen
 import dev.wdona.burntout.presentation.ui.pantallas.tablero.TablerosScreen
 import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.*
@@ -31,7 +33,8 @@ class MainScreen(
     private val perfilFactory: MiPerfilViewModelFactory,
     private val tableroFactory: TablerosViewModelFactory,
     private val leaderboardFactory: LeaderboardViewModelFactory,
-    private val ajustesFactory: AjustesViewModelFactory
+    private val ajustesFactory: AjustesViewModelFactory,
+    private val formularioFactory: FormularioViewModelFactory
 ) : Screen {
 
     @Composable
@@ -40,6 +43,9 @@ class MainScreen(
         val equipoTab = remember { EquipoTab(equipoFactory, perfilFactory, ajustesFactory) }
         val leaderboardTab = remember { LeaderboardTab(leaderboardFactory, ajustesFactory, equipoFactory, perfilFactory) }
         val perfilTab = remember { PerfilTab(perfilFactory, ajustesFactory) }
+        val preguntasTab = remember { PreguntasTab(formularioFactory) }
+
+
 
         TabNavigator(tablerosTab) { tabNavigator ->
             Scaffold(
@@ -56,6 +62,7 @@ class MainScreen(
                         TabNavigationItem(equipoTab, tabNavigator)
                         TabNavigationItem(leaderboardTab, tabNavigator)
                         TabNavigationItem(perfilTab, tabNavigator)
+                        TabNavigationItem(preguntasTab, tabNavigator)
                     }
                 }
             )
@@ -156,6 +163,22 @@ private class PerfilTab(
     @Composable
     override fun Content() {
         Navigator(PerfilScreen(factory, ajustesFactory)) { navigator ->
+            SlideTransition(navigator)
+        }
+    }
+}
+
+private class PreguntasTab(
+    val factory: FormularioViewModelFactory,
+) : Tab {
+    override val key = "PreguntasTab"
+    @get:Composable
+    override val options: TabOptions
+        get() = TabOptions(index = 4u, title = "Diario", icon = rememberVectorPainter(Icons.Default.QuestionAnswer))
+
+    @Composable
+    override fun Content() {
+        Navigator(PreguntaScreen(factory)) { navigator ->
             SlideTransition(navigator)
         }
     }

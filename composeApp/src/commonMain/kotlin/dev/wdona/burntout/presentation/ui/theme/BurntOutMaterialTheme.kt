@@ -182,7 +182,8 @@ class BurntOutMaterialTheme() {
         @Composable
         fun getWarningColor() = if (isSystemInDarkTheme()) Color(0xFFFFB871) else Color(0xFFA25000)
 
-
+        @Composable
+        fun getErrorColor() = if (isSystemInDarkTheme()) Color(0xFFF44336) else Color(0xFFB00020)
     }
 }
 

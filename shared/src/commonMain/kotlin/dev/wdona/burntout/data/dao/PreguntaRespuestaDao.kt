@@ -1,7 +1,7 @@
 package dev.wdona.burntout.data.dao
 
 import dev.wdona.burntout.shared.domain.Pregunta
-import dev.wdona.burntout.shared.domain.Respuesta
+import dev.wdona.burntout.domain.model.Respuesta
 
 interface PreguntaRespuestaDao {
     suspend fun getPreguntasByOrg(idOrg: Long): List<Pregunta>
@@ -12,6 +12,7 @@ interface PreguntaRespuestaDao {
     
     suspend fun responderPregunta(respuesta: Respuesta)
     suspend fun getRespuestasByPregunta(idPregunta: Long): List<Respuesta>
-    suspend fun getRespuestasByUser(idUser: Long): List<Respuesta>
-    suspend fun getRespuestasByUserAndDate(idUser: Long, date: Long): List<Respuesta>
+    suspend fun getRespuestasByIdUsuario(idUsuario: Long): List<Respuesta>
+    suspend fun getLastRespuestasByIdUsuario(idUsuario: Long): List<Respuesta>
+    suspend fun getRespuestasByIdUsuarioAndDate(idUsuario: Long, date: Long): List<Respuesta>
 }

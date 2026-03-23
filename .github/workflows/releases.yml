@@ -52,7 +52,7 @@ jobs:
       - name: Build Android & Linux
         run: |
           chmod +x gradlew
-          ./gradlew :composeApp:assembleDebug :composeApp:packageDeb
+          ./gradlew :composeApp:assembleDebug :composeApp:packageDeb -PappVersion=${{ steps.vars.outputs.version }}
       - name: Find .deb file
         id: deb
         run: |
@@ -104,7 +104,7 @@ jobs:
           cache: 'gradle'
       - name: Build Windows
         run: |
-          ./gradlew :composeApp:packageMsi
+          ./gradlew :composeApp:packageMsi -PappVersion=${{ steps.vars.outputs.version }}
       - name: Prepare Files
         shell: bash
         run: |

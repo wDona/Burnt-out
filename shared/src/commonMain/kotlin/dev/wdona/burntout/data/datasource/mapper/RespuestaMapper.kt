@@ -1,7 +1,7 @@
 package dev.wdona.burntout.data.datasource.mapper
 
 import dev.wdona.burntout.domain.json.RespuestaJsonFields
-import dev.wdona.burntout.shared.domain.Respuesta
+import dev.wdona.burntout.domain.model.Respuesta
 import dev.wdona.burntout.shared.db.ResponderEntity
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject

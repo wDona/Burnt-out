@@ -12,6 +12,9 @@ object SettingsManager {
     private const val KEY_ROL_ACTUAL = "id_rol"
     private const val KEY_ID_EQUIPO_ACTUAL = "id_equipo"
     private const val KEY_TOKEN_USUARIO = "token_usuario"
+    private const val KEY_RIESGO_CE_USUARIO_ACTUAL = "riesgo_ce_usuario_actual"
+    private const val KEY_RIESGO_D_USUARIO_ACTUAL = "riesgo_d_usuario_actual"
+    private const val KEY_RIESGO_RP_USUARIO_ACTUAL = "riesgo_rp_usuario_actual"
 
     fun setIdUsuarioActual(id: Long?) {
         settings.putLong(KEY_ID_USUARIO_ACTUAL, id ?: Long.MIN_VALUE)
@@ -73,5 +76,29 @@ object SettingsManager {
 
     fun setIdEquipoActual(id: Long) {
         settings.putLong(KEY_ID_EQUIPO_ACTUAL, id)
+    }
+
+    fun setRiesgoCEUsuarioActual(riesgo: Double) {
+        settings.putDouble(KEY_RIESGO_CE_USUARIO_ACTUAL, riesgo)
+    }
+
+    fun getRiesgoCEUsuarioActual(): Double {
+        return settings.getDouble(KEY_RIESGO_CE_USUARIO_ACTUAL, 0.0)
+    }
+
+    fun setRiesgoDUsuarioActual(riesgo: Double) {
+        settings.putDouble(KEY_RIESGO_D_USUARIO_ACTUAL, riesgo)
+    }
+
+    fun getRiesgoDUsuarioActual(): Double {
+        return settings.getDouble(KEY_RIESGO_D_USUARIO_ACTUAL, 0.0)
+    }
+
+    fun setRiesgoRPUsuarioActual(riesgo: Double) {
+        settings.putDouble(KEY_RIESGO_RP_USUARIO_ACTUAL, riesgo)
+    }
+
+    fun getRiesgoRPUsuarioActual(): Double {
+        return settings.getDouble(KEY_RIESGO_RP_USUARIO_ACTUAL, 0.0)
     }
 }

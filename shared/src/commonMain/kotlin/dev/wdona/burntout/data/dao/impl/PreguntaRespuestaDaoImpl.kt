@@ -3,7 +3,7 @@ package dev.wdona.burntout.data.dao.impl
 import dev.wdona.burntout.data.dao.PreguntaRespuestaDao
 import dev.wdona.burntout.data.datasource.mapper.PreguntaMapper
 import dev.wdona.burntout.shared.domain.Pregunta
-import dev.wdona.burntout.shared.domain.Respuesta
+import dev.wdona.burntout.domain.model.Respuesta
 import dev.wdona.burntout.shared.db.AppDatabase
 
 class PreguntaRespuestaDaoImpl(appDatabase: AppDatabase) : PreguntaRespuestaDao {
@@ -18,6 +18,7 @@ class PreguntaRespuestaDaoImpl(appDatabase: AppDatabase) : PreguntaRespuestaDao 
     override suspend fun crearPregunta(pregunta: Pregunta): Long {
         queries.insertPregunta(
             Pregunta = pregunta.pregunta,
+            Categoria = pregunta.categoria,
             FK_ID_Org = pregunta.idOrganizacion
         )
         return queries.lastInsertRowId().executeAsOne()
@@ -27,6 +28,7 @@ class PreguntaRespuestaDaoImpl(appDatabase: AppDatabase) : PreguntaRespuestaDao 
         queries.upsertPregunta(
             ID_Pregunta = pregunta.idPregunta,
             Pregunta = pregunta.pregunta,
+            Categoria = pregunta.categoria,
             FK_ID_Org = pregunta.idOrganizacion
         )
     }
@@ -34,6 +36,7 @@ class PreguntaRespuestaDaoImpl(appDatabase: AppDatabase) : PreguntaRespuestaDao 
     override suspend fun actualizarPregunta(pregunta: Pregunta): Boolean {
         queries.updatePregunta(
             Pregunta = pregunta.pregunta,
+            Categoria = pregunta.categoria,
             ID_Pregunta = pregunta.idPregunta
         )
         return true
@@ -45,12 +48,23 @@ class PreguntaRespuestaDaoImpl(appDatabase: AppDatabase) : PreguntaRespuestaDao 
     }
 
     override suspend fun responderPregunta(respuesta: Respuesta) {
-        queries.insertRespuesta(
-            ID_Usuario = respuesta.idUsuario,
-            ID_Pregunta = respuesta.idPregunta,
-            Anonimo = if (respuesta.anonimo) 1L else 0L,
-            Respuesta = respuesta.respuesta
-        )
+        val fecha = respuesta.fecha ?: (System.currentTimeMillis() / 1000L)
+        
+        queries.transaction {
+            queries.deleteRespuestaByDate(
+                respuesta.idUsuario,
+                respuesta.idPregunta,
+                "" + fecha
+            )
+            
+            queries.insertRespuesta(
+                ID_Usuario = respuesta.idUsuario,
+                ID_Pregunta = respuesta.idPregunta,
+                Anonimo = if (respuesta.anonimo) 1L else 0L,
+                Respuesta = respuesta.respuesta,
+                Fecha = fecha
+            )
+        }
     }
 
     override suspend fun getRespuestasByPregunta(idPregunta: Long): List<Respuesta> {
@@ -66,8 +80,8 @@ class PreguntaRespuestaDaoImpl(appDatabase: AppDatabase) : PreguntaRespuestaDao 
         }
     }
 
-    override suspend fun getRespuestasByUser(idUser: Long): List<Respuesta> {
-        val filas = queries.getRespuestasByUser(idUser).executeAsList()
+    override suspend fun getRespuestasByIdUsuario(idUsuario: Long): List<Respuesta> {
+        val filas = queries.getRespuestasByUser(idUsuario).executeAsList()
         return filas.map { row ->
             Respuesta(
                 idUsuario = row.ID_Usuario,
@@ -80,8 +94,22 @@ class PreguntaRespuestaDaoImpl(appDatabase: AppDatabase) : PreguntaRespuestaDao 
         }
     }
 
-    override suspend fun getRespuestasByUserAndDate(idUser: Long, date: Long): List<Respuesta> {
-        val filas = queries.getRespuestasByUserAndDate(idUser, date).executeAsList()
+    override suspend fun getLastRespuestasByIdUsuario(idUsuario: Long): List<Respuesta> {
+        val filas = queries.getLastRespuestasByUser(idUsuario, idUsuario).executeAsList()
+        return filas.map { row ->
+            Respuesta(
+                idUsuario = row.ID_Usuario,
+                idPregunta = row.ID_Pregunta,
+                anonimo = row.Anonimo == 1L,
+                respuesta = row.Respuesta,
+                nombreUsuario = null,
+                fecha = row.Fecha
+            )
+        }
+    }
+
+    override suspend fun getRespuestasByIdUsuarioAndDate(idUsuario: Long, date: Long): List<Respuesta> {
+        val filas = queries.getRespuestasByUserAndDate(idUsuario, "" + date).executeAsList()
         return filas.map { row ->
             Respuesta(
                 idUsuario = row.ID_Usuario,

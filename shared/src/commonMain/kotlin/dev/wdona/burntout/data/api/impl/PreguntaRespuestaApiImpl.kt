@@ -2,7 +2,7 @@ package dev.wdona.burntout.data.api.impl
 
 import dev.wdona.burntout.data.api.PreguntaRespuestaApi
 import dev.wdona.burntout.shared.domain.Pregunta
-import dev.wdona.burntout.shared.domain.Respuesta
+import dev.wdona.burntout.domain.model.Respuesta
 import dev.wdona.burntout.shared.network.ApiClient
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -40,15 +40,18 @@ class PreguntaRespuestaApiImpl(private val client: HttpClient = ApiClient.client
     override suspend fun getRespuestasByPregunta(idPregunta: Long): List<Respuesta> =
         client.get("/respuestas/pregunta=$idPregunta").body()
 
-    override suspend fun getRespuestasByUser(idUser: Long): List<Respuesta> {
-        TODO("Not yet implemented")
+    override suspend fun getRespuestasByIdUsuario(idUser: Long): List<Respuesta> {
+        return client.get("/respuestas/usuario=$idUser").body<List<Respuesta>>()
     }
 
-    override suspend fun getRespuestasByUserAndDate(
+    override suspend fun getLastRespuestasByIdUsuario(idUser: Long): List<Respuesta> {
+        return client.get("/respuestas/usuario=$idUser&last=true").body<List<Respuesta>>()
+    }
+
+    override suspend fun getRespuestasByIdUsuarioAndDate(
         idUser: Long,
         date: Long
     ): List<Respuesta> {
-        TODO("Not yet implemented")
+        return client.get("/respuestas/usuario=$idUser&date=$date").body<List<Respuesta>>()
     }
 }
-

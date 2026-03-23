@@ -1,6 +1,38 @@
 import org.gradle.kotlin.dsl.implementation
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.gradle.api.provider.ValueSource
+import org.gradle.api.provider.ValueSourceParameters
+import org.gradle.process.ExecOperations
+import javax.inject.Inject
+import java.io.ByteArrayOutputStream
+
+abstract class GitVersionValueSource : ValueSource<String, ValueSourceParameters.None> {
+    @get:Inject
+    abstract val execOperations: ExecOperations
+
+    override fun obtain(): String {
+        return try {
+            val output = ByteArrayOutputStream()
+            execOperations.exec {
+                commandLine("git", "rev-list", "--count", "HEAD")
+                standardOutput = output
+            }
+            val count = output.toString().trim().toLong()
+            val majorPart = count / 100
+            val minorPart = String.format("%02d", count % 100)
+            "1.$majorPart.$minorPart"
+        } catch (e: Exception) {
+            "1.0.0"
+        }
+    }
+}
+
+val appVersion = if (project.hasProperty("appVersion")) {
+    project.property("appVersion") as String
+} else {
+    providers.of(GitVersionValueSource::class) {}.get()
+}
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
@@ -71,7 +103,7 @@ android {
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
         versionCode = 1
-        versionName = "1.1.13"
+        versionName = appVersion
     }
     packaging {
         resources {
@@ -96,6 +128,7 @@ android {
     }
     buildFeatures {
         viewBinding = true
+        buildConfig = true
     }
 }
 
@@ -106,12 +139,13 @@ dependencies {
 compose.desktop {
     application {
         mainClass = "dev.wdona.burntout.MainKt"
+        jvmArgs += "-Dapp.version=$appVersion"
 
         nativeDistributions {
             // WIN - DEB - ARCH
             targetFormats(TargetFormat.Msi, TargetFormat.Deb, TargetFormat.Rpm)
             packageName = "BurntOutApp"
-            packageVersion = "1.1.14"
+            packageVersion = appVersion
             
             modules("java.sql")
 
@@ -133,3 +167,5 @@ compose.desktop {
         }
     }
 }
+
+

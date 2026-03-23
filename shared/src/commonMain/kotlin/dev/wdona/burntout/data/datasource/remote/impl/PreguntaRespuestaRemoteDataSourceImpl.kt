@@ -3,7 +3,7 @@ package dev.wdona.burntout.data.datasource.remote.impl
 import dev.wdona.burntout.data.api.PreguntaRespuestaApi
 import dev.wdona.burntout.data.datasource.remote.PreguntaRespuestaRemoteDataSource
 import dev.wdona.burntout.shared.domain.Pregunta
-import dev.wdona.burntout.shared.domain.Respuesta
+import dev.wdona.burntout.domain.model.Respuesta
 
 class PreguntaRespuestaRemoteDataSourceImpl(private val api: PreguntaRespuestaApi): PreguntaRespuestaRemoteDataSource {
     override suspend fun getPreguntasByOrg(idOrg: Long): List<Pregunta> {
@@ -38,11 +38,15 @@ class PreguntaRespuestaRemoteDataSourceImpl(private val api: PreguntaRespuestaAp
         return api.getRespuestasByPregunta(idPregunta)
     }
 
-    override suspend fun getRespuestasByUser(idUser: Long): List<Respuesta> {
-        return api.getRespuestasByUser(idUser)
+    override suspend fun getRespuestasByIdUsuario(idUser: Long): List<Respuesta> {
+        return api.getRespuestasByIdUsuario(idUser)
     }
 
-    override suspend fun getRespuestasByUserAndDate(idUser: Long, date: Long): List<Respuesta> {
-        return api.getRespuestasByUserAndDate(idUser, date)
+    override suspend fun getLastRespuestasByIdUsuario(idUser: Long): List<Respuesta> {
+        return api.getLastRespuestasByIdUsuario(idUser)
+    }
+
+    override suspend fun getRespuestasByIdUsuarioAndDate(idUser: Long, date: Long): List<Respuesta> {
+        return api.getRespuestasByIdUsuarioAndDate(idUser, date)
     }
 }
