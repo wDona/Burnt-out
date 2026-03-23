@@ -1,19 +1,14 @@
 package dev.wdona.burntout.presentation.ui.pantallas.perfil
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.CloudOff
 import androidx.compose.material.icons.filled.Person4
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
@@ -39,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import dev.wdona.burntout.presentation.ui.pantallas.SettingsScreen
 import dev.wdona.burntout.presentation.ui.theme.BurntOutMaterialTheme
 import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.AjustesViewModelFactory
+import kotlin.math.round
 
 class PerfilScreen(val factory: MiPerfilViewModelFactory, val ajustesFactory: AjustesViewModelFactory, val onVolver: (() -> Unit)? = null, var idUsuario: Long? = null) : Screen {
     @Composable
@@ -124,15 +120,18 @@ fun PerfilContent(viewModel: PerfilViewModel, onAjustes: () -> Unit, onVolver: (
                         Text("Volver")
                     }
                 } else {
+                    val riesgo = usuario?.riesgoBurnout ?: 0.0
+                    val riesgoVisual = round(riesgo * 100) / 100.0
+
                     Text(
                         text =
-                            if ((usuario!!.riesgoBurnout ?: 0.0) < 0.33) "Riesgo de Burnout Bajo"
-                            else if ((usuario!!.riesgoBurnout ?: 0.0) in 0.33..<0.66) "Riesgo de Burnout Medio"
-                            else "Riesgo de Burnout Alto",
+                            if (riesgo < 0.33) "Riesgo de Burnout bajo ($riesgoVisual)"
+                            else if (riesgo in 0.33..<0.66) "Riesgo de Burnout mediano ($riesgoVisual)"
+                            else "Riesgo de Burnout alto ($riesgoVisual)",
                         style = MaterialTheme.typography.titleMedium,
                         color =
-                            if ((usuario!!.riesgoBurnout ?: 0.0) < 0.33) BurntOutMaterialTheme.getSuccessColor()
-                            else if ((usuario!!.riesgoBurnout ?: 0.0) in 0.33..<0.66) BurntOutMaterialTheme.getWarningColor()
+                            if (riesgo < 0.33) BurntOutMaterialTheme.getSuccessColor()
+                            else if (riesgo in 0.33..<0.66) BurntOutMaterialTheme.getWarningColor()
                             else BurntOutMaterialTheme.getErrorColor()
                     )
 //                    Text("ID: ${usuario!!.idUsuario}", style = MaterialTheme.typography.titleMedium)
