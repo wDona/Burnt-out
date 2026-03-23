@@ -40,13 +40,17 @@ fun MiembroCard(miembro: Usuario, onClick: () -> Unit) {
         verticalAlignment = Alignment.CenterVertically
     ){
         val tint: androidx.compose.ui.graphics.Color
-        miembro.riesgoBurnout?.let {
-            tint = if (it < 0.33) {
-                BurntOutMaterialTheme.getSuccessColor()
-            } else if (it in 0.33..0.66) {
-                BurntOutMaterialTheme.getWarningColor()
+        miembro.riesgoBurnout.let {
+            if (it != null) {
+                tint = if (it < 0.33) {
+                    BurntOutMaterialTheme.getSuccessColor()
+                } else if (it in 0.33..0.66) {
+                    BurntOutMaterialTheme.getWarningColor()
+                } else {
+                    BurntOutMaterialTheme.getErrorColor()
+                }
             } else {
-                BurntOutMaterialTheme.getErrorColor()
+                tint = BurntOutMaterialTheme.getColorScheme().onSurface
             }
             Icon(
                 imageVector = Icons.Default.Person,

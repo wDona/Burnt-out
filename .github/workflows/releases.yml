@@ -92,10 +92,10 @@ jobs:
         id: vars
         shell: bash
         run: |
-          COUNT=$(git rev-list --count HEAD)
+          COUNT=$(git rev-list --count HEAD | tr -d '[:space:]')
           MAJOR_PART=$((COUNT / 100))
           MINOR_PART=$(printf "%02d" $((COUNT % 100)))
-          echo "version=1.$MAJOR_PART.$MINOR_PART" >> $GITHUB_OUTPUT
+          echo "version=1.$MAJOR_PART.$MINOR_PART" | tr -d '\r' >> $GITHUB_OUTPUT
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
@@ -104,7 +104,7 @@ jobs:
           cache: 'gradle'
       - name: Build Windows
         run: |
-          ./gradlew :composeApp:packageMsi -PappVersion=${{ steps.vars.outputs.version }}
+          ./gradlew :composeApp:packageMsi "-PappVersion=${{ steps.vars.outputs.version }}"
       - name: Prepare Files
         shell: bash
         run: |
