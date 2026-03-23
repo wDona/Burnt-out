@@ -39,5 +39,16 @@ class PreguntaRespuestaApiImpl(private val client: HttpClient = ApiClient.client
 
     override suspend fun getRespuestasByPregunta(idPregunta: Long): List<Respuesta> =
         client.get("/respuestas/pregunta=$idPregunta").body()
+
+    override suspend fun getRespuestasByUser(idUser: Long): List<Respuesta> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun getRespuestasByUserAndDate(
+        idUser: Long,
+        date: Long
+    ): List<Respuesta> {
+        TODO("Not yet implemented")
+    }
 }
 
