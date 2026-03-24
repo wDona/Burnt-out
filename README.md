@@ -73,10 +73,10 @@ El resultado se expone como un `Double` entre `0.0` y `1.0` almacenado en `Riesg
 
 ```kotlin
 data class ResultadoBurnout(
-    val nivelCE: Int,        // 0 = bajo, 1 = medio, 2 = alto
-    val nivelD: Int,         // 0 = bajo, 1 = medio, 2 = alto
-    val nivelRP: Int,        // 2 = bajo, 1 = medio, 1 = alto
-    val riesgoGlobal: Float  // 0.0 - 1.0
+    val nivelCE: Double,        // 0-0.33 = bajo, 0.34-0.66 = medio, 0.67-1.0 = alto
+    val nivelD: Double,         // 0-0.33 = bajo, 0.34-0.66 = medio, 0.67-1.0 = alto
+    val nivelRP: Double,        // 0-0.33 = bajo, 0.34-0.66 = medio, 0.67-1.0 = alto
+    val riesgoGlobal: Float     // (nivelCE + nivelD + nivelRP) / 3
 )
 ```
 
