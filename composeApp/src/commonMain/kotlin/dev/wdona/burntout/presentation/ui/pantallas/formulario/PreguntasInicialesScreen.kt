@@ -62,7 +62,6 @@ import dev.wdona.burntout.shared.utils.SettingsManager
 class PreguntasInicialesScreen(
     private val viewModelFactory: FormularioViewModelFactory,
     private val onVolver: (() -> Unit)? = null,
-    private val onSaltar: (() -> Unit)? = null,
     private val nPreguntas: Int,
 
     private val tareaFactory: TareasViewModelFactory,
@@ -112,7 +111,6 @@ class PreguntasInicialesScreen(
 @Composable
 fun PreguntasInicialesContent(onVolver: (() -> Unit)? = null, viewModel: PreguntasInicialesViewModel, onTerminar: (() -> Unit)? = null) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val listaPreguntas = uiState.preguntas
     val preguntaActual = uiState.preguntaActual
     val isLoading = uiState.isLoading
     val respuestaActual by viewModel.respuestaActual.collectAsStateWithLifecycle()
@@ -159,7 +157,13 @@ fun PreguntasInicialesContent(onVolver: (() -> Unit)? = null, viewModel: Pregunt
         }
     }
 
-    val titulo = if (isLoading) "" else "Diario inicial"
+    val tiempo = if ((uiState.preguntas.size * 6) > 60) {
+        "${(uiState.preguntas.size * 6) / 60} minutos"
+    } else {
+        "${uiState.preguntas.size * 6} segundos"
+    }
+
+    val titulo = if (isLoading) "" else "Diario inicial ($tiempo aprox)"
 
     ScaffoldBase (
         titulo = titulo,

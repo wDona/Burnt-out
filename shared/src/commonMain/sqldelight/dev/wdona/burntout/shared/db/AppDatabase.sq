@@ -359,7 +359,7 @@ AND date(Fecha, 'unixepoch', 'localtime') = date(?, 'unixepoch', 'localtime');
 
 insertRespuestasBase:
 INSERT OR IGNORE INTO ResponderEntity(ID_Usuario, ID_Pregunta, Anonimo, Respuesta, Fecha)
-SELECT :idUsuario, ID_Pregunta, 0, -100, :fecha
+SELECT :idUsuario, ID_Pregunta, 0, -6, :fecha
 FROM PreguntaEntity
 WHERE FK_ID_Org = -9223372036854775808;
 

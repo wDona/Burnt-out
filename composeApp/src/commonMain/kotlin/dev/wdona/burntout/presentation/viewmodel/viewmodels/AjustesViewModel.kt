@@ -79,4 +79,8 @@ class AjustesViewModel(private val repository: AjusteRepository) : ScreenModel {
         val nuevoValor = !SettingsManager.getPrimerCuestionarioHecho()
         SettingsManager.setPrimerCuestionarioHecho(nuevoValor)
     }
+
+    fun resetSettings() {
+        SettingsManager.clearAll()
+    }
 }

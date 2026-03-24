@@ -133,13 +133,13 @@ fun PerfilContent(viewModel: PerfilViewModel, onAjustes: () -> Unit, onVolver: (
                     }
                 }
                 else {
-                    val riesgo = usuario?.riesgoBurnout ?: 0.0
+                    val riesgo = usuario.riesgoBurnout ?: -1.0
 
                     BateriaBurnout(riesgo = riesgo)
 
 //                    Text("ID: ${usuario!!.idUsuario}", style = MaterialTheme.typography.titleMedium)
-                    Text(usuario!!.username, style = MaterialTheme.typography.titleMedium)
-                    Text(usuario!!.descripcion ?: "-", style = MaterialTheme.typography.titleMedium)
+                    Text(usuario.username, style = MaterialTheme.typography.titleMedium)
+                    Text(usuario.descripcion ?: "-", style = MaterialTheme.typography.titleMedium)
 
 //                    if (usuario!!.idUsuario == SettingsManager.getIdUsuarioActual()) {
 //                        OutlinedButton(

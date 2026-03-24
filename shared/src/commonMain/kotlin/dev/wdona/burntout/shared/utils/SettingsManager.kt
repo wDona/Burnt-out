@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.asStateFlow
 
 object SettingsManager {
     // TODO: Hardcodear usuario offline
-    private val settings = Settings()
+    private val settings = createSettings()
     private const val KEY_PRIMER_CUESTIONARIO_HECHO = "cuestionario_inicial_hecho"
     private const val KEY_ID_USUARIO_ACTUAL = "id_usuario_actual"
     private const val KEY_NOMBRE_USUARIO = "nombre_usuario"
@@ -24,6 +24,13 @@ object SettingsManager {
 
     private val _cuestionarioHoyHechoFlow = MutableStateFlow(esCuestionarioHoyHecho())
     val cuestionarioHoyHechoFlow = _cuestionarioHoyHechoFlow.asStateFlow()
+
+    fun clearAll() {
+        settings.clear()
+
+        _primerCuestionarioHechoFlow.value = false
+        _cuestionarioHoyHechoFlow.value = false
+    }
 
     fun setIdUsuarioActual(id: Long?) {
         settings.putLong(KEY_ID_USUARIO_ACTUAL, id ?: Long.MIN_VALUE)
@@ -93,7 +100,7 @@ object SettingsManager {
     }
 
     fun getRiesgoCEUsuarioActual(): Double {
-        return settings.getDouble(KEY_RIESGO_CE_USUARIO_ACTUAL, 0.0)
+        return settings.getDouble(KEY_RIESGO_CE_USUARIO_ACTUAL, -1.0)
     }
 
     fun setRiesgoDUsuarioActual(riesgo: Double) {
@@ -101,7 +108,7 @@ object SettingsManager {
     }
 
     fun getRiesgoDUsuarioActual(): Double {
-        return settings.getDouble(KEY_RIESGO_D_USUARIO_ACTUAL, 0.0)
+        return settings.getDouble(KEY_RIESGO_D_USUARIO_ACTUAL, -1.0)
     }
 
     fun setRiesgoRPUsuarioActual(riesgo: Double) {
@@ -109,7 +116,7 @@ object SettingsManager {
     }
 
     fun getRiesgoRPUsuarioActual(): Double {
-        return settings.getDouble(KEY_RIESGO_RP_USUARIO_ACTUAL, 0.0)
+        return settings.getDouble(KEY_RIESGO_RP_USUARIO_ACTUAL, -1.0)
     }
 
     fun setUltimaFechaCuestionarioHoy() {

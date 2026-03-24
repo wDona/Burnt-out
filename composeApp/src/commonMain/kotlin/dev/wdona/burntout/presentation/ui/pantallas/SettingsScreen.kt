@@ -1,6 +1,8 @@
 package dev.wdona.burntout.presentation.ui.pantallas
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -47,6 +49,12 @@ fun SettingsContent(viewModel: AjustesViewModel, onVolver: () -> Unit) {
             FilaAjusteInfo("Organizacion de usuario: " + ajustes.idOrganizacion)
             FilaAjusteInfo("Equipo de usuario: " + ajustes.idEquipo)
             FilaAjusteInfo("Version de app: " + ajustes.versionApp)
+
+            TextButton(
+                onClick = { viewModel.resetSettings() }
+            ) {
+                Text("Resetear Datos de Aplicación (Debug)")
+            }
         }
     }
 
