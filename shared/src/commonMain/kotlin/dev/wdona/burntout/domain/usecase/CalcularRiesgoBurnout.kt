@@ -9,31 +9,21 @@ class CalcularRiesgoBurnout {
         val itemsD = setOf(5L, 10L, 11L, 15L, 22L)
         val itemsRP = setOf(4L, 7L, 9L, 12L, 17L, 18L, 19L, 21L)
 
-        val sumCE = respuestas.filter { it.idPregunta in itemsCE }.sumOf { it.respuesta.toInt() }
-        val sumD = respuestas.filter { it.idPregunta in itemsD }.sumOf { it.respuesta.toInt() }
-        val sumRP = respuestas.filter { it.idPregunta in itemsRP }.sumOf { it.respuesta.toInt() }
+        val ce = respuestas.filter { it.idPregunta in itemsCE }.sumOf { it.respuesta.toInt() }
+        val d = respuestas.filter { it.idPregunta in itemsD }.sumOf { it.respuesta.toInt() }
+        val rp = respuestas.filter { it.idPregunta in itemsRP }.sumOf { it.respuesta.toInt() }
 
-        // Cansancio emocional
-        val nivelCE = when {
-            sumCE >= 27 -> 2.0
-            sumCE >= 19 -> 1.0
-            else -> 0.0
-        }
+        val scoreCE = ce / 54.0                  // max 9×6
+        val scoreD  = d  / 30.0                  // max 5×6
+        val scoreRP = 1.0 - (rp / 48.0)          // max 8×6 - invertido
 
-        // Despersonalización
-        val nivelD = when {
-            sumD >= 10 -> 2.0
-            sumD >= 6 -> 1.0
-            else -> 0.0
-        }
-
-        // Realizacion personal
-        val nivelRP = when {
-            sumRP <= 33 -> 2.0
-            sumRP <= 39 -> 1.0
-            else -> 0.0
-        }
-
-        return ResultadoBurnout(nivelCE, nivelD, nivelRP)
+        return ResultadoBurnout(
+            scoreCE = scoreCE,
+            scoreD  = scoreD,
+            scoreRP = scoreRP,
+//            nivelCE  = when { ce >= 27 -> 2; ce >= 19 -> 1; else -> 0 },
+//            nivelD   = when { d  >= 10 -> 2; d  >=  6 -> 1; else -> 0 },
+//            nivelRP  = when { rp <= 33 -> 2; rp <= 39 -> 1; else -> 0 },
+        )
     }
 }

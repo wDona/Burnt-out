@@ -13,8 +13,8 @@ class GuardarRiesgoBurnout(
         val riesgoBurnout = CalcularRiesgoBurnout().invoke(respuestas)
         usuarioRepository.updateRiesgoBurnout(idUsuario, riesgoBurnout.riesgoTotal)
 
-        SettingsManager.setRiesgoCEUsuarioActual(riesgoBurnout.nivelCE)
-        SettingsManager.setRiesgoDUsuarioActual(riesgoBurnout.nivelD)
-        SettingsManager.setRiesgoRPUsuarioActual(riesgoBurnout.nivelRP)
+        SettingsManager.setRiesgoCEUsuarioActual(riesgoBurnout.scoreCE)
+        SettingsManager.setRiesgoDUsuarioActual(riesgoBurnout.scoreD)
+        SettingsManager.setRiesgoRPUsuarioActual(riesgoBurnout.scoreRP)
     }
 }

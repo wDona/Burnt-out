@@ -79,7 +79,7 @@ class PerfilViewModel(private val repository: UsuarioRepository) : ScreenModel {
 
     fun actualizarRiesgo(idUsuario: Long) {
         screenModelScope.launch {
-            repository.updateRiesgoBurnout(idUsuario, resultadoBurnout.riesgoTotal)
+            // repository.updateRiesgoBurnout(idUsuario, resultadoBurnout.riesgoTotal)
             cargarUsuario(idUsuario)
         }
     }
