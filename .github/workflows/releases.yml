@@ -77,14 +77,13 @@ jobs:
           files: release-artifacts/*
           body: |
             ## 📦 Instalación
-
             Descarga el archivo correspondiente a tu plataforma:
 
-            | Plataforma | Archivo | Instrucciones |
-            |---|---|---|
-            | 🪟 Windows | `burnt-out-${{ steps.vars.outputs.version }}-installer.msi` | Doble clic e instala normalmente |
-            | 🐧 Linux | `burnt-out-${{ steps.vars.outputs.version }}-installer.deb` | `sudo dpkg -i burnt-out-*.deb` |
-            | 🤖 Android | `burnt-out-${{ steps.vars.outputs.version }}-installer.apk` | Activa "orígenes desconocidos" e instala el APK |
+            | Plataforma | Extension |
+            | --- | --- |
+            | Windows | .msi |
+            | Linux (Debian) | .deb |
+            | Android | .apk |
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
