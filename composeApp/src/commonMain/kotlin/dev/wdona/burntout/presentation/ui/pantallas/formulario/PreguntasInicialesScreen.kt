@@ -44,46 +44,85 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
 import dev.wdona.burntout.presentation.ui.components.template.ScaffoldBase
 import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.FormularioViewModelFactory
-import dev.wdona.burntout.presentation.viewmodel.viewmodels.FormularioViewModel
 import dev.wdona.burntout.domain.model.Respuesta
+import dev.wdona.burntout.presentation.ui.pantallas.MainScreen
+import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.AjustesViewModelFactory
+import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.LeaderboardViewModelFactory
+import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.MiEquipoViewModelFactory
+import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.MiPerfilViewModelFactory
+import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.TablerosViewModelFactory
+import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.TareasViewModelFactory
+import dev.wdona.burntout.presentation.viewmodel.viewmodels.PreguntasInicialesViewModel
 import dev.wdona.burntout.shared.utils.SettingsManager
 
-class PreguntaScreen(private val viewModelFactory: FormularioViewModelFactory, private val onVolver: (() -> Unit)? = null) : Screen {
+class PreguntasInicialesScreen(
+    private val viewModelFactory: FormularioViewModelFactory,
+    private val onVolver: (() -> Unit)? = null,
+    private val onSaltar: (() -> Unit)? = null,
+    private val nPreguntas: Int,
+
+    private val tareaFactory: TareasViewModelFactory,
+    private val equipoFactory: MiEquipoViewModelFactory,
+    private val perfilFactory: MiPerfilViewModelFactory,
+    private val tableroFactory: TablerosViewModelFactory,
+    private val leaderboardFactory: LeaderboardViewModelFactory,
+    private val ajustesFactory: AjustesViewModelFactory,
+) : Screen {
 
     @Composable
     override fun Content() {
-        val viewModel = rememberScreenModel { viewModelFactory.createFormularioViewModel() }
+        val navigator = LocalNavigator.currentOrThrow
+        val onTerminar = {
+            navigator.push(
+                MainScreen(
+                        tareaFactory = tareaFactory,
+                        equipoFactory = equipoFactory,
+                        perfilFactory = perfilFactory,
+                        tableroFactory = tableroFactory,
+                        leaderboardFactory = leaderboardFactory,
+                        ajustesFactory = ajustesFactory,
+                        formularioFactory = viewModelFactory
+                )
+            )
+        }
+        val viewModel = rememberScreenModel { viewModelFactory.createPreguntasInicialesViewModel() }
 
         val idOrganizacion = SettingsManager.getIdOrganizacionActual()
-        
+
         LaunchedEffect(idOrganizacion) {
             try {
-                viewModel.cargarPreguntas(idOrganizacion)
-                viewModel.cargarRespuestasByIdUsuario(
-                    SettingsManager.getIdUsuarioActual(),
-                    System.currentTimeMillis() / 1000L
-                )
+                viewModel.cargarUltimasNPreguntasPorResponder(idOrganizacion, nPreguntas)
             } catch (e: Exception) {
                 println("Error al cargar preguntas: ${e.message}")
             }
         }
 
-        PreguntaContent(
+        PreguntasInicialesContent(
             onVolver = onVolver,
-            viewModel = viewModel
+            viewModel = viewModel,
+            onTerminar = onTerminar
         )
     }
 }
 
 @Composable
-fun PreguntaContent(onVolver: (() -> Unit)? = null, viewModel: FormularioViewModel) {
+fun PreguntasInicialesContent(onVolver: (() -> Unit)? = null, viewModel: PreguntasInicialesViewModel, onTerminar: (() -> Unit)? = null) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val listaPreguntas = uiState.preguntas
     val preguntaActual = uiState.preguntaActual
     val isLoading = uiState.isLoading
     val respuestaActual by viewModel.respuestaActual.collectAsStateWithLifecycle()
+
+    LaunchedEffect(isLoading, preguntaActual) {
+        if (!isLoading && preguntaActual == null && uiState.preguntas.isNotEmpty()) {
+            SettingsManager.setPrimerCuestionarioHecho(true)
+            SettingsManager.setUltimaFechaCuestionarioHoy()
+        }
+    }
 
     var selectedCantidad by remember { mutableStateOf<Int?>(null) }
     val focusRequester = remember { FocusRequester() }
@@ -119,12 +158,13 @@ fun PreguntaContent(onVolver: (() -> Unit)? = null, viewModel: FormularioViewMod
             focusRequester.requestFocus()
         }
     }
-    
-    val titulo = if (isLoading) "" else "Diario"
+
+    val titulo = if (isLoading) "" else "Diario inicial"
 
     ScaffoldBase (
         titulo = titulo,
         onVolver = onVolver,
+        onSaltar = onTerminar,
         onFAB = if (preguntaActual != null) responderAccion else null,
         fabEnabled = selectedCantidad != null && preguntaActual != null,
         iconFAB = {
@@ -146,23 +186,23 @@ fun PreguntaContent(onVolver: (() -> Unit)? = null, viewModel: FormularioViewMod
             }
     ) {
         if (isLoading) {
-            // Estructura vacia
+
         } else {
             val scrollState = rememberScrollState()
-            
+
             val showMoreIcon by remember {
                 derivedStateOf {
                     scrollState.maxValue > 0 && scrollState.value < scrollState.maxValue
                 }
             }
-            
+
             Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(16.dp)
             ) {
                 Text(
-                    text = preguntaActual?.pregunta ?: "Todo contestado",
+                    text = preguntaActual?.pregunta ?: "Sin preguntas disponibles para contestar hoy",
                     style = MaterialTheme.typography.titleLarge,
                     modifier = Modifier
                         .fillMaxWidth()
@@ -191,7 +231,6 @@ fun PreguntaContent(onVolver: (() -> Unit)? = null, viewModel: FormularioViewMod
                                         else -> "invalid"
                                     }
 
-
                                     Row(
                                         Modifier
                                             .fillMaxWidth()
@@ -219,21 +258,11 @@ fun PreguntaContent(onVolver: (() -> Unit)? = null, viewModel: FormularioViewMod
                                 }
                             }
                         } else {
-                            Column (
-                                horizontalAlignment = Alignment.CenterHorizontally
-                            ){
-                                Text(
-                                    text = "Quieres contestar otra vez?",
-                                    style = MaterialTheme.typography.titleMedium,
-                                    modifier = Modifier.padding(bottom = 16.dp),
-                                    textAlign = TextAlign.Center
-                                )
-                                OutlinedButton(onClick = {
-                                    viewModel.limpiarRespuestas()
-                                }) {
-                                    Text("Reiniciar preguntas")
-                                }
+                            LaunchedEffect(1) {
+                                SettingsManager.setUltimaFechaCuestionarioHoy()
+                                SettingsManager.setPrimerCuestionarioHecho(true)
                             }
+                            onTerminar?.invoke()
                         }
                     }
 

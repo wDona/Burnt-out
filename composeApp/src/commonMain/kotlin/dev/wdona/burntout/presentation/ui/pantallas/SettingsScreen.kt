@@ -35,8 +35,8 @@ fun SettingsContent(viewModel: AjustesViewModel, onVolver: () -> Unit) {
     ){
         Column {
             FilaAjusteSwitch(
-                if (ajustes.esPrimeraEjecucion) "Es primera ejecucion" else "No es primera ejecucion",
-                ajustes.esPrimeraEjecucion,
+                if (ajustes.primerCuestionarioHecho) "Es primera ejecucion" else "No es primera ejecucion",
+                ajustes.primerCuestionarioHecho,
                 onSwitch = {
                     viewModel.togglePrimeraEjecucion()
                 }

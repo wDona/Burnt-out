@@ -1,11 +1,13 @@
 package dev.wdona.burntout.shared.utils
 
 import com.russhwolf.settings.Settings
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 object SettingsManager {
     // TODO: Hardcodear usuario offline
     private val settings = Settings()
-    private const val KEY_PRIMERA_EJECUCION = "es_primera_ejecucion"
+    private const val KEY_PRIMER_CUESTIONARIO_HECHO = "cuestionario_inicial_hecho"
     private const val KEY_ID_USUARIO_ACTUAL = "id_usuario_actual"
     private const val KEY_NOMBRE_USUARIO = "nombre_usuario"
     private const val KEY_ID_ORGANIZACION_ACTUAL = "id_organizacion"
@@ -15,6 +17,13 @@ object SettingsManager {
     private const val KEY_RIESGO_CE_USUARIO_ACTUAL = "riesgo_ce_usuario_actual"
     private const val KEY_RIESGO_D_USUARIO_ACTUAL = "riesgo_d_usuario_actual"
     private const val KEY_RIESGO_RP_USUARIO_ACTUAL = "riesgo_rp_usuario_actual"
+    private const val KEY_ULTIMA_FECHA_CUESTIONARIO = "ultima_fecha_cuestionario"
+
+    private val _primerCuestionarioHechoFlow = MutableStateFlow(getPrimerCuestionarioHecho())
+    val primerCuestionarioHechoFlow = _primerCuestionarioHechoFlow.asStateFlow()
+
+    private val _cuestionarioHoyHechoFlow = MutableStateFlow(esCuestionarioHoyHecho())
+    val cuestionarioHoyHechoFlow = _cuestionarioHoyHechoFlow.asStateFlow()
 
     fun setIdUsuarioActual(id: Long?) {
         settings.putLong(KEY_ID_USUARIO_ACTUAL, id ?: Long.MIN_VALUE)
@@ -34,12 +43,13 @@ object SettingsManager {
         return token
     }
 
-    fun setPrimeraEjecucion(primeraEjecucion: Boolean) {
-        settings.putBoolean(KEY_PRIMERA_EJECUCION, primeraEjecucion)
+    fun setPrimerCuestionarioHecho(primerCuestionario: Boolean) {
+        settings.putBoolean(KEY_PRIMER_CUESTIONARIO_HECHO, primerCuestionario)
+        _primerCuestionarioHechoFlow.value = primerCuestionario
     }
 
-    fun getPrimeraEjecucion(): Boolean {
-        return settings.getBoolean(KEY_PRIMERA_EJECUCION, true)
+    fun getPrimerCuestionarioHecho(): Boolean {
+        return settings.getBoolean(KEY_PRIMER_CUESTIONARIO_HECHO, false)
     }
 
     fun getIdEquipoActual(): Long {
@@ -100,5 +110,17 @@ object SettingsManager {
 
     fun getRiesgoRPUsuarioActual(): Double {
         return settings.getDouble(KEY_RIESGO_RP_USUARIO_ACTUAL, 0.0)
+    }
+
+    fun setUltimaFechaCuestionarioHoy() {
+        val fechaHoy = getCurrentDateString()
+        settings.putString(KEY_ULTIMA_FECHA_CUESTIONARIO, fechaHoy)
+        _cuestionarioHoyHechoFlow.value = true
+    }
+
+    fun esCuestionarioHoyHecho(): Boolean {
+        val ultimaFecha = settings.getString(KEY_ULTIMA_FECHA_CUESTIONARIO, "")
+        val fechaHoy = getCurrentDateString()
+        return ultimaFecha == fechaHoy
     }
 }

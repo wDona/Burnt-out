@@ -25,7 +25,7 @@ import dev.wdona.burntout.presentation.ui.theme.BurntOutMaterialTheme
 import kotlin.math.round
 
 @Composable
-fun BateriaBurnout(riesgo: Double, mostrarTexto: Boolean = true) {
+fun BateriaBurnout(riesgo: Double, mostrarTexto: Boolean = true, size: Int = 24, modifier: Modifier = Modifier) {
     val (icon, color, text) = getEstadoBateria(riesgo)
     
     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -33,7 +33,7 @@ fun BateriaBurnout(riesgo: Double, mostrarTexto: Boolean = true) {
             imageVector = icon,
             contentDescription = text,
             tint = color,
-            modifier = Modifier.size(24.dp)
+            modifier = modifier.size(size.dp)
         )
         if (mostrarTexto) {
             val riesgoVisual = round(riesgo * 100) / 100.0
@@ -50,6 +50,11 @@ fun BateriaBurnout(riesgo: Double, mostrarTexto: Boolean = true) {
 @Composable
 fun getEstadoBateria(riesgo: Double): Triple<ImageVector, Color, String> {
     return when {
+        riesgo < 0 -> Triple (
+            Icons.Default.BatteryFull,
+            BurntOutMaterialTheme.getColorScheme().onSurface,
+            "Sin responder"
+        )
         riesgo < 0.10 -> Triple(
             Icons.Default.BatteryFull,
             BurntOutMaterialTheme.getSuccessColor(),

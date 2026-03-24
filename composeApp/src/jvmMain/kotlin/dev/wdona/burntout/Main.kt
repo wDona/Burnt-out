@@ -66,7 +66,9 @@ fun main() = application {
                     ) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Text(
-                                text = "¡Ups! Algo salió mal",
+                                text = "¡Ups! Algo salió mal, vuelve a intentarlo, reinstala la aplicacion" +
+                                        "o elimina la carpeta .burntout_app (/home/tuusuario/.burntout_app o " +
+                                        "C:/Users/tuusuario/.burntout_app)",
                                 style = MaterialTheme.typography.headlineMedium,
                                 color = MaterialTheme.colorScheme.error
                             )

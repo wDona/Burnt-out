@@ -35,22 +35,21 @@ fun MiembroCard(miembro: Usuario, onClick: () -> Unit) {
 
         verticalAlignment = Alignment.CenterVertically
     ){
+        val riesgo = miembro.riesgoBurnout
+        if (riesgo != null) {
+            BateriaBurnout(riesgo = riesgo, mostrarTexto = false, modifier = Modifier.padding(start = 16.dp, end = 8.dp))
+        }
         Icon(
             imageVector = Icons.Default.Person,
             contentDescription = "Icono de usuario",
-            modifier = Modifier.padding(start = 16.dp, end = 8.dp),
+            modifier = Modifier.padding(end = 8.dp),
             tint = BurntOutMaterialTheme.getColorScheme().onSurface
         )
         Text(
             text = "$id ${miembro.nombre}",
             style = MaterialTheme.typography.titleMedium,
             color = BurntOutMaterialTheme.getColorScheme().onSurface,
-            modifier = Modifier.weight(1f)
         )
-        
-        val riesgo = miembro.riesgoBurnout
-        if (riesgo != null) {
-            BateriaBurnout(riesgo = riesgo, mostrarTexto = false)
-        }
+
     }
 }

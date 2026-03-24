@@ -15,6 +15,7 @@ composeIcons = "1.7.3"
 junit = "4.13.2"
 kotlin = "2.3.0"
 kotlinx-coroutines = "1.10.2"
+kotlinx-datetime = "0.6.0"
 ktor = "3.3.3"
 ktorClient = "2.3.11"
 logback = "1.5.24"
@@ -44,6 +45,7 @@ compose-uiToolingPreview = { module = "org.jetbrains.compose.ui:ui-tooling-previ
 composeIcons-core = { module = "org.jetbrains.compose.material:material-icons-core", version.ref = "composeIcons" }
 composeIcons-extended = { module = "org.jetbrains.compose.material:material-icons-extended", version.ref = "composeIcons" }
 kotlinx-coroutinesSwing = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-swing", version.ref = "kotlinx-coroutines" }
+kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinx-datetime" }
 ktor-serverCore = { module = "io.ktor:ktor-server-core-jvm", version.ref = "ktor" }
 ktor-serverNetty = { module = "io.ktor:ktor-server-netty-jvm", version.ref = "ktor" }
 ktor-serverTestHost = { module = "io.ktor:ktor-server-test-host-jvm", version.ref = "ktor" }

@@ -10,9 +10,12 @@ import dev.wdona.burntout.shared.utils.SettingsManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.SharingStarted
 
 data class AjustesUiState(
-    val esPrimeraEjecucion: Boolean = true,
+    val primerCuestionarioHecho: Boolean = false,
     val token: String = "",
     val idUsuario: Long = Long.MIN_VALUE,
     val idOrganizacion: Long = Long.MIN_VALUE,
@@ -20,12 +23,30 @@ data class AjustesUiState(
     val nombreUsuario: String = "Offline",
     val versionApp: String = AppInfo.version,
     // w.x.yz -> w. major version, x. centena de commits, yz. -> decena/ud de commit
+    val hoyHecho: Boolean = false
 )
 
 class AjustesViewModel(private val repository: AjusteRepository) : ScreenModel {
-    private val _ajustesUiState = MutableStateFlow(
+    
+    val ajustesUiState = combine(
+        SettingsManager.primerCuestionarioHechoFlow,
+        SettingsManager.cuestionarioHoyHechoFlow
+    ) { primerCuestionario, hoyHecho ->
         AjustesUiState(
-            esPrimeraEjecucion = SettingsManager.getPrimeraEjecucion(),
+            primerCuestionarioHecho = primerCuestionario,
+            hoyHecho = hoyHecho,
+            token = SettingsManager.getTokenUsuario(),
+            idUsuario = SettingsManager.getIdUsuarioActual(),
+            idOrganizacion = SettingsManager.getIdOrganizacionActual(),
+            idEquipo = SettingsManager.getIdEquipoActual(),
+            nombreUsuario = SettingsManager.getNombreUsuario(),
+        )
+    }.stateIn(
+        scope = screenModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = AjustesUiState(
+            primerCuestionarioHecho = SettingsManager.getPrimerCuestionarioHecho(),
+            hoyHecho = SettingsManager.esCuestionarioHoyHecho(),
             token = SettingsManager.getTokenUsuario(),
             idUsuario = SettingsManager.getIdUsuarioActual(),
             idOrganizacion = SettingsManager.getIdOrganizacionActual(),
@@ -33,8 +54,6 @@ class AjustesViewModel(private val repository: AjusteRepository) : ScreenModel {
             nombreUsuario = SettingsManager.getNombreUsuario(),
         )
     )
-
-    val ajustesUiState = _ajustesUiState.asStateFlow()
 
     // Deprecated??
     var _listaAjustes = MutableStateFlow<List<Ajuste?>>(emptyList())
@@ -57,9 +76,7 @@ class AjustesViewModel(private val repository: AjusteRepository) : ScreenModel {
     }
 
     fun togglePrimeraEjecucion() {
-        val nuevoValor = !SettingsManager.getPrimeraEjecucion()
-        SettingsManager.setPrimeraEjecucion(nuevoValor)
-
-        _ajustesUiState.value = _ajustesUiState.value.copy(esPrimeraEjecucion = nuevoValor)
+        val nuevoValor = !SettingsManager.getPrimerCuestionarioHecho()
+        SettingsManager.setPrimerCuestionarioHecho(nuevoValor)
     }
 }

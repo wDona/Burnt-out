@@ -129,15 +129,15 @@ INSERT OR IGNORE INTO PreguntaEntity(ID_Pregunta, Pregunta, Categoria, FK_ID_Org
 (1, 'Debido a mi trabajo me siento emocionalmente agotado', 'CE', -9223372036854775808),
 (2, 'Al final de la jornada me siento agotado.', 'CE', -9223372036854775808),
 (3, 'Me encuentro cansado cuando me levanto por las mañanas y tengo que enfrentarme a otro día de trabajo.', 'CE', -9223372036854775808),
-(4, 'Puedo comprender facilmente como se sienten las personas que tengo que atender.', 'RP', -9223372036854775808),
+(4, 'Puedo comprender fácilmente cómo se sienten las personas que tengo que atender.', 'RP', -9223372036854775808),
 (5, 'Creo que trato a algunas personas con indiferencia, como si fueran objetos impersonales.', 'D', -9223372036854775808),
 (6, 'Trabajar con personas todos los días es estresante/tenso para mí.', 'CE', -9223372036854775808),
 (7, 'Me enfrento bien a los problemas que me presentan las personas que tengo que atender.', 'RP', -9223372036854775808),
-(8, 'Siento siento que mi trabajo me esta desgastando.', 'CE', -9223372036854775808),
+(8, 'Siento que mi trabajo me está desgastando.', 'CE', -9223372036854775808),
 (9, 'Siento que mediante mi trabajo estoy influyendo positivamente en la vida de otros.', 'RP', -9223372036854775808),
 (10, 'Creo que me comporto de manera más insensible con la gente desde que hago este trabajo.', 'D', -9223372036854775808),
 (11, 'Me preocupa que este trabajo me esté endureciendo emocionalmente.', 'D', -9223372036854775808),
-(12, 'Me encuentro con mucha vitalidad/energetico.', 'RP', -9223372036854775808),
+(12, 'Me encuentro con mucha vitalidad/energético.', 'RP', -9223372036854775808),
 (13, 'Me siento frustrado por mi trabajo.', 'CE', -9223372036854775808),
 (14, 'Siento que estoy haciendo un trabajo demasiado duro/trabajando demasiado.', 'CE', -9223372036854775808),
 (15, 'Realmente no me importa lo que les ocurre a algunas personas a las que doy servicio.', 'D', -9223372036854775808),
@@ -146,7 +146,7 @@ INSERT OR IGNORE INTO PreguntaEntity(ID_Pregunta, Pregunta, Categoria, FK_ID_Org
 (18, 'Me siento estimulado después de trabajar junto con personas.', 'RP', -9223372036854775808),
 (19, 'He realizado muchas cosas valiosas en este trabajo.', 'RP', -9223372036854775808),
 (20, 'Siento que he llegado al límite de mis posibilidades.', 'CE', -9223372036854775808),
-(21, 'Siento que se tratar con calma los conflictos emocionales en el trabajo.', 'RP', -9223372036854775808),
+(21, 'Siento que sé tratar con calma los conflictos emocionales en el trabajo.', 'RP', -9223372036854775808),
 (22, 'Siento que las personas que atiendo me culpan de sus problemas.', 'D', -9223372036854775808);
 
 -- ====== TAREAS ======
@@ -349,12 +349,19 @@ JOIN (
     WHERE ID_Usuario = ?
     GROUP BY ID_Pregunta
 ) r2 ON r1.ID_Pregunta = r2.ID_Pregunta AND r1.Fecha = r2.MaxFecha
-WHERE r1.ID_Usuario = ?;
+WHERE r1.ID_Usuario = ?
+ORDER BY r1.Fecha DESC;
 
 getRespuestasByUserAndDate:
 SELECT * FROM ResponderEntity
 WHERE ID_Usuario = ?
 AND date(Fecha, 'unixepoch', 'localtime') = date(?, 'unixepoch', 'localtime');
+
+insertRespuestasBase:
+INSERT OR IGNORE INTO ResponderEntity(ID_Usuario, ID_Pregunta, Anonimo, Respuesta, Fecha)
+SELECT :idUsuario, ID_Pregunta, 0, -100, :fecha
+FROM PreguntaEntity
+WHERE FK_ID_Org = -9223372036854775808;
 
 -- ====== AJUSTES USUARIO ======
 insertOrUpdateAjusteUser:

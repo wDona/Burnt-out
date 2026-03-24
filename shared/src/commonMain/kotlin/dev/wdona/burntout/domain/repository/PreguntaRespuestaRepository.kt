@@ -1,4 +1,4 @@
-package dev.wdona.burntout.data.dao
+package dev.wdona.burntout.domain.repository
 
 import dev.wdona.burntout.shared.domain.Pregunta
 import dev.wdona.burntout.domain.model.Respuesta

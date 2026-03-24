@@ -1,6 +1,6 @@
 package dev.wdona.burntout.data.repository
 
-import dev.wdona.burntout.data.dao.PreguntaRespuestaRepository
+import dev.wdona.burntout.domain.repository.PreguntaRespuestaRepository
 import dev.wdona.burntout.data.datasource.local.OperacionPendienteLocalDataSource
 import dev.wdona.burntout.data.datasource.local.PreguntaRespuestaLocalDataSource
 import dev.wdona.burntout.data.datasource.mapper.PreguntaMapper

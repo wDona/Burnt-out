@@ -1,6 +1,6 @@
 package dev.wdona.burntout.domain.usecase
 
-import dev.wdona.burntout.data.dao.PreguntaRespuestaRepository
+import dev.wdona.burntout.domain.repository.PreguntaRespuestaRepository
 import dev.wdona.burntout.domain.repository.UsuarioRepository
 import dev.wdona.burntout.shared.utils.SettingsManager
 

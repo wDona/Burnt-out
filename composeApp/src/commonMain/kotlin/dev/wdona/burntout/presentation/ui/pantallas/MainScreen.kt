@@ -11,10 +11,13 @@ import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.QuestionAnswer
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.tab.*
@@ -22,6 +25,7 @@ import cafe.adriel.voyager.transitions.SlideTransition
 import dev.wdona.burntout.presentation.ui.pantallas.equipo.EquipoScreen
 import dev.wdona.burntout.presentation.ui.pantallas.equipo.LeaderboardScreen
 import dev.wdona.burntout.presentation.ui.pantallas.formulario.PreguntaScreen
+import dev.wdona.burntout.presentation.ui.pantallas.formulario.PreguntasInicialesScreen
 import dev.wdona.burntout.presentation.ui.pantallas.perfil.PerfilScreen
 import dev.wdona.burntout.presentation.ui.pantallas.tablero.TablerosScreen
 import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.*
@@ -45,8 +49,6 @@ class MainScreen(
         val perfilTab = remember { PerfilTab(perfilFactory, ajustesFactory) }
         val preguntasTab = remember { PreguntasTab(formularioFactory) }
 
-
-
         TabNavigator(tablerosTab) { tabNavigator ->
             Scaffold(
                 content = { paddingValues ->
@@ -67,6 +69,7 @@ class MainScreen(
                 }
             )
         }
+
     }
 }
 

@@ -16,7 +16,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.launch
 
-data class FormularioUiState(
+data class PreguntasInicialesUiState(
     val isLoading: Boolean = true,
     val preguntas: List<Pregunta> = emptyList(),
     val preguntaActual: Pregunta? = null,
@@ -24,15 +24,15 @@ data class FormularioUiState(
     val error: String? = null
 )
 
-class FormularioViewModel(
+class PreguntasInicialesViewModel(
     private val repository: PreguntaRespuestaRepository,
     private val usuarioRepository: UsuarioRepository,
     private val calcularRiesgoBurnout: CalcularRiesgoBurnout
 ) : ScreenModel {
-    
+
     private val _uiState = MutableStateFlow(FormularioUiState(isLoading = true))
     val uiState: StateFlow<FormularioUiState> = _uiState.asStateFlow()
-    
+
     val respuestaActual: StateFlow<Respuesta?> = _uiState.asStateFlow().combine(_uiState.asStateFlow()) { state, _ ->
         val pregunta = state.preguntaActual
         val respuestas = state.respuestas
@@ -44,13 +44,25 @@ class FormularioViewModel(
         initialValue = null
     )
 
-    fun cargarPreguntas(idOrg: Long) {
+    fun cargarUltimasNPreguntasPorResponder(idOrg: Long, nPreguntas: Int) {
         screenModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
             try {
-                val preguntas = repository.getPreguntasByOrg(idOrg)
+                val respuestas = repository.getLastRespuestasByIdUsuario(idOrg)
+
+                if (respuestas.size >= nPreguntas) {
+
+                }
+
+                val preguntas = repository.getPreguntasByOrg(idOrg).filter { pregunta ->
+                    respuestas.any { it.idPregunta == pregunta.idPregunta }
+                }.sortedBy { pregunta ->
+                    respuestas.indexOfFirst { it.idPregunta == pregunta.idPregunta }
+                }.take(nPreguntas)
+
+
                 _uiState.update { it.copy(preguntas = preguntas, isLoading = false) }
-                seleccionarSiguientePreguntaSinResponder() // Trigger logic after loading
+                seleccionarSiguientePreguntaSinResponder()
             } catch (e: Exception) {
                 _uiState.update { it.copy(isLoading = false, error = e.message) }
             }
@@ -61,27 +73,26 @@ class FormularioViewModel(
         val currentState = _uiState.value
         val preguntasList = currentState.preguntas
         val respuestasList = currentState.respuestas
-        
+
         val idsRespondidas = respuestasList.map { it.idPregunta }.toSet()
 
         val siguiente = preguntasList.firstOrNull { it.idPregunta !in idsRespondidas }
-        
+
         _uiState.update { it.copy(preguntaActual = siguiente) }
     }
 
     fun cargarRespuesta(idPregunta: Long) {
         screenModelScope.launch {
-             // Maybe loading here?
-             val respuestas = repository.getRespuestasByPregunta(idPregunta)
-             _uiState.update { it.copy(respuestas = it.respuestas + respuestas) }
+            val respuestas = repository.getRespuestasByPregunta(idPregunta)
+            _uiState.update { it.copy(respuestas = it.respuestas + respuestas) }
         }
     }
 
     fun cargarRespuestasByIdUsuario(idUsuario: Long) {
         screenModelScope.launch {
             val respuestas = repository.getRespuestasByIdUsuario(idUsuario)
-             _uiState.update { it.copy(respuestas = respuestas) }
-             seleccionarSiguientePreguntaSinResponder()
+            _uiState.update { it.copy(respuestas = respuestas) }
+            seleccionarSiguientePreguntaSinResponder()
         }
     }
 
@@ -91,31 +102,10 @@ class FormularioViewModel(
             try {
                 val respuestas = repository.getRespuestasByIdUsuarioAndDate(idUsuario, date)
                 _uiState.update { it.copy(respuestas = respuestas, isLoading = false) }
-                 seleccionarSiguientePreguntaSinResponder()
+                seleccionarSiguientePreguntaSinResponder()
             } catch (e: Exception) {
-                 _uiState.update { it.copy(isLoading = false, error = e.message) }
+                _uiState.update { it.copy(isLoading = false, error = e.message) }
             }
-        }
-    }
-
-    fun crearPregunta(pregunta: Pregunta) {
-        screenModelScope.launch {
-            repository.crearPregunta(pregunta)
-            cargarPreguntas(pregunta.idOrganizacion)
-        }
-    }
-
-    fun actualizarPregunta(pregunta: Pregunta) {
-        screenModelScope.launch {
-            repository.actualizarPregunta(pregunta)
-            cargarPreguntas(pregunta.idOrganizacion)
-        }
-    }
-
-    fun eliminarPregunta(idPregunta: Long, idOrg: Long) {
-        screenModelScope.launch {
-            repository.eliminarPregunta(idPregunta)
-            cargarPreguntas(idOrg)
         }
     }
 
@@ -125,7 +115,7 @@ class FormularioViewModel(
 
             val currentState = _uiState.value
             val nuevasRespuestas = currentState.respuestas.filterNot { it.idPregunta == respuesta.idPregunta } + respuesta
-             _uiState.update { it.copy(respuestas = nuevasRespuestas) }
+            _uiState.update { it.copy(respuestas = nuevasRespuestas) }
 
             try {
                 val resultado = calcularRiesgoBurnout(nuevasRespuestas)
@@ -134,13 +124,6 @@ class FormularioViewModel(
                 println("Error calculando riesgo: ${e.message}")
             }
 
-            seleccionarSiguientePreguntaSinResponder()
-        }
-    }
-
-    fun limpiarRespuestas() {
-        screenModelScope.launch {
-            _uiState.update { it.copy(respuestas = emptyList()) }
             seleccionarSiguientePreguntaSinResponder()
         }
     }

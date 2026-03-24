@@ -9,6 +9,7 @@ import androidx.compose.ui.Modifier
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.transitions.SlideTransition
 import dev.wdona.burntout.presentation.ui.pantallas.MainScreen
+import dev.wdona.burntout.presentation.ui.pantallas.PreMainScreen
 import dev.wdona.burntout.presentation.ui.theme.BurntOutMaterialTheme
 import dev.wdona.burntout.presentation.ui.theme.DarkColorScheme
 import dev.wdona.burntout.presentation.ui.theme.LightColorScheme
@@ -31,7 +32,7 @@ fun App(
             color = BurntOutMaterialTheme.getColorScheme().background
         ) {
             Navigator(
-                MainScreen(
+                PreMainScreen(
                     tareaFactory = tareaFactory,
                     equipoFactory = miEquipoViewModelFactory,
                     perfilFactory = miPerfilViewModelFactory,

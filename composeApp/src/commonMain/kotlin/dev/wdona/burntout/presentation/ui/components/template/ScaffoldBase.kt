@@ -22,6 +22,7 @@ fun ScaffoldBase(
     onVolver: (() -> Unit)? = null,
     onAjustes: (() -> Unit)? = null,
     onFAB: (() -> Unit)? = null,
+    onSaltar: (() -> Unit)? = null,
     fabEnabled: Boolean = true,
     textoFAB: String? = null,
     iconFAB: @Composable (() -> Unit)? = null,
@@ -36,7 +37,8 @@ fun ScaffoldBase(
                 title = titulo,
                 onVolver = onVolver,
                 onAjustes = onAjustes,
-                titleIcon = titleIcon
+                titleIcon = titleIcon,
+                onSaltar = onSaltar
             )
         },
         floatingActionButton = {
