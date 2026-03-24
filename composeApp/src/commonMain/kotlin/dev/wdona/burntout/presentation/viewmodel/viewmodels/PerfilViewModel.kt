@@ -9,13 +9,18 @@ import dev.wdona.burntout.shared.utils.SettingsManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-
+data class PerfilUiState(
+    val usuario: Usuario? = null,
+    val isLoading: Boolean = false,
+    val error: String? = null
+)
 
 class PerfilViewModel(private val repository: UsuarioRepository) : ScreenModel {
-    private val _usuarioActual = MutableStateFlow<Usuario?>(null)
-    val usuarioActual: StateFlow<Usuario?> = _usuarioActual.asStateFlow()
+    private val _uiState = MutableStateFlow(PerfilUiState(isLoading = true))
+    val uiState: StateFlow<PerfilUiState> = _uiState.asStateFlow()
 
     val riesgoBurnoutCE = SettingsManager.getRiesgoCEUsuarioActual()
     val riesgoBurnoutD = SettingsManager.getRiesgoDUsuarioActual()
@@ -28,10 +33,13 @@ class PerfilViewModel(private val repository: UsuarioRepository) : ScreenModel {
 
     fun cargarUsuario(idUsuario: Long) {
         screenModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
             try {
-                _usuarioActual.value = repository.getUserById(idUsuario)
+                val user = repository.getUserById(idUsuario)
+                _uiState.update { it.copy(usuario = user, isLoading = false) }
             } catch (e: Exception) {
                 println("Error al cargar usuario: ${e.message}")
+                _uiState.update { it.copy(isLoading = false, error = e.message) }
             }
         }
     }
@@ -45,14 +53,14 @@ class PerfilViewModel(private val repository: UsuarioRepository) : ScreenModel {
     fun actualizarPerfil(usuario: Usuario) {
         screenModelScope.launch {
             repository.actualizarUsuario(usuario)
-            _usuarioActual.value = usuario
+            _uiState.update { it.copy(usuario = usuario) }
         }
     }
 
     fun eliminarPerfil(idUsuario: Long) {
         screenModelScope.launch {
             repository.eliminarUsuario(idUsuario)
-            _usuarioActual.value = null
+            _uiState.update { it.copy(usuario = null) }
         }
     }
 
@@ -60,7 +68,7 @@ class PerfilViewModel(private val repository: UsuarioRepository) : ScreenModel {
         screenModelScope.launch {
             try {
                 val user = repository.login(username, contrasena)
-                _usuarioActual.value = user
+                _uiState.update { it.copy(usuario = user) }
                 onResult(true)
             } catch (e: Exception) {
                 println("Error en login: ${e.message}")

@@ -8,10 +8,8 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -48,7 +46,6 @@ class LeaderboardScreen(
         LeaderboardContent(
             leaderboardViewModel = viewModel,
             onEquipoClick = { idEquipo ->
-                // TODO: Pasar idEquipo a EquipoScreen para cargar uno concreto
                 navigator.push(EquipoScreen(equipoFactory, perfilFactory, ajustesFactory, onVolver = { navigator.pop() }))
             }
         )
@@ -62,23 +59,31 @@ fun LeaderboardContent(
     onEquipoClick: (Long) -> Unit,
     onVolver: (() -> Unit)? = null
 ) {
-    val listaEquipos by leaderboardViewModel.leaderboard.collectAsStateWithLifecycle()
-    
+    val uiState by leaderboardViewModel.uiState.collectAsStateWithLifecycle()
+    val listaEquipos = uiState.leaderboard
+    val isLoading = uiState.isLoading
+
+    val titulo = if (isLoading) "" else "Leaderboard"
+
     ScaffoldBase(
-        titulo = "Leaderboard",
+        titulo = titulo,
         onVolver = onVolver
     ) {
-        LazyVerticalGrid(
-            columns = GridCells.Adaptive(minSize = 300.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            items(listaEquipos, key = { it.idEquipo }) { equipo ->
-                EquipoCard(
-                    equipo, 
-                    onClick = { onEquipoClick(equipo.idEquipo) }
-                )
+        if (isLoading) {
+
+        } else {
+            LazyVerticalGrid(
+                columns = GridCells.Adaptive(minSize = 300.dp),
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                items(listaEquipos, key = { it.idEquipo }) { equipo ->
+                    EquipoCard(
+                        equipo,
+                        onClick = { onEquipoClick(equipo.idEquipo) }
+                    )
+                }
             }
         }
     }

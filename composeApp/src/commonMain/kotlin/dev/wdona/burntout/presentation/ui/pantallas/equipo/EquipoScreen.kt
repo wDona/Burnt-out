@@ -1,8 +1,6 @@
 package dev.wdona.burntout.presentation.ui.pantallas.equipo
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -10,22 +8,24 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.AjustesViewModelFactory
 import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.MiEquipoViewModelFactory
+import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.MiPerfilViewModelFactory
 import dev.wdona.burntout.presentation.viewmodel.viewmodels.EquipoViewModel
-import androidx.compose.runtime.getValue
-import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import cafe.adriel.voyager.core.model.rememberScreenModel
+import dev.wdona.burntout.presentation.viewmodel.viewmodels.PerfilViewModel
 import dev.wdona.burntout.presentation.ui.components.equipo.MiembroCard
 import dev.wdona.burntout.presentation.ui.components.template.ScaffoldBase
 import dev.wdona.burntout.presentation.ui.pantallas.perfil.PerfilScreen
-import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.AjustesViewModelFactory
-import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.MiPerfilViewModelFactory
-import dev.wdona.burntout.presentation.viewmodel.viewmodels.PerfilViewModel
 import dev.wdona.burntout.shared.utils.SettingsManager
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import cafe.adriel.voyager.core.model.rememberScreenModel
+import androidx.compose.runtime.getValue
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Arrangement
 
 class EquipoScreen(val factory: MiEquipoViewModelFactory, val perfilFactory: MiPerfilViewModelFactory, val ajustesFactory: AjustesViewModelFactory, val onVolver: (() -> Unit)? = null) : Screen {
     @Composable
@@ -52,17 +52,24 @@ class EquipoScreen(val factory: MiEquipoViewModelFactory, val perfilFactory: MiP
     }
 }
 
-    @OptIn(ExperimentalMaterial3Api::class)
-    @Composable
-    fun EquipoContent(viewModel: EquipoViewModel, onVolver: (() -> Unit)? = null, onClickUsuario: (Long) -> Unit, perfilViewModel: PerfilViewModel) {
-        val equipo by viewModel.uiStateEquipo.collectAsStateWithLifecycle()
-        val miembros by viewModel.listaMiembros.collectAsStateWithLifecycle()
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun EquipoContent(viewModel: EquipoViewModel, onVolver: (() -> Unit)? = null, onClickUsuario: (Long) -> Unit, perfilViewModel: PerfilViewModel) {
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val equipo = uiState.equipo
+    val miembros = uiState.miembros
+    val isLoading = uiState.isLoading
 
-        ScaffoldBase(
-            titulo = (equipo?.titulo ?: "Mi equipo (off)") + " (" + (equipo?.puntuacion ?: "0") + "pts)",
-            onVolver = onVolver
-        ) {
-            Column {
+    val titulo = if (isLoading) "" else ((equipo?.titulo ?: "Mi equipo (off)") + " (" + (equipo?.puntuacion ?: "0") + "pts)")
+
+    ScaffoldBase(
+        titulo = titulo,
+        onVolver = onVolver
+    ) {
+         Box(modifier = Modifier.fillMaxSize()) {
+            if (isLoading) {
+                // Estructura vacia
+            } else {
                 LazyVerticalGrid(
                     columns = GridCells.Adaptive(minSize = 400.dp), // el min size es el tamanio ancho de cada tarjeta
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -80,3 +87,4 @@ class EquipoScreen(val factory: MiEquipoViewModelFactory, val perfilFactory: MiP
             }
         }
     }
+}

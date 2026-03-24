@@ -9,37 +9,52 @@ import dev.wdona.burntout.shared.domain.Usuario
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+
+data class EquipoUiState(
+    val equipo: Equipo? = null,
+    val miembros: List<Usuario> = emptyList(),
+    val isLoading: Boolean = false,
+    val error: String? = null
+)
 
 class EquipoViewModel(
     private val repository: EquipoRepository,
     private val cargarMiembrosEquipo: CargarMiembrosEquipo
 ) : ScreenModel {
-    private val _uiStateEquipo = MutableStateFlow<Equipo?>(null)
-    val uiStateEquipo: StateFlow<Equipo?> = _uiStateEquipo.asStateFlow()
-
-    private val _listaEquipos = MutableStateFlow<List<Equipo>>(emptyList())
-    val listaEquipos: StateFlow<List<Equipo>> = _listaEquipos.asStateFlow()
-
-    private val _listaMiembros = MutableStateFlow<List<Usuario>>(emptyList())
-    val listaMiembros: StateFlow<List<Usuario>> = _listaMiembros.asStateFlow()
+    private val _uiState = MutableStateFlow(EquipoUiState(isLoading = true))
+    val uiState: StateFlow<EquipoUiState> = _uiState.asStateFlow()
 
     fun cargarEquipoPorId(idEquipo: Long) {
         screenModelScope.launch {
-            _uiStateEquipo.value = repository.getEquipoById(idEquipo)
+            _uiState.update { it.copy(isLoading = true) }
+            try {
+                val equipo = repository.getEquipoById(idEquipo)
+                _uiState.update { it.copy(equipo = equipo, isLoading = false) }
+            } catch (e: Exception) {
+                 _uiState.update { it.copy(isLoading = false, error = e.message) }
+            }
         }
     }
 
     fun sumarPuntos(idEquipo: Long, puntos: Long) {
         screenModelScope.launch {
             repository.updatePuntuacion(idEquipo, puntos)
-            cargarEquipoPorId(idEquipo)
+            val equipo = repository.getEquipoById(idEquipo) // Refresh just the team
+             _uiState.update { it.copy(equipo = equipo) }
         }
     }
 
     fun cargarMiembrosEquipo(idEquipo: Long) {
         screenModelScope.launch {
-            _listaMiembros.value = cargarMiembrosEquipo.invoke(idEquipo)
+             _uiState.update { it.copy(isLoading = true) }
+            try {
+                val miembros = cargarMiembrosEquipo.invoke(idEquipo)
+                _uiState.update { it.copy(miembros = miembros, isLoading = false) }
+            } catch (e: Exception) {
+                 _uiState.update { it.copy(isLoading = false, error = e.message) }
+            }
         }
     }
 }

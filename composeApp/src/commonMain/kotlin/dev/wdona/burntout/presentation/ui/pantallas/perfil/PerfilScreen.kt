@@ -1,5 +1,6 @@
 package dev.wdona.burntout.presentation.ui.pantallas.perfil
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -9,6 +10,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CloudOff
 import androidx.compose.material.icons.filled.Person4
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
@@ -32,9 +34,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.unit.dp
 import dev.wdona.burntout.presentation.ui.pantallas.SettingsScreen
-import dev.wdona.burntout.presentation.ui.theme.BurntOutMaterialTheme
 import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.AjustesViewModelFactory
-import kotlin.math.round
+import dev.wdona.burntout.presentation.ui.components.common.BateriaBurnout
 
 class PerfilScreen(val factory: MiPerfilViewModelFactory, val ajustesFactory: AjustesViewModelFactory, val onVolver: (() -> Unit)? = null, var idUsuario: Long? = null) : Screen {
     @Composable
@@ -62,10 +63,17 @@ class PerfilScreen(val factory: MiPerfilViewModelFactory, val ajustesFactory: Aj
 @Composable
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 fun PerfilContent(viewModel: PerfilViewModel, onAjustes: () -> Unit, onVolver: (() -> Unit)? = null) {
-    val usuario by viewModel.usuarioActual.collectAsStateWithLifecycle()
+    // Hacer que uiState sea un objeto para refrescar todos los elementos a la vez
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val usuario = uiState.usuario
+    val isLoading = uiState.isLoading
+
+    val titulo = if (isLoading) "" else (usuario?.nombre ?: "No se ha cargado el usuario")
 
     val titleIcon = @Composable {
-        if (usuario != null) {
+        if (isLoading) {
+             // TODO: placeholders como en youtube
+        } else if (usuario != null) {
             Icon(
                 imageVector = Icons.Default.Person4,
                 contentDescription = "Icono de usuario",
@@ -83,7 +91,7 @@ fun PerfilContent(viewModel: PerfilViewModel, onAjustes: () -> Unit, onVolver: (
     }
 
     ScaffoldBase(
-        titulo = usuario?.nombre ?: "No se ha cargado el usuario",
+        titulo = titulo,
         onAjustes = onAjustes,
         onVolver = onVolver,
         titleIcon = titleIcon
@@ -93,17 +101,21 @@ fun PerfilContent(viewModel: PerfilViewModel, onAjustes: () -> Unit, onVolver: (
 
             Column(
                 modifier = Modifier.fillMaxSize(),
-                horizontalAlignment = Alignment.CenterHorizontally
+                horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                if (usuario == null) {
-                    Icon(
-                        imageVector = Icons.Default.CloudOff,
-                        contentDescription = "Icono de nube tachada",
-                        modifier = Modifier
-                            .size(tamanioIconoResponsive)
-                            .padding(bottom = 8.dp)
-                            .alpha(0.2f)
-                    )
+
+                if (isLoading) {
+//                    CircularProgressIndicator(
+//                        modifier = Modifier
+//                            .padding(bottom = 8.dp)
+//                    )
+                    // TODO: PLACEHOLDER como en youtueb
+//                    Text(
+//                        text = "Cargando perfil...",
+//                        style = MaterialTheme.typography.titleLarge,
+//                        modifier = Modifier.padding(16.dp)
+//                    )
+                } else if (usuario == null) {
                     Text(
                         text = "No se ha podido cargar el usuario",
                         style = MaterialTheme.typography.titleLarge,
@@ -119,21 +131,12 @@ fun PerfilContent(viewModel: PerfilViewModel, onAjustes: () -> Unit, onVolver: (
                     ) {
                         Text("Volver")
                     }
-                } else {
+                }
+                else {
                     val riesgo = usuario?.riesgoBurnout ?: 0.0
-                    val riesgoVisual = round(riesgo * 100) / 100.0
 
-                    Text(
-                        text =
-                            if (riesgo < 0.33) "Riesgo de Burnout bajo ($riesgoVisual)"
-                            else if (riesgo in 0.33..<0.66) "Riesgo de Burnout mediano ($riesgoVisual)"
-                            else "Riesgo de Burnout alto ($riesgoVisual)",
-                        style = MaterialTheme.typography.titleMedium,
-                        color =
-                            if (riesgo < 0.33) BurntOutMaterialTheme.getSuccessColor()
-                            else if (riesgo in 0.33..<0.66) BurntOutMaterialTheme.getWarningColor()
-                            else BurntOutMaterialTheme.getErrorColor()
-                    )
+                    BateriaBurnout(riesgo = riesgo)
+
 //                    Text("ID: ${usuario!!.idUsuario}", style = MaterialTheme.typography.titleMedium)
                     Text(usuario!!.username, style = MaterialTheme.typography.titleMedium)
                     Text(usuario!!.descripcion ?: "-", style = MaterialTheme.typography.titleMedium)

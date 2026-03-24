@@ -79,8 +79,10 @@ class PreguntaScreen(private val viewModelFactory: FormularioViewModelFactory, p
 
 @Composable
 fun PreguntaContent(onVolver: (() -> Unit)? = null, viewModel: FormularioViewModel) {
-    val listaPreguntas by viewModel.preguntas.collectAsStateWithLifecycle()
-    val preguntaActual by viewModel.preguntaActual.collectAsStateWithLifecycle()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val listaPreguntas = uiState.preguntas
+    val preguntaActual = uiState.preguntaActual
+    val isLoading = uiState.isLoading
     val respuestaActual by viewModel.respuestaActual.collectAsStateWithLifecycle()
 
     var selectedCantidad by remember { mutableStateOf<Int?>(null) }
@@ -90,7 +92,7 @@ fun PreguntaContent(onVolver: (() -> Unit)? = null, viewModel: FormularioViewMod
         if (selectedCantidad != null && preguntaActual != null) {
             val respuesta = Respuesta(
                 idUsuario = SettingsManager.getIdUsuarioActual(),
-                idPregunta = preguntaActual!!.idPregunta,
+                idPregunta = preguntaActual.idPregunta,
                 anonimo = false,
                 respuesta = selectedCantidad!!.toLong(),
                 fecha = System.currentTimeMillis() / 1000L
@@ -98,12 +100,6 @@ fun PreguntaContent(onVolver: (() -> Unit)? = null, viewModel: FormularioViewMod
 
             viewModel.responderPregunta(respuesta)
 
-            viewModel.seleccionarSiguientePreguntaSinResponder()
-        }
-    }
-
-    LaunchedEffect(listaPreguntas) {
-        if (listaPreguntas.isNotEmpty() && preguntaActual == null) {
             viewModel.seleccionarSiguientePreguntaSinResponder()
         }
     }
@@ -124,8 +120,10 @@ fun PreguntaContent(onVolver: (() -> Unit)? = null, viewModel: FormularioViewMod
         }
     }
     
+    val titulo = if (isLoading) "" else "Diario"
+
     ScaffoldBase (
-        titulo = "Diario",
+        titulo = titulo,
         onVolver = onVolver,
         onFAB = if (preguntaActual != null) responderAccion else null,
         fabEnabled = selectedCantidad != null && preguntaActual != null,
@@ -147,101 +145,105 @@ fun PreguntaContent(onVolver: (() -> Unit)? = null, viewModel: FormularioViewMod
                 }
             }
     ) {
-        val scrollState = rememberScrollState()
-        
-        val showMoreIcon by remember {
-            derivedStateOf {
-                scrollState.maxValue > 0 && scrollState.value < scrollState.maxValue
+        if (isLoading) {
+            // Estructura vacia
+        } else {
+            val scrollState = rememberScrollState()
+            
+            val showMoreIcon by remember {
+                derivedStateOf {
+                    scrollState.maxValue > 0 && scrollState.value < scrollState.maxValue
+                }
             }
-        }
-        
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp)
-        ) {
-            Text(
-                text = preguntaActual?.pregunta ?: "Sin preguntas disponibles para contestar hoy",
-                style = MaterialTheme.typography.titleLarge,
+            
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 24.dp),
-                textAlign = TextAlign.Center
-            )
-
-            Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
-                Column(
+                    .fillMaxSize()
+                    .padding(16.dp)
+            ) {
+                Text(
+                    text = preguntaActual?.pregunta ?: "Sin preguntas disponibles para contestar hoy",
+                    style = MaterialTheme.typography.titleLarge,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .verticalScroll(scrollState),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    if (preguntaActual?.pregunta != null) {
-                        Column(Modifier.selectableGroup()) {
-                            (0..6).forEach { cantidadOpcion ->
-                                val textoRespuesta = when (cantidadOpcion) {
-                                    0 -> "Nunca / Ninguna vez"
-                                    1 -> "Casi nunca / Pocas veces al año"
-                                    2 -> "Algunas veces / Una vez al mes o menos"
-                                    3 -> "Regularmente / Pocas veces al mes"
-                                    4 -> "Bastantes veces / Una vez por semana"
-                                    5 -> "Casi siempre / Pocas veces por semana"
-                                    6 -> "Siempre / Todos los días"
-                                    else -> "invalid"
-                                }
+                        .padding(bottom = 24.dp),
+                    textAlign = TextAlign.Center
+                )
+
+                Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .verticalScroll(scrollState),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        if (preguntaActual?.pregunta != null) {
+                            Column(Modifier.selectableGroup()) {
+                                (0..6).forEach { cantidadOpcion ->
+                                    val textoRespuesta = when (cantidadOpcion) {
+                                        0 -> "Nunca / Ninguna vez"
+                                        1 -> "Casi nunca / Pocas veces al año"
+                                        2 -> "Algunas veces / Una vez al mes o menos"
+                                        3 -> "Regularmente / Pocas veces al mes"
+                                        4 -> "Bastantes veces / Una vez por semana"
+                                        5 -> "Casi siempre / Pocas veces por semana"
+                                        6 -> "Siempre / Todos los días"
+                                        else -> "invalid"
+                                    }
 
 
-                                Row(
-                                    Modifier
-                                        .fillMaxWidth()
-                                        .height(56.dp)
-                                        .selectable(
+                                    Row(
+                                        Modifier
+                                            .fillMaxWidth()
+                                            .height(56.dp)
+                                            .selectable(
+                                                selected = (selectedCantidad == cantidadOpcion),
+                                                onClick = {
+                                                    selectedCantidad = cantidadOpcion
+                                                },
+                                                role = Role.RadioButton
+                                            )
+                                            .padding(horizontal = 16.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        RadioButton(
                                             selected = (selectedCantidad == cantidadOpcion),
-                                            onClick = {
-                                                selectedCantidad = cantidadOpcion
-                                            },
-                                            role = Role.RadioButton
+                                            onClick = null
                                         )
-                                        .padding(horizontal = 16.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    RadioButton(
-                                        selected = (selectedCantidad == cantidadOpcion),
-                                        onClick = null
-                                    )
-                                    Text(
-                                        text = textoRespuesta,
-                                        style = MaterialTheme.typography.bodyLarge,
-                                        modifier = Modifier.padding(start = 16.dp)
-                                    )
+                                        Text(
+                                            text = textoRespuesta,
+                                            style = MaterialTheme.typography.bodyLarge,
+                                            modifier = Modifier.padding(start = 16.dp)
+                                        )
+                                    }
                                 }
                             }
-                        }
-                    } else {
-                        Column (
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ){
-                            Text(
-                                text = "Quieres contestar otra vez?",
-                                style = MaterialTheme.typography.titleLarge,
-                                modifier = Modifier.padding(bottom = 16.dp),
-                                textAlign = TextAlign.Center
-                            )
-                            OutlinedButton(onClick = {
-                                viewModel.limpiarRespuestas()
-                            }) {
-                                Text("Reiniciar preguntas")
+                        } else {
+                            Column (
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ){
+                                Text(
+                                    text = "Quieres contestar otra vez?",
+                                    style = MaterialTheme.typography.titleLarge,
+                                    modifier = Modifier.padding(bottom = 16.dp),
+                                    textAlign = TextAlign.Center
+                                )
+                                OutlinedButton(onClick = {
+                                    viewModel.limpiarRespuestas()
+                                }) {
+                                    Text("Reiniciar preguntas")
+                                }
                             }
                         }
                     }
-                }
 
-                ScrollMoreIndicator(
-                    visible = showMoreIcon,
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .padding(bottom = 8.dp)
-                )
+                    ScrollMoreIndicator(
+                        visible = showMoreIcon,
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .padding(bottom = 8.dp)
+                    )
+                }
             }
         }
     }
