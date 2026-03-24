@@ -158,9 +158,9 @@ fun PreguntasInicialesContent(onVolver: (() -> Unit)? = null, viewModel: Pregunt
     }
 
     val tiempo = if ((uiState.preguntas.size * 6) > 60) {
-        "${(uiState.preguntas.size * 6) / 60} minutos"
+        "${(uiState.preguntas.size * 6) / 60} mins"
     } else {
-        "${uiState.preguntas.size * 6} segundos"
+        "${uiState.preguntas.size * 6} segs"
     }
 
     val titulo = if (isLoading) "" else "Diario inicial ($tiempo aprox)"
