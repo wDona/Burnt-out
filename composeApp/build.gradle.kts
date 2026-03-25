@@ -157,12 +157,14 @@ compose.desktop {
                 shortcut = true
                 menuGroup = "Office"
                 appCategory = "Office"
+                iconFile.set(project.file("src/jvmMain/resources/logoBurntOutIcon.png"))
             }
 
             windows {
                 shortcut = true
                 menu = true
                 menuGroup = "BurntOut"
+                iconFile.set(project.file("src/jvmMain/resources/logoBurntOutIcon.ico"))
             }
         }
     }

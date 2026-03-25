@@ -18,15 +18,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
-import burnt_out.composeapp.generated.resources.Res
-import burnt_out.composeapp.generated.resources.logoBurntOutIcon
 import dev.wdona.burntout.presentation.ui.theme.BurntOutMaterialTheme
 import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.*
 import dev.wdona.burntout.shared.db.DatabaseDriverFactory
 import dev.wdona.burntout.shared.db.DatabaseInit
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import org.jetbrains.compose.resources.painterResource
+import androidx.compose.ui.res.painterResource
 
 fun main() = application {
     var isDatabaseReady by remember { mutableStateOf(false) }
@@ -52,7 +50,7 @@ fun main() = application {
     Window(
         onCloseRequest = ::exitApplication,
         title = "Burn't out",
-        icon = painterResource(Res.drawable.logoBurntOutIcon) // FIXME NO FUNCINOA
+        icon = painterResource("logoBurntOutIcon.png")
     ) {
         BurntOutMaterialTheme {
             Surface (
@@ -66,7 +64,7 @@ fun main() = application {
                     ) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Text(
-                                text = "¡Ups! Algo salió mal, vuelve a intentarlo, reinstala la aplicacion" +
+                                text = "¡Ups! Algo salió mal, vuelve a intentarlo, reinstala la aplicacion " +
                                         "o elimina la carpeta .burntout_app (/home/tuusuario/.burntout_app o " +
                                         "C:/Users/tuusuario/.burntout_app)",
                                 style = MaterialTheme.typography.headlineMedium,
