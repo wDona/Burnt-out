@@ -79,7 +79,7 @@ jobs:
             ## 📦 Instalación
             Descarga el archivo correspondiente a tu plataforma:
 
-            | Plataforma | Extension |
+            | Plataforma | Instalacion |
             | --- | --- |
             | Windows | .msi |
             | Linux (Debian) | .deb |
