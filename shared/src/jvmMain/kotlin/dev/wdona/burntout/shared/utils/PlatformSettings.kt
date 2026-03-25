@@ -11,7 +11,8 @@ actual fun createSettings(): Settings {
     if (!appDataDir.exists()) {
         appDataDir.mkdirs()
     }
-    
+
+
     val finalDir = if (appDataDir.exists() && appDataDir.isDirectory) appDataDir else File(".")
     
     val settingsFile = File(finalDir, "settings.properties")
