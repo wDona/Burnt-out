@@ -1,8 +1,12 @@
 package dev.wdona.burntout.presentation.ui.pantallas.formulario
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -203,149 +207,162 @@ fun PreguntasInicialesContent(onVolver: (() -> Unit)? = null, viewModel: Pregunt
                 }
             },
     ) {
-        if (isLoading) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp)
-            ) {
-                FilaTextoPlaceholder(
+        androidx.compose.animation.Crossfade(targetState = isLoading) { loading ->
+            if (loading) {
+                Column(
                     modifier = Modifier
-                        .padding(horizontal = 32.dp)
-                )
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-                Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
-                    Column(
+                        .fillMaxSize()
+                        .padding(16.dp)
+                ) {
+                    FilaTextoPlaceholder(
                         modifier = Modifier
-                            .fillMaxWidth()
-                    ) {
-                        Column {
-                            (0..6).forEach { cantidadOpcion ->
-                                Row(
-                                    Modifier
-                                        .fillMaxWidth()
-                                        .height(56.dp)
-                                        .padding(horizontal = 16.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    RadioButton(
-                                        selected = false,
-                                        onClick = null
-                                    )
-                                    FilaTextoPlaceholder(paddingEnd = 32)
-                                }
+                            .padding(horizontal = 32.dp)
+                    )
 
-                            }
-                        }
-                    }
-                }
-            }
-        } else {
-            val scrollState = rememberScrollState()
+                    Spacer(modifier = Modifier.height(24.dp))
 
-            val showMoreIcon by remember {
-                derivedStateOf {
-                    scrollState.maxValue > 0 && scrollState.value < scrollState.maxValue
-                }
-            }
-
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp)
-            ) {
-                Text(
-                    text = preguntaActual?.pregunta ?: "Sin preguntas disponibles para contestar hoy",
-                    style = MaterialTheme.typography.titleLarge,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 24.dp),
-                    textAlign = TextAlign.Center
-                )
-
-                Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .verticalScroll(scrollState),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        if (preguntaActual?.pregunta != null) {
-                            println("Carga preguntasInicialesContent la pregunta")
-                            Column(
-                                Modifier
-                                    .selectableGroup()
-                                    .onPreviewKeyEvent {
-                                        if (it.type == KeyEventType.KeyUp && (it.key == Key.Enter || it.key == Key.NumPadEnter)) {
-                                            if (selectedCantidad != null) {
-                                                responderAccion()
-                                                true
-                                            } else {
-                                                false
-                                            }
-                                        } else {
-                                            false
-                                        }
-                                    }
-                            ) {
+                    Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                        ) {
+                            Column {
                                 (0..6).forEach { cantidadOpcion ->
-                                    val textoRespuesta = when (cantidadOpcion) {
-                                        0 -> "Nunca / Ninguna vez"
-                                        1 -> "Casi nunca / Pocas veces al año"
-                                        2 -> "Algunas veces / Una vez al mes o menos"
-                                        3 -> "Regularmente / Pocas veces al mes"
-                                        4 -> "Bastantes veces / Una vez por semana"
-                                        5 -> "Casi siempre / Pocas veces por semana"
-                                        6 -> "Siempre / Todos los días"
-                                        else -> "invalid"
-                                    }
-
                                     Row(
                                         Modifier
                                             .fillMaxWidth()
                                             .height(56.dp)
-                                            .selectable(
-                                                selected = (selectedCantidad == cantidadOpcion),
-                                                onClick = {
-                                                    selectedCantidad = cantidadOpcion
-                                                    focusRequester.requestFocus()
-                                                },
-                                                role = Role.RadioButton
-                                            )
                                             .padding(horizontal = 16.dp),
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
                                         RadioButton(
-                                            selected = (selectedCantidad == cantidadOpcion),
+                                            selected = false,
                                             onClick = null
                                         )
-                                        Text(
-                                            text = textoRespuesta,
-                                            style = MaterialTheme.typography.bodyLarge,
-                                            modifier = Modifier.padding(start = 16.dp)
-                                        )
+                                        FilaTextoPlaceholder(paddingEnd = 32)
                                     }
                                 }
                             }
-                        } else {
-                            println("Carga el else de preguntasInicialesContent")
-                            Text("No hay más preguntas por hoy.")
-                            LaunchedEffect(1) {
-                                SettingsManager.setUltimaFechaCuestionarioHoy()
-                                SettingsManager.setPrimerCuestionarioHecho(true) // COMENTADO PARA DEBUG
-                                onSaltar?.invoke()
+                        }
+                    }
+                }
+            } else {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp)
+                ) {
+                    Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
+                        AnimatedContent(
+                            targetState = preguntaActual,
+                            transitionSpec = {
+                                (slideInHorizontally { width -> width } + fadeIn()).togetherWith(
+                                    slideOutHorizontally { width -> -width } + fadeOut())
+                            },
+                            contentKey = { it?.idPregunta ?: "final" },
+                            label = "PreguntaAnimation"
+                        ) { targetPregunta ->
+                            val scrollState = rememberScrollState()
+                            val showMoreIcon by remember {
+                                derivedStateOf {
+                                    scrollState.maxValue > 0 && scrollState.value < scrollState.maxValue
+                                }
+                            }
+    
+                            Box(Modifier.fillMaxSize()) {
+                                Column(
+                                    Modifier
+                                        .verticalScroll(scrollState)
+                                        .padding(bottom = 16.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    if (targetPregunta != null) {
+                                        println("Carga preguntasInicialesContent la pregunta: ${targetPregunta.idPregunta}")
+                                        
+                                        Text(
+                                            text = targetPregunta.pregunta,
+                                            style = MaterialTheme.typography.titleLarge,
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(bottom = 24.dp, start = 8.dp, end = 8.dp),
+                                            textAlign = TextAlign.Center
+                                        )
+                                        
+                                        Column(
+                                            Modifier
+                                                .selectableGroup()
+                                                .onPreviewKeyEvent {
+                                                    if (it.type == KeyEventType.KeyUp && (it.key == Key.Enter || it.key == Key.NumPadEnter)) {
+                                                        if (selectedCantidad != null) {
+                                                            responderAccion()
+                                                            true
+                                                        } else {
+                                                            false
+                                                        }
+                                                    } else {
+                                                        false
+                                                    }
+                                                }
+                                        ) {
+                                            (0..6).forEach { cantidadOpcion ->
+                                                val textoRespuesta = when (cantidadOpcion) {
+                                                    0 -> "Nunca / Ninguna vez"
+                                                    1 -> "Casi nunca / Pocas veces al año"
+                                                    2 -> "Algunas veces / Una vez al mes o menos"
+                                                    3 -> "Regularmente / Pocas veces al mes"
+                                                    4 -> "Bastantes veces / Una vez por semana"
+                                                    5 -> "Casi siempre / Pocas veces por semana"
+                                                    6 -> "Siempre / Todos los días"
+                                                    else -> "invalid"
+                                                }
+
+                                                Row(
+                                                    Modifier
+                                                        .fillMaxWidth()
+                                                        .height(56.dp)
+                                                        .selectable(
+                                                            selected = (selectedCantidad == cantidadOpcion && preguntaActual?.idPregunta == targetPregunta.idPregunta),
+                                                            onClick = {
+                                                                selectedCantidad = cantidadOpcion
+                                                                focusRequester.requestFocus()
+                                                            },
+                                                            role = Role.RadioButton
+                                                        )
+                                                        .padding(horizontal = 16.dp),
+                                                    verticalAlignment = Alignment.CenterVertically
+                                                ) {
+                                                    RadioButton(
+                                                        selected = (selectedCantidad == cantidadOpcion && preguntaActual?.idPregunta == targetPregunta.idPregunta),
+                                                        onClick = null
+                                                    )
+                                                    Text(
+                                                        text = textoRespuesta,
+                                                        style = MaterialTheme.typography.bodyLarge,
+                                                        modifier = Modifier.padding(start = 16.dp)
+                                                    )
+                                                }
+                                            }
+                                        }
+                                    } else {
+                                        println("Carga el else de preguntasInicialesContent")
+                                        Text("No hay más preguntas por hoy.")
+                                        LaunchedEffect(1) {
+                                            SettingsManager.setUltimaFechaCuestionarioHoy()
+                                            SettingsManager.setPrimerCuestionarioHecho(true) // COMENTADO PARA DEBUG
+                                            onSaltar?.invoke()
+                                        }
+                                    }
+                                }
+
+                                ScrollMoreIndicator(
+                                    visible = showMoreIcon,
+                                    modifier = Modifier
+                                        .align(Alignment.BottomCenter)
+                                        .padding(bottom = 8.dp)
+                                )
                             }
                         }
                     }
-
-                    ScrollMoreIndicator(
-                        visible = showMoreIcon,
-                        modifier = Modifier
-                            .align(Alignment.BottomCenter)
-                            .padding(bottom = 8.dp)
-                    )
                 }
             }
         }

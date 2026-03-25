@@ -24,7 +24,7 @@ import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.Navigator
-import cafe.adriel.voyager.navigator.CurrentScreen
+import cafe.adriel.voyager.transitions.CrossfadeTransition
 import cafe.adriel.voyager.navigator.tab.*
 import dev.wdona.burntout.presentation.ui.pantallas.equipo.EquipoScreen
 import dev.wdona.burntout.presentation.ui.pantallas.equipo.LeaderboardScreen
@@ -113,7 +113,7 @@ private class TablerosTab(
     @Composable
     override fun Content() {
         Navigator(TablerosScreen(factory, tareaFactory)) { navigator ->
-            CurrentScreen()
+            CrossfadeTransition(navigator)
         }
     }
 }
@@ -131,7 +131,7 @@ private class EquipoTab(
     @Composable
     override fun Content() {
         Navigator(EquipoScreen(factory, perfilFactory, settingsFactory)) { navigator ->
-            CurrentScreen()
+            CrossfadeTransition(navigator)
         }
     }
 }
@@ -155,7 +155,7 @@ private class LeaderboardTab(
             perfilFactory = perfilFactory,
             ajustesFactory = settingsFactory
         )) { navigator ->
-            CurrentScreen()
+            CrossfadeTransition(navigator)
         }
     }
 }
@@ -172,7 +172,7 @@ private class PerfilTab(
     @Composable
     override fun Content() {
         Navigator(PerfilScreen(factory, ajustesFactory)) { navigator ->
-            CurrentScreen()
+            CrossfadeTransition(navigator)
         }
     }
 }
@@ -188,7 +188,7 @@ private class PreguntasTab(
     @Composable
     override fun Content() {
         Navigator(PreguntaScreen(factory)) { navigator ->
-            CurrentScreen()
+            CrossfadeTransition(navigator)
         }
     }
 }

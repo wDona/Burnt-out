@@ -1,25 +1,25 @@
 package dev.wdona.burntout.presentation.ui.pantallas.formulario
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.Crossfade
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.foundation.background
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.NavigateNext
@@ -88,7 +88,6 @@ class PreguntaScreen(private val viewModelFactory: FormularioViewModelFactory, p
 @Composable
 fun PreguntaContent(onVolver: (() -> Unit)? = null, viewModel: FormularioViewModel) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val listaPreguntas = uiState.preguntas
     val preguntaActual = uiState.preguntaActual
     val isLoading = uiState.isLoading
     val respuestaActual by viewModel.respuestaActual.collectAsStateWithLifecycle()
@@ -153,167 +152,183 @@ fun PreguntaContent(onVolver: (() -> Unit)? = null, viewModel: FormularioViewMod
                 }
             }
     ) {
-        if (isLoading) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp)
-            ) {
-                (0..1).forEach { _ ->
-                    FilaTextoPlaceholder(
-                        modifier = Modifier
-                            .padding(horizontal = 32.dp)
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-                Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                    ) {
-                        Column {
-                            (0..6).forEach { cantidadOpcion ->
-                                Row(
-                                    Modifier
-                                        .fillMaxWidth()
-                                        .height(56.dp)
-                                        .padding(horizontal = 16.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    RadioButton(
-                                        selected = false,
-                                        onClick = null
-                                    )
-                                    FilaTextoPlaceholder(paddingEnd = 32)
-                                }
-
-                            }
-                        }
+        Crossfade(targetState = isLoading) { loading ->
+            if (loading) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp)
+                ) {
+                    (0..1).forEach { _ ->
+                        FilaTextoPlaceholder(
+                            modifier = Modifier
+                                .padding(horizontal = 32.dp)
+                        )
                     }
-                }
-            }
-        } else {
-            val scrollState = rememberScrollState()
 
-            val showMoreIcon by remember {
-                derivedStateOf {
-                    scrollState.maxValue > 0 && scrollState.value < scrollState.maxValue
-                }
-            }
-            
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp)
-            ) {
-                if (preguntaActual?.pregunta != null) {
-                    Text(
-                        text = preguntaActual.pregunta,
-                        style = MaterialTheme.typography.titleLarge,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 24.dp),
-                        textAlign = TextAlign.Center
-                    )
-                }
+                    Spacer(modifier = Modifier.height(24.dp))
 
-                Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
-                    if (preguntaActual?.pregunta != null) {
+                    Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .verticalScroll(scrollState),
-                            horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-                            Column(
-                                Modifier
-                                    .selectableGroup()
-                                    .onPreviewKeyEvent {
-                                        if (it.type == KeyEventType.KeyUp && (it.key == Key.Enter || it.key == Key.NumPadEnter)) {
-                                            if (selectedCantidad != null) {
-                                                responderAccion()
-                                                true
-                                            } else {
-                                                false
-                                            }
-                                        } else {
-                                            false
-                                        }
-                                    }
-                            ) {
+                            Column {
                                 (0..6).forEach { cantidadOpcion ->
-                                    val textoRespuesta = when (cantidadOpcion) {
-                                        0 -> "Nunca / Ninguna vez"
-                                        1 -> "Casi nunca / Pocas veces al año"
-                                        2 -> "Algunas veces / Una vez al mes o menos"
-                                        3 -> "Regularmente / Pocas veces al mes"
-                                        4 -> "Bastantes veces / Una vez por semana"
-                                        5 -> "Casi siempre / Pocas veces por semana"
-                                        6 -> "Siempre / Todos los días"
-                                        else -> "invalid"
-                                    }
-
-
                                     Row(
                                         Modifier
                                             .fillMaxWidth()
                                             .height(56.dp)
-                                            .selectable(
-                                                selected = (selectedCantidad == cantidadOpcion),
-                                                onClick = {
-                                                    selectedCantidad = cantidadOpcion
-                                                    focusRequester.requestFocus()
-                                                },
-                                                role = Role.RadioButton
-                                            )
                                             .padding(horizontal = 16.dp),
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
                                         RadioButton(
-                                            selected = (selectedCantidad == cantidadOpcion),
+                                            selected = false,
                                             onClick = null
                                         )
-                                        Text(
-                                            text = textoRespuesta,
-                                            style = MaterialTheme.typography.bodyLarge,
-                                            modifier = Modifier.padding(start = 16.dp)
-                                        )
+                                        FilaTextoPlaceholder(paddingEnd = 32)
                                     }
+
                                 }
                             }
                         }
+                    }
+                }
+            } else {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp)
+                ) {
+                    // Remove direct Text rendering here and wrap content in AnimatedContent
+                    Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
+                        AnimatedContent(
+                            targetState = preguntaActual,
+                            transitionSpec = {
+                                (slideInHorizontally { width -> width } + fadeIn()).togetherWith(
+                                    slideOutHorizontally { width -> -width } + fadeOut())
+                            },
+                            contentKey = { it?.idPregunta ?: "final" },
+                            label = "PreguntaAnimation"
+                        ) { targetPregunta ->
+                            val scrollState = rememberScrollState()
 
-                        ScrollMoreIndicator(
-                            visible = showMoreIcon,
-                            modifier = Modifier
-                                .align(Alignment.BottomCenter)
-                                .padding(bottom = 8.dp)
-                        )
-                    } else {
-                        // CENTRAR
-                        Column (
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.Center,
-                            modifier = Modifier.fillMaxSize()
-                        ){
-                            Text(
-                                text = "Todo contestado",
-                                style = MaterialTheme.typography.titleLarge,
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier.padding(vertical = 16.dp)
-                            )
-                            Text(
-                                text = "Quieres contestar otra vez?",
-                                style = MaterialTheme.typography.titleMedium,
-                                modifier = Modifier.padding(bottom = 16.dp),
-                                textAlign = TextAlign.Center
-                            )
-                            OutlinedButton(onClick = {
-                                viewModel.limpiarRespuestas()
-                            }) {
-                                Text("Reiniciar preguntas")
+                            val showMoreIcon by remember {
+                                derivedStateOf {
+                                    scrollState.maxValue > 0 && scrollState.value < scrollState.maxValue
+                                }
+                            }
+
+                            Column(modifier = Modifier.fillMaxSize()) {
+
+                                if (targetPregunta != null) {
+                                    Text(
+                                        text = targetPregunta.pregunta,
+                                        style = MaterialTheme.typography.titleLarge,
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(bottom = 24.dp),
+                                        textAlign = TextAlign.Center
+                                    )
+                                }
+
+                                Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
+                                    if (targetPregunta != null) {
+                                        Column(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .verticalScroll(scrollState),
+                                            horizontalAlignment = Alignment.CenterHorizontally
+                                        ) {
+                                            Column(
+                                                Modifier
+                                                    .selectableGroup()
+                                                    .onPreviewKeyEvent {
+                                                        if (it.type == KeyEventType.KeyUp && (it.key == Key.Enter || it.key == Key.NumPadEnter)) {
+                                                            if (selectedCantidad != null) {
+                                                                responderAccion()
+                                                                true
+                                                            } else {
+                                                                false
+                                                            }
+                                                        } else {
+                                                            false
+                                                        }
+                                                    }
+                                            ) {
+                                                (0..6).forEach { cantidadOpcion ->
+                                                    val textoRespuesta = when (cantidadOpcion) {
+                                                        0 -> "Nunca / Ninguna vez"
+                                                        1 -> "Casi nunca / Pocas veces al año"
+                                                        2 -> "Algunas veces / Una vez al mes o menos"
+                                                        3 -> "Regularmente / Pocas veces al mes"
+                                                        4 -> "Bastantes veces / Una vez por semana"
+                                                        5 -> "Casi siempre / Pocas veces por semana"
+                                                        6 -> "Siempre / Todos los días"
+                                                        else -> "invalid"
+                                                    }
+
+                                                    Row(
+                                                        Modifier
+                                                            .fillMaxWidth()
+                                                            .height(56.dp)
+                                                            .selectable(
+                                                                selected = (selectedCantidad == cantidadOpcion && preguntaActual?.idPregunta == targetPregunta.idPregunta),
+                                                                onClick = {
+                                                                    selectedCantidad = cantidadOpcion
+                                                                    focusRequester.requestFocus()
+                                                                },
+                                                                role = Role.RadioButton
+                                                            )
+                                                            .padding(horizontal = 16.dp),
+                                                        verticalAlignment = Alignment.CenterVertically
+                                                    ) {
+                                                        RadioButton(
+                                                            selected = (selectedCantidad == cantidadOpcion && preguntaActual?.idPregunta == targetPregunta.idPregunta),
+                                                            onClick = null
+                                                        )
+                                                        Text(
+                                                            text = textoRespuesta,
+                                                            style = MaterialTheme.typography.bodyLarge,
+                                                            modifier = Modifier.padding(start = 16.dp)
+                                                        )
+                                                    }
+                                                }
+                                            }
+                                        }
+
+                                        ScrollMoreIndicator(
+                                            visible = showMoreIcon,
+                                            modifier = Modifier
+                                                .align(Alignment.BottomCenter)
+                                                .padding(bottom = 8.dp)
+                                        )
+                                    } else {
+                                        Column(
+                                            horizontalAlignment = Alignment.CenterHorizontally,
+                                            verticalArrangement = Arrangement.Center,
+                                            modifier = Modifier.fillMaxSize()
+                                        ) {
+                                            Text(
+                                                text = "Todo contestado",
+                                                style = MaterialTheme.typography.titleLarge,
+                                                textAlign = TextAlign.Center,
+                                                modifier = Modifier.padding(vertical = 16.dp)
+                                            )
+                                            Text(
+                                                text = "Quieres contestar otra vez?",
+                                                style = MaterialTheme.typography.titleMedium,
+                                                modifier = Modifier.padding(bottom = 16.dp),
+                                                textAlign = TextAlign.Center
+                                            )
+                                            OutlinedButton(onClick = {
+                                                viewModel.limpiarRespuestas()
+                                            }) {
+                                                Text("Reiniciar preguntas")
+                                            }
+                                        }
+                                    }
+                                }
                             }
                         }
                     }

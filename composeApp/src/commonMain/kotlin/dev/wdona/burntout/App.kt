@@ -7,7 +7,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import cafe.adriel.voyager.navigator.Navigator
-import cafe.adriel.voyager.transitions.SlideTransition
+import cafe.adriel.voyager.transitions.CrossfadeTransition
 import dev.wdona.burntout.presentation.ui.pantallas.MainScreen
 import dev.wdona.burntout.presentation.ui.pantallas.PreMainScreen
 import dev.wdona.burntout.presentation.ui.theme.BurntOutMaterialTheme
@@ -45,7 +45,7 @@ fun App(
                 PressBackHandler(enabled = navigator.canPop) {
                     navigator.pop()
                 }
-                SlideTransition(navigator)
+                CrossfadeTransition(navigator)
             }
         }
     }
