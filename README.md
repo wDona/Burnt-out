@@ -136,7 +136,6 @@ El proyecto emplea **Kotlin Multiplatform (KMP)** para compartir la lógica de n
 ---
 
 ## 🚀 Guía de Ejecución en Desarrollo
-
 ### Requisitos Previos
 * Java Development Kit (JDK) 11 o superior.
 * Android Studio o IntelliJ IDEA (con plugin KMP configurado).
