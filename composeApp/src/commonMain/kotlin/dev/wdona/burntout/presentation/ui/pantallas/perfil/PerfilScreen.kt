@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CloudOff
@@ -36,6 +37,7 @@ import androidx.compose.ui.unit.dp
 import dev.wdona.burntout.presentation.ui.pantallas.SettingsScreen
 import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.AjustesViewModelFactory
 import dev.wdona.burntout.presentation.ui.components.common.BateriaBurnout
+import dev.wdona.burntout.presentation.ui.components.common.FilaTextoPlaceholder
 
 class PerfilScreen(val factory: MiPerfilViewModelFactory, val ajustesFactory: AjustesViewModelFactory, val onVolver: (() -> Unit)? = null, var idUsuario: Long? = null) : Screen {
     @Composable
@@ -97,7 +99,7 @@ fun PerfilContent(viewModel: PerfilViewModel, onAjustes: () -> Unit, onVolver: (
         titleIcon = titleIcon
     ) {
         BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
-            val tamanioIconoResponsive = (maxWidth * 0.5f).coerceIn(100.dp, 300.dp)
+            val tamanioIconoResponsive = (maxWidth * 1f).coerceIn(100.dp, 800.dp)
 
             Column(
                 modifier = Modifier.fillMaxSize(),
@@ -105,31 +107,44 @@ fun PerfilContent(viewModel: PerfilViewModel, onAjustes: () -> Unit, onVolver: (
             ) {
 
                 if (isLoading) {
-//                    CircularProgressIndicator(
-//                        modifier = Modifier
-//                            .padding(bottom = 8.dp)
-//                    )
-                    // TODO: PLACEHOLDER como en youtueb
-//                    Text(
-//                        text = "Cargando perfil...",
-//                        style = MaterialTheme.typography.titleLarge,
-//                        modifier = Modifier.padding(16.dp)
-//                    )
+                    FilaTextoPlaceholder(
+                        modifier = Modifier
+                            .padding(horizontal = 32.dp)
+                            .width(tamanioIconoResponsive),
+                        paddingBottom = 16,
+                        height = 28
+                    )
+                    FilaTextoPlaceholder(
+                        modifier = Modifier
+                            .padding(horizontal = 32.dp)
+                            .width(tamanioIconoResponsive),
+                        paddingBottom = 8,
+                        height = 28
+                    )
+                    FilaTextoPlaceholder(
+                        modifier = Modifier
+                            .padding(horizontal = 32.dp)
+                            .width(tamanioIconoResponsive),
+                        height = 64,
+                        paddingBottom = 8,
+                        paddingTop = 8
+
+                    )
                 } else if (usuario == null) {
                     Text(
                         text = "No se ha podido cargar el usuario",
                         style = MaterialTheme.typography.titleLarge,
                         modifier = Modifier.padding(16.dp)
                     )
-                    OutlinedButton(
-                        onClick = {
-                            if (onVolver != null) {
+                    if (onVolver != null) {
+                        OutlinedButton(
+                            onClick = {
                                 onVolver()
-                            }
-                        },
-                        shape = RoundedCornerShape(24.dp),
-                    ) {
-                        Text("Volver")
+                            },
+                            shape = RoundedCornerShape(24.dp),
+                        ) {
+                            Text("Volver")
+                        }
                     }
                 }
                 else {

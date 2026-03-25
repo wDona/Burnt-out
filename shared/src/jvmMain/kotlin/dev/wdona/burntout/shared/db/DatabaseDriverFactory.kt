@@ -9,8 +9,7 @@ actual class DatabaseDriverFactory {
 
     // TODO: coger si es la primera ejecucion o no
     actual fun createDriver(): SqlDriver {
-        val userHome = System.getProperty("user.home")
-        val appDataDir = File(userHome, ".burntout_app")
+        val appDataDir = File(System.getProperty("user.dir"), "burntout_data")
         
         if (!appDataDir.exists()) {
             appDataDir.mkdirs()

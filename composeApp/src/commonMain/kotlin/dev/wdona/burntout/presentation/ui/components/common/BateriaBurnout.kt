@@ -11,6 +11,7 @@ import androidx.compose.material.icons.filled.Battery3Bar
 import androidx.compose.material.icons.filled.Battery4Bar
 import androidx.compose.material.icons.filled.Battery5Bar
 import androidx.compose.material.icons.filled.Battery6Bar
+import androidx.compose.material.icons.filled.BatteryAlert
 import androidx.compose.material.icons.filled.BatteryFull
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -50,50 +51,50 @@ fun BateriaBurnout(riesgo: Double, mostrarTexto: Boolean = true, size: Int = 24,
 @Composable
 fun getEstadoBateria(riesgo: Double): Triple<ImageVector, Color, String> {
     return when {
-        riesgo < 0 -> Triple (
+        riesgo < 0 -> Triple(
             Icons.Default.BatteryFull,
-            BurntOutMaterialTheme.getColorScheme().onSurface,
-            "Sin responder"
+            BurntOutMaterialTheme.getColorScheme().onSurface.copy(alpha=0.5f),
+            "Sin datos"
         )
-        riesgo < 0.10 -> Triple(
+        riesgo <= 0.10 -> Triple(
             Icons.Default.BatteryFull,
             BurntOutMaterialTheme.getSuccessColor(),
             "Sin riesgo"
         )
-        riesgo < 0.20 -> Triple(
-            Icons.Default.Battery6Bar,
-            Color(0xFFCCFF00),
-            "Riesgo bajo"
-        )
-        riesgo < 0.35 -> Triple(
+        riesgo <= 0.25 -> Triple(
             Icons.Default.Battery5Bar,
-            Color(0xFFCCFF00),
+            Color(0xFF8BC34A),
             "Riesgo bajo"
         )
-        riesgo < 0.50 -> Triple(
+        riesgo <= 0.40 -> Triple(
             Icons.Default.Battery4Bar,
-            Color(0xFFFFCC00),
-            "Riesgo medio"
+            Color(0xFFFFB300),
+            "Riesgo moderado"
         )
-        riesgo < 0.65 -> Triple(
+        riesgo <= 0.55 -> Triple(
             Icons.Default.Battery3Bar,
-            Color(0xFFFFCC00),
-            "Riesgo medio"
+            Color(0xFFFF8F00),
+            "Riesgo alto"
         )
-        riesgo < 0.80 -> Triple(
+        riesgo <= 0.65 -> Triple(
             Icons.Default.Battery2Bar,
-            Color(0xFFFF6600),
-            "Riesgo alto"
+            Color(0xFFFF6D00),
+            "Riesgo muy alto"
         )
-        riesgo < 0.90 -> Triple(
+        riesgo <= 0.80 -> Triple(
             Icons.Default.Battery1Bar,
-            Color(0xFFFF6600),
-            "Riesgo alto"
+            Color(0xFFE65100),
+            "Burnout leve"
+        )
+        riesgo <= 0.90 -> Triple(
+            Icons.Default.Battery0Bar,
+            Color(0xFFE53935),
+            "Burnout moderado"
         )
         else -> Triple(
-            Icons.Default.Battery0Bar,
+            Icons.Default.BatteryAlert,
             BurntOutMaterialTheme.getErrorColor(),
-            "Burnout"
+            "Burnout grave"
         )
     }
 }

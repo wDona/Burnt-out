@@ -3,6 +3,7 @@ package dev.wdona.burntout.presentation.ui.components.template
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
@@ -19,6 +20,7 @@ import dev.wdona.burntout.presentation.ui.components.common.MainTopBar
 fun ScaffoldBase(
     titulo: String = "",
     titleIcon: @Composable (() -> Unit)? = null,
+    subtitle: String? = null,
     onVolver: (() -> Unit)? = null,
     onAjustes: (() -> Unit)? = null,
     onFAB: (() -> Unit)? = null,
@@ -26,19 +28,22 @@ fun ScaffoldBase(
     fabEnabled: Boolean = true,
     textoFAB: String? = null,
     iconFAB: @Composable (() -> Unit)? = null,
-    fabModifier: Modifier = Modifier,
     bottomBar: @Composable () -> Unit = {},
+    topBarWindowInsets: WindowInsets = WindowInsets(0, 0, 0, 0),
+    fabModifier: Modifier = Modifier,
     content: @Composable (PaddingValues) -> Unit
 ) {
     Scaffold(
-        contentWindowInsets = WindowInsets(0, 0, 0, 0),
+        contentWindowInsets = WindowInsets.safeDrawing,
         topBar = {
             MainTopBar(
                 title = titulo,
+                subtitle = subtitle,
                 onVolver = onVolver,
                 onAjustes = onAjustes,
                 titleIcon = titleIcon,
-                onSaltar = onSaltar
+                onSaltar = onSaltar,
+                windowInsets = topBarWindowInsets
             )
         },
         floatingActionButton = {

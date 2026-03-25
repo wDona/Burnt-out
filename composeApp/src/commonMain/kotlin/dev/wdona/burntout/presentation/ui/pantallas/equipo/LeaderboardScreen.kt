@@ -1,9 +1,12 @@
 package dev.wdona.burntout.presentation.ui.pantallas.equipo
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -18,6 +21,7 @@ import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import dev.wdona.burntout.presentation.ui.components.common.FilaTextoPlaceholder
 import dev.wdona.burntout.presentation.ui.components.equipo.EquipoCard
 import dev.wdona.burntout.presentation.ui.components.template.ScaffoldBase
 import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.AjustesViewModelFactory
@@ -70,7 +74,16 @@ fun LeaderboardContent(
         onVolver = onVolver
     ) {
         if (isLoading) {
-
+            BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+                val tamanio = if (maxWidth < 600.dp) maxWidth else 300.dp
+                (0..3).forEach { _ ->
+                    FilaTextoPlaceholder(
+                        modifier = Modifier
+                            .width(tamanio),
+                        paddingTop = 32
+                    )
+                }
+            }
         } else {
             LazyVerticalGrid(
                 columns = GridCells.Adaptive(minSize = 300.dp),

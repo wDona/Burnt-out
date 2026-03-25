@@ -3,16 +3,23 @@ package dev.wdona.burntout.presentation.ui.pantallas.formulario
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.NavigateNext
@@ -48,6 +55,7 @@ import dev.wdona.burntout.presentation.ui.components.template.ScaffoldBase
 import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.FormularioViewModelFactory
 import dev.wdona.burntout.presentation.viewmodel.viewmodels.FormularioViewModel
 import dev.wdona.burntout.domain.model.Respuesta
+import dev.wdona.burntout.presentation.ui.components.common.FilaTextoPlaceholder
 import dev.wdona.burntout.shared.utils.SettingsManager
 
 class PreguntaScreen(private val viewModelFactory: FormularioViewModelFactory, private val onVolver: (() -> Unit)? = null) : Screen {
@@ -146,10 +154,49 @@ fun PreguntaContent(onVolver: (() -> Unit)? = null, viewModel: FormularioViewMod
             }
     ) {
         if (isLoading) {
-            // Estructura vacia
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp)
+            ) {
+                (0..1).forEach { _ ->
+                    FilaTextoPlaceholder(
+                        modifier = Modifier
+                            .padding(horizontal = 32.dp)
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                    ) {
+                        Column {
+                            (0..6).forEach { cantidadOpcion ->
+                                Row(
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .height(56.dp)
+                                        .padding(horizontal = 16.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    RadioButton(
+                                        selected = false,
+                                        onClick = null
+                                    )
+                                    FilaTextoPlaceholder(paddingEnd = 32)
+                                }
+
+                            }
+                        }
+                    }
+                }
+            }
         } else {
             val scrollState = rememberScrollState()
-            
+
             val showMoreIcon by remember {
                 derivedStateOf {
                     scrollState.maxValue > 0 && scrollState.value < scrollState.maxValue
@@ -161,24 +208,41 @@ fun PreguntaContent(onVolver: (() -> Unit)? = null, viewModel: FormularioViewMod
                     .fillMaxSize()
                     .padding(16.dp)
             ) {
-                Text(
-                    text = preguntaActual?.pregunta ?: "Todo contestado",
-                    style = MaterialTheme.typography.titleLarge,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 24.dp),
-                    textAlign = TextAlign.Center
-                )
-
-                Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
-                    Column(
+                if (preguntaActual?.pregunta != null) {
+                    Text(
+                        text = preguntaActual.pregunta,
+                        style = MaterialTheme.typography.titleLarge,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .verticalScroll(scrollState),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        if (preguntaActual?.pregunta != null) {
-                            Column(Modifier.selectableGroup()) {
+                            .padding(bottom = 24.dp),
+                        textAlign = TextAlign.Center
+                    )
+                }
+
+                Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
+                    if (preguntaActual?.pregunta != null) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .verticalScroll(scrollState),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Column(
+                                Modifier
+                                    .selectableGroup()
+                                    .onPreviewKeyEvent {
+                                        if (it.type == KeyEventType.KeyUp && (it.key == Key.Enter || it.key == Key.NumPadEnter)) {
+                                            if (selectedCantidad != null) {
+                                                responderAccion()
+                                                true
+                                            } else {
+                                                false
+                                            }
+                                        } else {
+                                            false
+                                        }
+                                    }
+                            ) {
                                 (0..6).forEach { cantidadOpcion ->
                                     val textoRespuesta = when (cantidadOpcion) {
                                         0 -> "Nunca / Ninguna vez"
@@ -200,6 +264,7 @@ fun PreguntaContent(onVolver: (() -> Unit)? = null, viewModel: FormularioViewMod
                                                 selected = (selectedCantidad == cantidadOpcion),
                                                 onClick = {
                                                     selectedCantidad = cantidadOpcion
+                                                    focusRequester.requestFocus()
                                                 },
                                                 role = Role.RadioButton
                                             )
@@ -218,31 +283,40 @@ fun PreguntaContent(onVolver: (() -> Unit)? = null, viewModel: FormularioViewMod
                                     }
                                 }
                             }
-                        } else {
-                            Column (
-                                horizontalAlignment = Alignment.CenterHorizontally
-                            ){
-                                Text(
-                                    text = "Quieres contestar otra vez?",
-                                    style = MaterialTheme.typography.titleMedium,
-                                    modifier = Modifier.padding(bottom = 16.dp),
-                                    textAlign = TextAlign.Center
-                                )
-                                OutlinedButton(onClick = {
-                                    viewModel.limpiarRespuestas()
-                                }) {
-                                    Text("Reiniciar preguntas")
-                                }
+                        }
+
+                        ScrollMoreIndicator(
+                            visible = showMoreIcon,
+                            modifier = Modifier
+                                .align(Alignment.BottomCenter)
+                                .padding(bottom = 8.dp)
+                        )
+                    } else {
+                        // CENTRAR
+                        Column (
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center,
+                            modifier = Modifier.fillMaxSize()
+                        ){
+                            Text(
+                                text = "Todo contestado",
+                                style = MaterialTheme.typography.titleLarge,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.padding(vertical = 16.dp)
+                            )
+                            Text(
+                                text = "Quieres contestar otra vez?",
+                                style = MaterialTheme.typography.titleMedium,
+                                modifier = Modifier.padding(bottom = 16.dp),
+                                textAlign = TextAlign.Center
+                            )
+                            OutlinedButton(onClick = {
+                                viewModel.limpiarRespuestas()
+                            }) {
+                                Text("Reiniciar preguntas")
                             }
                         }
                     }
-
-                    ScrollMoreIndicator(
-                        visible = showMoreIcon,
-                        modifier = Modifier
-                            .align(Alignment.BottomCenter)
-                            .padding(bottom = 8.dp)
-                    )
                 }
             }
         }

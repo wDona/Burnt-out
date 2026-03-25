@@ -26,6 +26,7 @@ import cafe.adriel.voyager.core.model.rememberScreenModel
 import androidx.compose.runtime.getValue
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Arrangement
+import dev.wdona.burntout.presentation.ui.components.common.FilaTextoPlaceholder
 
 class EquipoScreen(val factory: MiEquipoViewModelFactory, val perfilFactory: MiPerfilViewModelFactory, val ajustesFactory: AjustesViewModelFactory, val onVolver: (() -> Unit)? = null) : Screen {
     @Composable
@@ -45,7 +46,7 @@ class EquipoScreen(val factory: MiEquipoViewModelFactory, val perfilFactory: MiP
             viewModel,
             onVolver = onVolver,
             onClickUsuario = {
-                navigator.push(PerfilScreen(perfilFactory, ajustesFactory, onVolver = { navigator.pop() }))
+                navigator.push(PerfilScreen(perfilFactory, ajustesFactory, onVolver = { navigator.pop() }, idUsuario = it))
             },
             perfilViewModel
         )
@@ -68,7 +69,14 @@ fun EquipoContent(viewModel: EquipoViewModel, onVolver: (() -> Unit)? = null, on
     ) {
          Box(modifier = Modifier.fillMaxSize()) {
             if (isLoading) {
-                // Estructura vacia
+                Column {
+                    (0..3).forEach { _ ->
+                        FilaTextoPlaceholder(
+                            paddingEnd = 48,
+                            paddingTop = 32
+                        )
+                    }
+                }
             } else {
                 LazyVerticalGrid(
                     columns = GridCells.Adaptive(minSize = 400.dp), // el min size es el tamanio ancho de cada tarjeta

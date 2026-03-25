@@ -7,6 +7,9 @@ import dev.wdona.burntout.domain.repository.UsuarioRepository
 import dev.wdona.burntout.shared.domain.Pregunta
 import dev.wdona.burntout.domain.model.Respuesta
 import dev.wdona.burntout.domain.usecase.CalcularRiesgoBurnout
+import dev.wdona.burntout.shared.utils.SettingsManager
+import dev.wdona.burntout.shared.utils.convertTimestampToStringDate
+import dev.wdona.burntout.shared.utils.getCurrentDateString
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -44,18 +47,20 @@ class PreguntasInicialesViewModel(
         initialValue = null
     )
 
-    fun cargarUltimasNPreguntasPorResponder(idOrg: Long, nPreguntas: Int) {
+    fun cargarUltimasNPreguntasPorResponderNoRespondidasHoy(idUser: Long, nPreguntas: Int) {
         screenModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
             try {
-                val respuestas = repository.getLastRespuestasByIdUsuario(idOrg)
+                val respuestas = repository.getLastRespuestasByIdUsuario(idUser)
+                val hoyString = getCurrentDateString()
 
-                if (respuestas.size >= nPreguntas) {
-
-                }
-
-                val preguntas = repository.getPreguntasByOrg(idOrg).filter { pregunta ->
-                    respuestas.any { it.idPregunta == pregunta.idPregunta }
+                val preguntas = repository.getPreguntasByOrg(SettingsManager.getIdOrganizacionActual()).filter { pregunta ->
+                    val respuesta = respuestas.find { it.idPregunta == pregunta.idPregunta }
+                    if (respuesta == null) {
+                         true
+                    } else {
+                        hoyString != convertTimestampToStringDate(respuesta.fecha ?: 0L)
+                    }
                 }.sortedBy { pregunta ->
                     respuestas.indexOfFirst { it.idPregunta == pregunta.idPregunta }
                 }.take(nPreguntas)
@@ -74,9 +79,14 @@ class PreguntasInicialesViewModel(
         val preguntasList = currentState.preguntas
         val respuestasList = currentState.respuestas
 
-        val idsRespondidas = respuestasList.map { it.idPregunta }.toSet()
+        val hoy = getCurrentDateString()
+        val idsRespondidasHoy = respuestasList.filter { 
+            val fechaRespuesta = convertTimestampToStringDate(it.fecha ?: 0L)
+            fechaRespuesta == hoy
+        }.map { it.idPregunta }.toSet()
 
-        val siguiente = preguntasList.firstOrNull { it.idPregunta !in idsRespondidas }
+        val siguiente = preguntasList.firstOrNull { it.idPregunta !in idsRespondidasHoy }
+        println("ViewModel: Seleccionando siguiente. Respondidas hoy ($hoy): $idsRespondidasHoy. Siguiente: ${siguiente?.idPregunta}")
 
         _uiState.update { it.copy(preguntaActual = siguiente) }
     }
@@ -110,11 +120,13 @@ class PreguntasInicialesViewModel(
     }
 
     fun responderPregunta(respuesta: Respuesta) {
+        println("ViewModel: Recibida peticion de responder pregunta ${respuesta.idPregunta}, valor ${respuesta.respuesta}")
         screenModelScope.launch {
             repository.responderPregunta(respuesta)
 
             val currentState = _uiState.value
             val nuevasRespuestas = currentState.respuestas.filterNot { it.idPregunta == respuesta.idPregunta } + respuesta
+            println("ViewModel: Respuestas actualizadas: ${nuevasRespuestas.size}")
             _uiState.update { it.copy(respuestas = nuevasRespuestas) }
 
             try {
@@ -126,5 +138,10 @@ class PreguntasInicialesViewModel(
 
             seleccionarSiguientePreguntaSinResponder()
         }
+    }
+
+    fun preguntaActualFueRespondidaHoy(): Boolean {
+        val respuesta = uiState.value.respuestas.find { it.idPregunta == uiState.value.preguntaActual?.idPregunta } ?: return false
+        return getCurrentDateString() == convertTimestampToStringDate(respuesta.fecha ?: 0L)
     }
 }

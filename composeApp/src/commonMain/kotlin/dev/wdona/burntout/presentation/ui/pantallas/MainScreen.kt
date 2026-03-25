@@ -1,7 +1,10 @@
 package dev.wdona.burntout.presentation.ui.pantallas
 
+import androidx.compose.animation.Crossfade
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
@@ -13,15 +16,16 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.Navigator
+import cafe.adriel.voyager.navigator.CurrentScreen
 import cafe.adriel.voyager.navigator.tab.*
-import cafe.adriel.voyager.transitions.SlideTransition
 import dev.wdona.burntout.presentation.ui.pantallas.equipo.EquipoScreen
 import dev.wdona.burntout.presentation.ui.pantallas.equipo.LeaderboardScreen
 import dev.wdona.burntout.presentation.ui.pantallas.formulario.PreguntaScreen
@@ -44,17 +48,20 @@ class MainScreen(
     @Composable
     override fun Content() {
         val tablerosTab = remember { TablerosTab(tableroFactory, tareaFactory) }
-        val equipoTab = remember { EquipoTab(equipoFactory, perfilFactory, ajustesFactory) }
-        val leaderboardTab = remember { LeaderboardTab(leaderboardFactory, ajustesFactory, equipoFactory, perfilFactory) }
         val perfilTab = remember { PerfilTab(perfilFactory, ajustesFactory) }
+        val leaderboardTab = remember { LeaderboardTab(leaderboardFactory, ajustesFactory, equipoFactory, perfilFactory) }
         val preguntasTab = remember { PreguntasTab(formularioFactory) }
 
         TabNavigator(tablerosTab) { tabNavigator ->
+            val equipoTab = remember { 
+                EquipoTab(equipoFactory, perfilFactory, ajustesFactory)
+            }
+
             Scaffold(
                 content = { paddingValues ->
-                    Box(modifier = Modifier.padding(paddingValues)) {
-                        key(tabNavigator.current.key) {
-                            tabNavigator.current.Content()
+                    Box(modifier = Modifier.padding(paddingValues).fillMaxSize().background(MaterialTheme.colorScheme.background)) {
+                        Crossfade(targetState = tabNavigator.current) { tab ->
+                            tab.Content()
                         }
                     }
                 },
@@ -106,7 +113,7 @@ private class TablerosTab(
     @Composable
     override fun Content() {
         Navigator(TablerosScreen(factory, tareaFactory)) { navigator ->
-            SlideTransition(navigator)
+            CurrentScreen()
         }
     }
 }
@@ -114,7 +121,7 @@ private class TablerosTab(
 private class EquipoTab(
     val factory: MiEquipoViewModelFactory,
     val perfilFactory: MiPerfilViewModelFactory,
-    val settingsFactory: AjustesViewModelFactory
+    val settingsFactory: AjustesViewModelFactory,
 ) : Tab {
     override val key = "EquipoTab"
     @get:Composable
@@ -124,7 +131,7 @@ private class EquipoTab(
     @Composable
     override fun Content() {
         Navigator(EquipoScreen(factory, perfilFactory, settingsFactory)) { navigator ->
-            SlideTransition(navigator)
+            CurrentScreen()
         }
     }
 }
@@ -148,7 +155,7 @@ private class LeaderboardTab(
             perfilFactory = perfilFactory,
             ajustesFactory = settingsFactory
         )) { navigator ->
-            SlideTransition(navigator)
+            CurrentScreen()
         }
     }
 }
@@ -165,7 +172,7 @@ private class PerfilTab(
     @Composable
     override fun Content() {
         Navigator(PerfilScreen(factory, ajustesFactory)) { navigator ->
-            SlideTransition(navigator)
+            CurrentScreen()
         }
     }
 }
@@ -181,7 +188,7 @@ private class PreguntasTab(
     @Composable
     override fun Content() {
         Navigator(PreguntaScreen(factory)) { navigator ->
-            SlideTransition(navigator)
+            CurrentScreen()
         }
     }
 }

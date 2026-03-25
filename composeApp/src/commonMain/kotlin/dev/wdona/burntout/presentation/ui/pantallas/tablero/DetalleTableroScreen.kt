@@ -84,7 +84,7 @@ fun DetalleTableroContent(
         ) {
             if (listaTareas.isEmpty()) {
                 Text(
-                    text = "No hay tareas en este tablero (o el servidor no responde)",
+                    text = "No hay tareas en este tablero",
                     modifier = Modifier
                         .align(Alignment.CenterHorizontally)
                         .padding(16.dp)

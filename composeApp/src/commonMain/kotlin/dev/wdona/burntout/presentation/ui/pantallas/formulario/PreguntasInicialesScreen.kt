@@ -6,10 +6,13 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
@@ -19,7 +22,6 @@ import androidx.compose.material.icons.automirrored.filled.NavigateNext
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -49,6 +51,7 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import dev.wdona.burntout.presentation.ui.components.template.ScaffoldBase
 import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.FormularioViewModelFactory
 import dev.wdona.burntout.domain.model.Respuesta
+import dev.wdona.burntout.presentation.ui.components.common.FilaTextoPlaceholder
 import dev.wdona.burntout.presentation.ui.pantallas.MainScreen
 import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.AjustesViewModelFactory
 import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.LeaderboardViewModelFactory
@@ -75,16 +78,16 @@ class PreguntasInicialesScreen(
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
-        val onTerminar = {
-            navigator.push(
+        val onTerminar: () -> Unit = {
+            navigator.replaceAll(
                 MainScreen(
-                        tareaFactory = tareaFactory,
-                        equipoFactory = equipoFactory,
-                        perfilFactory = perfilFactory,
-                        tableroFactory = tableroFactory,
-                        leaderboardFactory = leaderboardFactory,
-                        ajustesFactory = ajustesFactory,
-                        formularioFactory = viewModelFactory
+                    tareaFactory = tareaFactory,
+                    equipoFactory = equipoFactory,
+                    perfilFactory = perfilFactory,
+                    tableroFactory = tableroFactory,
+                    leaderboardFactory = leaderboardFactory,
+                    ajustesFactory = ajustesFactory,
+                    formularioFactory = viewModelFactory
                 )
             )
         }
@@ -94,7 +97,10 @@ class PreguntasInicialesScreen(
 
         LaunchedEffect(idOrganizacion) {
             try {
-                viewModel.cargarUltimasNPreguntasPorResponder(idOrganizacion, nPreguntas)
+                //viewModel.cargarUltimasNPreguntasPorResponderNoRespondidasHoy(idOrganizacion, nPreguntas)
+                val idUsuario = SettingsManager.getIdUsuarioActual()
+                // Usar idUsuario en lugar de idOrganizacion para cargar respuestas del usuario
+                viewModel.cargarUltimasNPreguntasPorResponderNoRespondidasHoy(idUsuario, nPreguntas)
             } catch (e: Exception) {
                 println("Error al cargar preguntas: ${e.message}")
             }
@@ -103,13 +109,13 @@ class PreguntasInicialesScreen(
         PreguntasInicialesContent(
             onVolver = onVolver,
             viewModel = viewModel,
-            onTerminar = onTerminar
+            onSaltar = onTerminar
         )
     }
 }
 
 @Composable
-fun PreguntasInicialesContent(onVolver: (() -> Unit)? = null, viewModel: PreguntasInicialesViewModel, onTerminar: (() -> Unit)? = null) {
+fun PreguntasInicialesContent(onVolver: (() -> Unit)? = null, viewModel: PreguntasInicialesViewModel, onSaltar: (() -> Unit)? = null) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val preguntaActual = uiState.preguntaActual
     val isLoading = uiState.isLoading
@@ -126,6 +132,7 @@ fun PreguntasInicialesContent(onVolver: (() -> Unit)? = null, viewModel: Pregunt
     val focusRequester = remember { FocusRequester() }
 
     val responderAccion = {
+        println("CLICK en Responder: selected=$selectedCantidad, pregunta=$preguntaActual por usuario ${SettingsManager.getIdUsuarioActual()}")
         if (selectedCantidad != null && preguntaActual != null) {
             val respuesta = Respuesta(
                 idUsuario = SettingsManager.getIdUsuarioActual(),
@@ -134,10 +141,13 @@ fun PreguntasInicialesContent(onVolver: (() -> Unit)? = null, viewModel: Pregunt
                 respuesta = selectedCantidad!!.toLong(),
                 fecha = System.currentTimeMillis() / 1000L
             )
+            println("Enviando respuesta con fecha ${respuesta.fecha} (${dev.wdona.burntout.shared.utils.convertTimestampToStringDate(respuesta.fecha ?: 0L)})")
 
             viewModel.responderPregunta(respuesta)
 
-            viewModel.seleccionarSiguientePreguntaSinResponder()
+            //viewModel.seleccionarSiguientePreguntaSinResponder() // Eliminado porque el VM ya lo hace
+        } else {
+             println("NO SE PUEDE RESPONDER: selected o pregunta es null")
         }
     }
 
@@ -158,17 +168,21 @@ fun PreguntasInicialesContent(onVolver: (() -> Unit)? = null, viewModel: Pregunt
     }
 
     val tiempo = if ((uiState.preguntas.size * 6) > 60) {
-        "${(uiState.preguntas.size * 6) / 60} mins"
+        "~${(uiState.preguntas.size * 6) / 60} mins"
     } else {
-        "${uiState.preguntas.size * 6} segs"
+        "~${uiState.preguntas.size * 6} segs"
     }
 
-    val titulo = if (isLoading) "" else "Diario inicial ($tiempo aprox)"
+    val titulo = "Diario inicial"
+    val subtitulo = if (isLoading) "" else tiempo
 
-    ScaffoldBase (
+    ScaffoldBase(
         titulo = titulo,
+        subtitle = subtitulo,
+        topBarWindowInsets = WindowInsets.safeDrawing,
+
         onVolver = onVolver,
-        onSaltar = onTerminar,
+        onSaltar = onSaltar,
         onFAB = if (preguntaActual != null) responderAccion else null,
         fabEnabled = selectedCantidad != null && preguntaActual != null,
         iconFAB = {
@@ -177,7 +191,7 @@ fun PreguntasInicialesContent(onVolver: (() -> Unit)? = null, viewModel: Pregunt
                 "Siguiente pregunta"
             )
         },
-        textoFAB = "Siguiente pregunta",
+        textoFAB = "Siguiente", // TODO: PONER TEXTO DE TERMINAR EN LA ULTIMA
         fabModifier = Modifier
             .focusRequester(focusRequester)
             .onPreviewKeyEvent {
@@ -187,10 +201,47 @@ fun PreguntasInicialesContent(onVolver: (() -> Unit)? = null, viewModel: Pregunt
                 } else {
                     false
                 }
-            }
+            },
     ) {
         if (isLoading) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp)
+            ) {
+                FilaTextoPlaceholder(
+                    modifier = Modifier
+                        .padding(horizontal = 32.dp)
+                )
 
+                Spacer(modifier = Modifier.height(24.dp))
+
+                Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                    ) {
+                        Column {
+                            (0..6).forEach { cantidadOpcion ->
+                                Row(
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .height(56.dp)
+                                        .padding(horizontal = 16.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    RadioButton(
+                                        selected = false,
+                                        onClick = null
+                                    )
+                                    FilaTextoPlaceholder(paddingEnd = 32)
+                                }
+
+                            }
+                        }
+                    }
+                }
+            }
         } else {
             val scrollState = rememberScrollState()
 
@@ -222,7 +273,23 @@ fun PreguntasInicialesContent(onVolver: (() -> Unit)? = null, viewModel: Pregunt
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         if (preguntaActual?.pregunta != null) {
-                            Column(Modifier.selectableGroup()) {
+                            println("Carga preguntasInicialesContent la pregunta")
+                            Column(
+                                Modifier
+                                    .selectableGroup()
+                                    .onPreviewKeyEvent {
+                                        if (it.type == KeyEventType.KeyUp && (it.key == Key.Enter || it.key == Key.NumPadEnter)) {
+                                            if (selectedCantidad != null) {
+                                                responderAccion()
+                                                true
+                                            } else {
+                                                false
+                                            }
+                                        } else {
+                                            false
+                                        }
+                                    }
+                            ) {
                                 (0..6).forEach { cantidadOpcion ->
                                     val textoRespuesta = when (cantidadOpcion) {
                                         0 -> "Nunca / Ninguna vez"
@@ -243,6 +310,7 @@ fun PreguntasInicialesContent(onVolver: (() -> Unit)? = null, viewModel: Pregunt
                                                 selected = (selectedCantidad == cantidadOpcion),
                                                 onClick = {
                                                     selectedCantidad = cantidadOpcion
+                                                    focusRequester.requestFocus()
                                                 },
                                                 role = Role.RadioButton
                                             )
@@ -262,11 +330,13 @@ fun PreguntasInicialesContent(onVolver: (() -> Unit)? = null, viewModel: Pregunt
                                 }
                             }
                         } else {
+                            println("Carga el else de preguntasInicialesContent")
+                            Text("No hay más preguntas por hoy.")
                             LaunchedEffect(1) {
                                 SettingsManager.setUltimaFechaCuestionarioHoy()
-                                SettingsManager.setPrimerCuestionarioHecho(true)
+                                SettingsManager.setPrimerCuestionarioHecho(true) // COMENTADO PARA DEBUG
+                                onSaltar?.invoke()
                             }
-                            onTerminar?.invoke()
                         }
                     }
 
