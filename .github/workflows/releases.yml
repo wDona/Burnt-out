@@ -84,6 +84,7 @@ jobs:
             | Windows | .msi |
             | Linux (Debian) | .deb |
             | Android | .apk |
+            | Arch | yay -S burnt-out |
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
