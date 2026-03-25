@@ -12,4 +12,7 @@ sha256sums_x86_64=('SKIP')
 package() { 
     bsdtar -xf "${srcdir}/burnt-out-${pkgver}-installer.deb" data.tar.*
     bsdtar -xf "${srcdir}/data.tar."* -C "${pkgdir}/"
+
+    mkdir -p "${pkgdir}/usr/bin"
+    ln -s /opt/burntoutapp/bin/BurntOutApp "${pkgdir}/usr/bin/burnt-out"
 }
