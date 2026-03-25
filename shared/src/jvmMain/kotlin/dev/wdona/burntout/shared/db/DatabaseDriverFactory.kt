@@ -7,15 +7,21 @@ import java.io.File
 
 actual class DatabaseDriverFactory {
 
-    // TODO: coger si es la primera ejecucion o no
+    // TODO: coger si existe el archivo o no o no
     actual fun createDriver(): SqlDriver {
-        val appDataDir = File(System.getProperty("user.dir"), "burntout_data")
+        val userHome = System.getProperty("user.home")
+        val appDataDir = File(userHome, ".burntout_app")
         
         if (!appDataDir.exists()) {
-            appDataDir.mkdirs()
+            val created = appDataDir.mkdirs()
+            if (!created) {
+                println("Fallo al crear el directorio de la app en ${appDataDir.absolutePath}, fallback en user.dir")
+            }
         }
+        
+        val finalDir = if (appDataDir.exists() && appDataDir.isDirectory) appDataDir else File(".")
 
-        val databaseFile = File(appDataDir, "burntout.db")
+        val databaseFile = File(finalDir, "burntout.db")
         val databasePath = databaseFile.absolutePath
         
         val driver: SqlDriver = JdbcSqliteDriver("jdbc:sqlite:$databasePath")
@@ -24,7 +30,11 @@ actual class DatabaseDriverFactory {
         if (isNewDatabase) {
             AppDatabase.Schema.create(driver)
             val database = AppDatabase(driver)
-            insertarDatosIniciales(database)
+            try {
+                insertarDatosIniciales(database)
+            } catch (e: Exception) {
+                println("Error insertando datos iniciales: ${e.message}")
+            }
         }
 
         return driver

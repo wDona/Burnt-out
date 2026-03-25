@@ -6,11 +6,15 @@ import java.util.Properties
 import java.io.File
 
 actual fun createSettings(): Settings {
-    val appDataDir = File(System.getProperty("user.dir"), "burntout_data")
+    val userHome = System.getProperty("user.home")
+    val appDataDir = File(userHome, ".burntout_app")
     if (!appDataDir.exists()) {
         appDataDir.mkdirs()
     }
-    val settingsFile = File(appDataDir, "settings.properties")
+    
+    val finalDir = if (appDataDir.exists() && appDataDir.isDirectory) appDataDir else File(".")
+    
+    val settingsFile = File(finalDir, "settings.properties")
     return FileSettings(settingsFile)
 }
 
