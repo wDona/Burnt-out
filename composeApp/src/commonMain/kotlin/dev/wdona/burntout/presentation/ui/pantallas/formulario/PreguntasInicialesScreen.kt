@@ -250,7 +250,7 @@ fun PreguntasInicialesContent(onVolver: (() -> Unit)? = null, viewModel: Pregunt
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(16.dp)
+                        .padding(bottom = 16.dp, start = 16.dp, end = 16.dp)
                 ) {
                     Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
                         AnimatedContent(

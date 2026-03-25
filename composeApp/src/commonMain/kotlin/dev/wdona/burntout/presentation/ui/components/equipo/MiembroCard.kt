@@ -38,6 +38,8 @@ fun MiembroCard(miembro: Usuario, onClick: () -> Unit) {
         val riesgo = miembro.riesgoBurnout
         if (riesgo != null) {
             BateriaBurnout(riesgo = riesgo, mostrarTexto = false, modifier = Modifier.padding(start = 16.dp, end = 8.dp))
+        } else {
+            BateriaBurnout(riesgo = -1.0, mostrarTexto = false, modifier = Modifier.padding(start = 16.dp, end = 8.dp))
         }
         Icon(
             imageVector = Icons.Default.Person,

@@ -61,10 +61,12 @@ fun EquipoContent(viewModel: EquipoViewModel, onVolver: (() -> Unit)? = null, on
     val miembros = uiState.miembros
     val isLoading = uiState.isLoading
 
-    val titulo = if (isLoading) "" else ((equipo?.titulo ?: "Mi equipo (off)") + " (" + (equipo?.puntuacion ?: "0") + "pts)")
+    val titulo = if (isLoading) "" else (equipo?.titulo ?: "Mi equipo (off)")
+    val subtitulo = "" + (equipo?.puntuacion ?: "0") + "pts"
 
     ScaffoldBase(
         titulo = titulo,
+        subtitle = subtitulo,
         onVolver = onVolver
     ) {
          Box(modifier = Modifier.fillMaxSize()) {

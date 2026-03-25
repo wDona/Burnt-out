@@ -198,7 +198,7 @@ fun PreguntaContent(onVolver: (() -> Unit)? = null, viewModel: FormularioViewMod
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(16.dp)
+                        .padding(bottom = 16.dp, start = 16.dp, end = 16.dp)
                 ) {
                     // Remove direct Text rendering here and wrap content in AnimatedContent
                     Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
