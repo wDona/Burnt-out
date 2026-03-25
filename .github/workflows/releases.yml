@@ -154,7 +154,10 @@ jobs:
       - name: Regenerate .SRCINFO
         run: |
           docker run --rm -v "$PWD:/pkg" archlinux:latest bash -c \
-            "pacman -Sy --noconfirm binutils && cd /pkg && makepkg --printsrcinfo > .SRCINFO"
+            "pacman -Sy --noconfirm --needed base-devel && \
+             useradd -m builder && \
+             chown -R builder /pkg && \
+             su builder -c 'cd /pkg && makepkg --printsrcinfo > .SRCINFO'"
 
       - name: Deploy to AUR
         uses: KSXGitHub/github-actions-deploy-aur@v2.7.2
