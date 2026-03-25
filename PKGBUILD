@@ -15,4 +15,8 @@ package() {
 
     mkdir -p "${pkgdir}/usr/bin"
     ln -s /opt/burntoutapp/bin/BurntOutApp "${pkgdir}/usr/bin/burnt-out"
+
+    mkdir -p "${pkgdir}/usr/share/applications"
+    cp "${pkgdir}/opt/burntoutapp/lib/burntoutapp-BurntOutApp.desktop" \
+       "${pkgdir}/usr/share/applications/burnt-out.desktop"
 }
