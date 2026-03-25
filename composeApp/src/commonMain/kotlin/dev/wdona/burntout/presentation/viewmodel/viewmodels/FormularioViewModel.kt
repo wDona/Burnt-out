@@ -7,6 +7,9 @@ import dev.wdona.burntout.domain.repository.UsuarioRepository
 import dev.wdona.burntout.shared.domain.Pregunta
 import dev.wdona.burntout.domain.model.Respuesta
 import dev.wdona.burntout.domain.usecase.CalcularRiesgoBurnout
+import dev.wdona.burntout.shared.utils.SettingsManager
+import dev.wdona.burntout.shared.utils.convertTimestampToStringDate
+import dev.wdona.burntout.shared.utils.getCurrentDateString
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -44,13 +47,18 @@ class FormularioViewModel(
         initialValue = null
     )
 
-    fun cargarPreguntas(idOrg: Long) {
+    fun cargarPreguntas(idUser: Long) {
         screenModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
             try {
-                val preguntas = repository.getPreguntasByOrg(idOrg)
+                val respuestas = repository.getLastRespuestasByIdUsuario(idUser)
+
+                val preguntas = repository.getPreguntasByOrg(SettingsManager.getIdOrganizacionActual()).sortedBy { pregunta ->
+                    respuestas.indexOfFirst { it.idPregunta == pregunta.idPregunta }
+                }
+
                 _uiState.update { it.copy(preguntas = preguntas, isLoading = false) }
-                seleccionarSiguientePreguntaSinResponder() // Trigger logic after loading
+                seleccionarSiguientePreguntaSinResponder()
             } catch (e: Exception) {
                 _uiState.update { it.copy(isLoading = false, error = e.message) }
             }

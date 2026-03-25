@@ -57,6 +57,7 @@ import dev.wdona.burntout.presentation.viewmodel.viewmodels.FormularioViewModel
 import dev.wdona.burntout.domain.model.Respuesta
 import dev.wdona.burntout.presentation.ui.components.common.FilaTextoPlaceholder
 import dev.wdona.burntout.shared.utils.SettingsManager
+import dev.wdona.burntout.shared.utils.getCurrentTimestampSeconds
 
 class PreguntaScreen(private val viewModelFactory: FormularioViewModelFactory, private val onVolver: (() -> Unit)? = null) : Screen {
 
@@ -71,7 +72,7 @@ class PreguntaScreen(private val viewModelFactory: FormularioViewModelFactory, p
                 viewModel.cargarPreguntas(idOrganizacion)
                 viewModel.cargarRespuestasByIdUsuario(
                     SettingsManager.getIdUsuarioActual(),
-                    System.currentTimeMillis() / 1000L
+                    getCurrentTimestampSeconds()
                 )
             } catch (e: Exception) {
                 println("Error al cargar preguntas: ${e.message}")
