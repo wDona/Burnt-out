@@ -4,8 +4,18 @@
 
 Este proyecto constituye mi proyecto intermodular para el Grado Superior de Desarrollo de Aplicaciones Multiplataforma (DAM).
 
-[![Ver Anteproyecto](https://img.shields.io/badge/Ver%20Anteproyecto-📄-red?style=for-the-badge)](./Burn't_Out_Anteproyecto.pdf) [![Descargar](https://img.shields.io/badge/Descargar-📄-green?style=for-the-badge)](https://github.com/wDona/Burnt-out/releases)
+[![Ver Anteproyecto](https://img.shields.io/badge/Ver%20Anteproyecto-📄-red?style=for-the-badge)](./Burn't_Out_Anteproyecto.pdf) 
 
+## Descarga
+### Windows, Linux (.deb), Android:
+
+[![Descargar](https://img.shields.io/badge/Descargar-📄-green?style=for-the-badge)](https://github.com/wDona/Burnt-out/releases)
+
+### AUR (Arch)
+
+```zsh
+yay -S burnt-out
+```
 ---
 
 ## 🧠 Sobre el Síndrome de Burnout
@@ -136,7 +146,6 @@ El proyecto emplea **Kotlin Multiplatform (KMP)** para compartir la lógica de n
 ---
 
 ## 🚀 Guía de Ejecución en Desarrollo
-
 ### Requisitos Previos
 * Java Development Kit (JDK) 11 o superior.
 * Android Studio o IntelliJ IDEA (con plugin KMP configurado).

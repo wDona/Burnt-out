@@ -79,11 +79,12 @@ jobs:
             ## 📦 Instalación
             Descarga el archivo correspondiente a tu plataforma:
 
-            | Plataforma | Extension |
+            | Plataforma | Instalacion |
             | --- | --- |
             | Windows | .msi |
             | Linux (Debian) | .deb |
             | Android | .apk |
+            | Arch | yay -S burnt-out |
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -129,3 +130,43 @@ jobs:
           files: release-artifacts/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
+      
+  deploy-aur:
+    needs: [build-unix, build-windows]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Calculate Version
+        id: vars
+        run: |
+          COUNT=$(git rev-list --count HEAD)
+          MAJOR_PART=$((COUNT / 100))
+          MINOR_PART=$(printf "%02d" $((COUNT % 100)))
+          echo "version=1.$MAJOR_PART.$MINOR_PART" >> $GITHUB_OUTPUT
+
+      - name: Update PKGBUILD version
+        run: |
+          sed -i "s/^pkgver=.*/pkgver=${{ steps.vars.outputs.version }}/" PKGBUILD
+          sed -i "s/^pkgrel=.*/pkgrel=1/" PKGBUILD
+
+      - name: Regenerate .SRCINFO
+        run: |
+          docker run --rm -v "$PWD:/pkg" archlinux:latest bash -c \
+            "pacman -Sy --noconfirm --needed base-devel && \
+             useradd -m builder && \
+             chown -R builder /pkg && \
+             su builder -c 'cd /pkg && makepkg --printsrcinfo > .SRCINFO'"
+
+      - name: Deploy to AUR
+        uses: KSXGitHub/github-actions-deploy-aur@v2.7.2
+        with:
+          pkgname: burnt-out
+          pkgbuild: ./PKGBUILD
+          commit_username: ${{ github.actor }}
+          commit_email: tu@email.com
+          ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
+          commit_message: "Update to ${{ steps.vars.outputs.version }}"
+          force_push: true
