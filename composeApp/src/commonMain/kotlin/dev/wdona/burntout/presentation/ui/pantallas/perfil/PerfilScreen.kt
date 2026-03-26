@@ -30,6 +30,8 @@ import dev.wdona.burntout.presentation.ui.components.template.ScaffoldBase
 import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.MiPerfilViewModelFactory
 import dev.wdona.burntout.presentation.viewmodel.viewmodels.PerfilViewModel
 import dev.wdona.burntout.shared.utils.SettingsManager
+import cafe.adriel.voyager.core.screen.ScreenKey
+import cafe.adriel.voyager.core.screen.uniqueScreenKey
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -40,6 +42,9 @@ import dev.wdona.burntout.presentation.ui.components.common.BateriaBurnout
 import dev.wdona.burntout.presentation.ui.components.common.FilaTextoPlaceholder
 
 class PerfilScreen(val factory: MiPerfilViewModelFactory, val ajustesFactory: AjustesViewModelFactory, val onVolver: (() -> Unit)? = null, var idUsuario: Long? = null) : Screen {
+
+    override val key: ScreenKey = uniqueScreenKey
+
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow

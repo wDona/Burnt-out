@@ -51,6 +51,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.core.screen.ScreenKey
+import cafe.adriel.voyager.core.screen.uniqueScreenKey
 import dev.wdona.burntout.presentation.ui.components.template.ScaffoldBase
 import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.FormularioViewModelFactory
 import dev.wdona.burntout.presentation.viewmodel.viewmodels.FormularioViewModel
@@ -60,6 +62,7 @@ import dev.wdona.burntout.shared.utils.SettingsManager
 import dev.wdona.burntout.shared.utils.getCurrentTimestampSeconds
 
 class PreguntaScreen(private val viewModelFactory: FormularioViewModelFactory, private val onVolver: (() -> Unit)? = null) : Screen {
+    override val key: ScreenKey = uniqueScreenKey
 
     @Composable
     override fun Content() {

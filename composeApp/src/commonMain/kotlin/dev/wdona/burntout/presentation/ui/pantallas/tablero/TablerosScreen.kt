@@ -15,6 +15,8 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.core.screen.ScreenKey
+import cafe.adriel.voyager.core.screen.uniqueScreenKey
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import dev.wdona.burntout.presentation.ui.components.tablero.CardTablero
@@ -28,6 +30,7 @@ class TablerosScreen(
     private val tableroFactory: TablerosViewModelFactory,
     private val tareasViewModelFactory: TareasViewModelFactory
 ) : Screen {
+    override val key: ScreenKey = uniqueScreenKey
 
     @Composable
     override fun Content() {

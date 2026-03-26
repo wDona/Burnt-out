@@ -26,11 +26,17 @@ import cafe.adriel.voyager.core.model.rememberScreenModel
 import androidx.compose.runtime.getValue
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Arrangement
+import cafe.adriel.voyager.core.screen.ScreenKey
+import cafe.adriel.voyager.core.screen.uniqueScreenKey
 import dev.wdona.burntout.presentation.ui.components.common.FilaTextoPlaceholder
 
 class EquipoScreen(val factory: MiEquipoViewModelFactory, val perfilFactory: MiPerfilViewModelFactory, val ajustesFactory: AjustesViewModelFactory, val onVolver: (() -> Unit)? = null) : Screen {
+    override val key: ScreenKey = uniqueScreenKey
+
     @Composable
     override fun Content() {
+
+
         val navigator = LocalNavigator.currentOrThrow // Para poder volver o ir a otra
 
         val viewModel = rememberScreenModel { factory.create() }

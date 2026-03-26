@@ -23,6 +23,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.core.screen.ScreenKey
+import cafe.adriel.voyager.core.screen.uniqueScreenKey
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.transitions.CrossfadeTransition
 import cafe.adriel.voyager.navigator.tab.*
@@ -44,6 +46,7 @@ class MainScreen(
     private val ajustesFactory: AjustesViewModelFactory,
     private val formularioFactory: FormularioViewModelFactory
 ) : Screen {
+    override val key: ScreenKey = uniqueScreenKey
 
     @Composable
     override fun Content() {

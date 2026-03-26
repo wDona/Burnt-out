@@ -26,6 +26,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.core.screen.ScreenKey
+import cafe.adriel.voyager.core.screen.uniqueScreenKey
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import dev.wdona.burntout.domain.model.TipoEstadoTarea
@@ -36,6 +38,8 @@ import dev.wdona.burntout.shared.domain.Tarea
 import dev.wdona.burntout.shared.utils.SettingsManager
 
 class TareaDetalleScreen(private val idTarea: Long, private val idTablero: Long, private val factory: TareasViewModelFactory) : Screen {
+    override val key: ScreenKey = uniqueScreenKey
+
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
