@@ -58,11 +58,11 @@ class EquipoRepositoryImpl(
     }
 
     override suspend fun crearEquipo(equipo: Equipo) {
-        val idGenerado = withContext(Dispatchers.IO) {
+        withContext(Dispatchers.IO) {
             try {
                 local.crearEquipo(equipo)
             } catch (e: Exception) {
-                -1L
+                println("Error local al crear equipo: ${e.message}")
             }
         }
 
@@ -71,71 +71,93 @@ class EquipoRepositoryImpl(
             try {
                 exito = remote.crearEquipo(equipo)
             } catch (e: Exception) {
-                // Servidor offline
+                println("Servidor offline al crear equipo: ${e.message}")
             }
 
             withContext(Dispatchers.IO) {
-                pendiente.insertOperacionPendiente(
-                    TipoAccion.CREACION.getNombreAccion(),
-                    Entity.EQUIPO.getNombreEntity(),
-                    if (exito) equipo.idEquipo else idGenerado,
-                    EquipoMapper.toJson(equipo),
-                    System.currentTimeMillis(),
-                    if (exito) 1L else 0L
-                )
+                try {
+                    pendiente.insertOperacionPendiente(
+                        TipoAccion.CREACION.getNombreAccion(),
+                        Entity.EQUIPO.getNombreEntity(),
+                        equipo.idEquipo,
+                        EquipoMapper.toJson(equipo),
+                        System.currentTimeMillis(),
+                        if (exito) 1L else 0L
+                    )
+                } catch (e: Exception) {
+                    println("Error al registrar operación pendiente: ${e.message}")
+                }
             }
         }
     }
 
     override suspend fun actualizarEquipo(equipo: Equipo) {
         withContext(Dispatchers.IO) {
-            local.actualizarEquipo(equipo)
+            try {
+                local.actualizarEquipo(equipo)
+            } catch (e: Exception) {
+                println("Error local al actualizar equipo: ${e.message}")
+            }
         }
 
         repositoryScope.launch {
             var exito = false
             try {
                 exito = remote.actualizarEquipo(equipo)
-            } catch (e: Exception) {}
+            } catch (e: Exception) {
+                println("Servidor offline al actualizar equipo: ${e.message}")
+            }
 
             withContext(Dispatchers.IO) {
-                pendiente.insertOperacionPendiente(
-                    TipoAccion.ACTUALIZACION.getNombreAccion(),
-                    Entity.EQUIPO.getNombreEntity(),
-                    equipo.idEquipo,
-                    EquipoMapper.toJson(equipo),
-                    System.currentTimeMillis(),
-                    if (exito) 1L else 0L
-                )
+                try {
+                    pendiente.insertOperacionPendiente(
+                        TipoAccion.ACTUALIZACION.getNombreAccion(),
+                        Entity.EQUIPO.getNombreEntity(),
+                        equipo.idEquipo,
+                        EquipoMapper.toJson(equipo),
+                        System.currentTimeMillis(),
+                        if (exito) 1L else 0L
+                    )
+                } catch (e: Exception) {
+                    println("Error al registrar operación pendiente: ${e.message}")
+                }
             }
         }
     }
 
     override suspend fun eliminarEquipo(idEquipo: Long) {
         withContext(Dispatchers.IO) {
-            local.eliminarEquipo(idEquipo)
+            try {
+                local.eliminarEquipo(idEquipo)
+            } catch (e: Exception) {
+                println("Error local al eliminar equipo: ${e.message}")
+            }
         }
 
         repositoryScope.launch {
             var exito = false
             try {
                 exito = remote.eliminarEquipo(idEquipo)
-            } catch (e: Exception) {}
+            } catch (e: Exception) {
+                println("Servidor offline al eliminar equipo: ${e.message}")
+            }
 
             withContext(Dispatchers.IO) {
-                pendiente.insertOperacionPendiente(
-                    TipoAccion.ELIMINACION.getNombreAccion(),
-                    Entity.EQUIPO.getNombreEntity(),
-                    idEquipo,
-                    "",
-                    System.currentTimeMillis(),
-                    if (exito) 1L else 0L
-                )
+                try {
+                    pendiente.insertOperacionPendiente(
+                        TipoAccion.ELIMINACION.getNombreAccion(),
+                        Entity.EQUIPO.getNombreEntity(),
+                        idEquipo,
+                        "",
+                        System.currentTimeMillis(),
+                        if (exito) 1L else 0L
+                    )
+                } catch (e: Exception) {
+                    println("Error al registrar operación pendiente: ${e.message}")
+                }
             }
         }
     }
-
-
 
     override suspend fun updatePuntuacion(idEquipo: Long, puntos: Long) {
         withContext(Dispatchers.IO) {

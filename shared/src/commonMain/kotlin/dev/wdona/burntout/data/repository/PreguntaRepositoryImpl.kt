@@ -116,7 +116,11 @@ class PreguntaRespuestaRepositoryImpl(
 
     override suspend fun actualizarPregunta(pregunta: Pregunta) {
         withContext(Dispatchers.IO) {
-             local.actualizarPregunta(pregunta)
+            try {
+                local.actualizarPregunta(pregunta)
+            } catch (e: Exception) {
+                println("Error local al actualizar pregunta: ${e.message}")
+            }
         }
         repositoryScope.launch {
             var exito = false
@@ -137,7 +141,11 @@ class PreguntaRespuestaRepositoryImpl(
 
     override suspend fun eliminarPregunta(idPregunta: Long) {
         withContext(Dispatchers.IO) {
-            local.eliminarPregunta(idPregunta)
+            try {
+                local.eliminarPregunta(idPregunta)
+            } catch (e: Exception) {
+                println("Error local al eliminar pregunta: ${e.message}")
+            }
         }
         repositoryScope.launch {
             var exito = false
@@ -158,7 +166,11 @@ class PreguntaRespuestaRepositoryImpl(
 
     override suspend fun responderPregunta(respuesta: Respuesta) {
         withContext(Dispatchers.IO) {
-            local.responderPregunta(respuesta)
+            try {
+                local.responderPregunta(respuesta)
+            } catch (e: Exception) {
+                println("Error local al responder pregunta: ${e.message}")
+            }
         }
         repositoryScope.launch {
             var exito = false

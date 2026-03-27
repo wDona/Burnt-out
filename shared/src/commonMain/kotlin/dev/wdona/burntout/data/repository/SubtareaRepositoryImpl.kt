@@ -1,64 +1,48 @@
 package dev.wdona.burntout.data.repository
 
+import dev.wdona.burntout.data.dao.SubtareaRepository
 import dev.wdona.burntout.data.datasource.local.OperacionPendienteLocalDataSource
-import dev.wdona.burntout.data.datasource.local.OrganizacionLocalDataSource
-import dev.wdona.burntout.data.datasource.mapper.OrganizacionMapper
-import dev.wdona.burntout.data.datasource.remote.OrganizacionRemoteDataSource
+import dev.wdona.burntout.data.datasource.local.SubtareaLocalDataSource
+import dev.wdona.burntout.data.datasource.mapper.SubtareaMapper
+import dev.wdona.burntout.data.datasource.remote.SubtareaRemoteDataSource
 import dev.wdona.burntout.domain.entity.Entity
 import dev.wdona.burntout.domain.model.TipoAccion
-import dev.wdona.burntout.domain.repository.OrganizacionRepository
-import dev.wdona.burntout.shared.domain.Organizacion
+import dev.wdona.burntout.shared.domain.Subtarea
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class OrganizacionRepositoryImpl(
-    private val local: OrganizacionLocalDataSource,
-    private val remote: OrganizacionRemoteDataSource,
+class SubtareaRepositoryImpl(
+    private val local: SubtareaLocalDataSource,
+    private val remote: SubtareaRemoteDataSource,
     private val pendiente: OperacionPendienteLocalDataSource
-) : OrganizacionRepository {
+) : SubtareaRepository {
 
     private val repositoryScope = CoroutineScope(Dispatchers.Default)
 
-    override suspend fun getOrganizacionById(idOrg: Long): Organizacion? = withContext(Dispatchers.IO) {
+    override suspend fun getSubtareasByTarea(idTarea: Long): List<Subtarea> = withContext(Dispatchers.IO) {
         repositoryScope.launch {
             try {
-                val org = remote.getOrganizacionById(idOrg)
-                if (org != null) local.insertOrUpdateOrganizacion(org)
+                val subtareasRemotas = remote.getSubtareasByTarea(idTarea)
+                subtareasRemotas.forEach { local.insertOrUpdateSubtarea(it) }
             } catch (e: Exception) {
-                println("Servidor offline (getOrganizacionById): ${e.message}")
+                println("Servidor offline (getSubtareasByTarea): ${e.message}")
             }
         }
         try {
-            local.getOrganizacionById(idOrg)
-        } catch (e: Exception) {
-            null
-        }
-    }
-
-    override suspend fun getAllOrganizaciones(): List<Organizacion> = withContext(Dispatchers.IO) {
-        repositoryScope.launch {
-            try {
-                val orgs = remote.getAllOrganizaciones()
-                orgs.forEach { local.insertOrUpdateOrganizacion(it) }
-            } catch (e: Exception) {
-                println("Servidor offline (getAllOrganizaciones): ${e.message}")
-            }
-        }
-        try {
-            local.getAllOrganizaciones()
+            local.getSubtareasByTarea(idTarea)
         } catch (e: Exception) {
             emptyList()
         }
     }
 
-    override suspend fun crearOrganizacion(organizacion: Organizacion) {
+    override suspend fun crearSubtarea(subtarea: Subtarea) {
         withContext(Dispatchers.IO) {
             try {
-                local.crearOrganizacion(organizacion)
+                local.crearSubtarea(subtarea)
             } catch (e: Exception) {
-                println("Error local al crear organización: ${e.message}")
+                println("Error local al crear subtarea: ${e.message}")
             }
         }
 
@@ -66,19 +50,19 @@ class OrganizacionRepositoryImpl(
             var exito = false
             var idRemoto: Long = -1
             try {
-                idRemoto = remote.crearOrganizacion(organizacion)
+                idRemoto = remote.crearSubtarea(subtarea)
                 exito = idRemoto != -1L
             } catch (e: Exception) {
-                println("Servidor offline al crear organización: ${e.message}")
+                println("Servidor offline al crear subtarea: ${e.message}")
             }
 
             withContext(Dispatchers.IO) {
                 try {
                     pendiente.insertOperacionPendiente(
                         TipoAccion.CREACION.getNombreAccion(),
-                        Entity.ORGANIZACION.getNombreEntity(),
+                        Entity.SUBTAREA.getNombreEntity(),
                         if (exito) idRemoto else 0L,
-                        OrganizacionMapper.toJson(organizacion),
+                        SubtareaMapper.toJson(subtarea),
                         System.currentTimeMillis(),
                         if (exito) 1L else 0L
                     )
@@ -89,30 +73,30 @@ class OrganizacionRepositoryImpl(
         }
     }
 
-    override suspend fun actualizarOrganizacion(organizacion: Organizacion) {
+    override suspend fun actualizarSubtarea(subtarea: Subtarea) {
         withContext(Dispatchers.IO) {
             try {
-                local.actualizarOrganizacion(organizacion)
+                local.actualizarSubtarea(subtarea)
             } catch (e: Exception) {
-                println("Error local al actualizar organización: ${e.message}")
+                println("Error local al actualizar subtarea: ${e.message}")
             }
         }
 
         repositoryScope.launch {
             var exito = false
             try {
-                exito = remote.actualizarOrganizacion(organizacion)
+                exito = remote.actualizarSubtarea(subtarea)
             } catch (e: Exception) {
-                println("Servidor offline al actualizar organización: ${e.message}")
+                println("Servidor offline al actualizar subtarea: ${e.message}")
             }
 
             withContext(Dispatchers.IO) {
                 try {
                     pendiente.insertOperacionPendiente(
                         TipoAccion.ACTUALIZACION.getNombreAccion(),
-                        Entity.ORGANIZACION.getNombreEntity(),
-                        organizacion.idOrganizacion,
-                        OrganizacionMapper.toJson(organizacion),
+                        Entity.SUBTAREA.getNombreEntity(),
+                        subtarea.idSubtarea,
+                        SubtareaMapper.toJson(subtarea),
                         System.currentTimeMillis(),
                         if (exito) 1L else 0L
                     )
@@ -123,29 +107,29 @@ class OrganizacionRepositoryImpl(
         }
     }
 
-    override suspend fun eliminarOrganizacion(idOrg: Long) {
+    override suspend fun eliminarSubtarea(idSubtarea: Long) {
         withContext(Dispatchers.IO) {
             try {
-                local.eliminarOrganizacion(idOrg)
+                local.eliminarSubtarea(idSubtarea)
             } catch (e: Exception) {
-                println("Error local al eliminar organización: ${e.message}")
+                println("Error local al eliminar subtarea: ${e.message}")
             }
         }
 
         repositoryScope.launch {
             var exito = false
             try {
-                exito = remote.eliminarOrganizacion(idOrg)
+                exito = remote.eliminarSubtarea(idSubtarea)
             } catch (e: Exception) {
-                println("Servidor offline al eliminar organización: ${e.message}")
+                println("Servidor offline al eliminar subtarea: ${e.message}")
             }
 
             withContext(Dispatchers.IO) {
                 try {
                     pendiente.insertOperacionPendiente(
                         TipoAccion.ELIMINACION.getNombreAccion(),
-                        Entity.ORGANIZACION.getNombreEntity(),
-                        idOrg,
+                        Entity.SUBTAREA.getNombreEntity(),
+                        idSubtarea,
                         "",
                         System.currentTimeMillis(),
                         if (exito) 1L else 0L

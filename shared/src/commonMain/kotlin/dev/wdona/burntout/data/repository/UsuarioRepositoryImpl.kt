@@ -23,7 +23,7 @@ class UsuarioRepositoryImpl(
     private val repositoryScope = CoroutineScope(Dispatchers.Default)
 
     override suspend fun getUserById(idUsuario: Long): Usuario = withContext(Dispatchers.IO) {
-        if (idUsuario < 0L) {
+        if (idUsuario == Long.MIN_VALUE) {
             return@withContext local.getUserById(idUsuario)
         }
         try {
@@ -67,6 +67,8 @@ class UsuarioRepositoryImpl(
             }
         }
 
+        if (usuario.idUsuario == Long.MIN_VALUE) return
+
         repositoryScope.launch {
             var exito = false
             try {
@@ -101,6 +103,8 @@ class UsuarioRepositoryImpl(
             }
         }
 
+        if (usuario.idUsuario == Long.MIN_VALUE) return
+
         repositoryScope.launch {
             var exito = false
             try {
@@ -134,6 +138,8 @@ class UsuarioRepositoryImpl(
                 println("Error local al eliminar usuario: ${e.message}")
             }
         }
+
+        if (idUsuario == Long.MIN_VALUE) return
 
         repositoryScope.launch {
             var exito = false
@@ -172,7 +178,7 @@ class UsuarioRepositoryImpl(
 
     override suspend fun login(username: String, contrasena: String): Usuario = withContext(Dispatchers.IO) {
         val usuario = remote.login(username, contrasena)
-        local.crearUsuario(usuario)
+        local.crearUsuario(usuario) // FIXME?
         usuario
     }
 }
