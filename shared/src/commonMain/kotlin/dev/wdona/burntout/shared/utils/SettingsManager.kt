@@ -18,6 +18,7 @@ object SettingsManager {
     private const val KEY_RIESGO_D_USUARIO_ACTUAL = "riesgo_d_usuario_actual"
     private const val KEY_RIESGO_RP_USUARIO_ACTUAL = "riesgo_rp_usuario_actual"
     private const val KEY_ULTIMA_FECHA_CUESTIONARIO = "ultima_fecha_cuestionario"
+    private const val KEY_SINCRONIZADO_EN_ESTA_APERTURA = "sincronizado_en_esta_apertura"
 
     private val _primerCuestionarioHechoFlow = MutableStateFlow(getPrimerCuestionarioHecho())
     val primerCuestionarioHechoFlow = _primerCuestionarioHechoFlow.asStateFlow()
@@ -25,11 +26,15 @@ object SettingsManager {
     private val _cuestionarioHoyHechoFlow = MutableStateFlow(esCuestionarioHoyHecho())
     val cuestionarioHoyHechoFlow = _cuestionarioHoyHechoFlow.asStateFlow()
 
+    private val _sincronizadoEnEstaAperturaFlow = MutableStateFlow(getSincronizadoEnEstaApertura())
+    val sincronizadoEnEstaAperturaFlow = _sincronizadoEnEstaAperturaFlow.asStateFlow()
+
     fun clearAll() {
         settings.clear()
 
         _primerCuestionarioHechoFlow.value = false
         _cuestionarioHoyHechoFlow.value = false
+
     }
 
     fun setIdUsuarioActual(id: Long?) {
@@ -129,5 +134,14 @@ object SettingsManager {
         val ultimaFecha = settings.getString(KEY_ULTIMA_FECHA_CUESTIONARIO, "")
         val fechaHoy = getCurrentDateString()
         return ultimaFecha == fechaHoy
+    }
+
+    fun getSincronizadoEnEstaApertura(): Boolean {
+        return settings.getBoolean(KEY_SINCRONIZADO_EN_ESTA_APERTURA, false)
+    }
+
+    fun setSincronizadoEnEstaApertura(sincronizado: Boolean) {
+        settings.putBoolean(KEY_SINCRONIZADO_EN_ESTA_APERTURA, sincronizado)
+        _sincronizadoEnEstaAperturaFlow.value = sincronizado
     }
 }

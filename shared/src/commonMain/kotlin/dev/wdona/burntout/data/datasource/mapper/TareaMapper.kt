@@ -1,11 +1,10 @@
 package dev.wdona.burntout.data.datasource.mapper
 
 import app.cash.sqldelight.Query
-import dev.wdona.burntout.domain.json.TareaJsonFields
 import dev.wdona.burntout.shared.domain.Tarea
 import dev.wdona.burntout.shared.db.TareaEntity
-import kotlinx.serialization.json.buildJsonObject
-import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 
 class TareaMapper {
     companion object {
@@ -53,15 +52,7 @@ class TareaMapper {
         }
 
         fun toJson(tarea: Tarea): String {
-            return buildJsonObject {
-                put(TareaJsonFields.ID.nombreCampo, JsonPrimitive(tarea.idTarea))
-                put(TareaJsonFields.NOMBRE.nombreCampo, JsonPrimitive(tarea.titulo))
-                put(TareaJsonFields.DESCRIPCION.nombreCampo, JsonPrimitive(tarea.descripcion ?: ""))
-                put(TareaJsonFields.ESTADO.nombreCampo, JsonPrimitive(tarea.estado))
-                put(TareaJsonFields.ID_TABLERO.nombreCampo, JsonPrimitive(tarea.idTableroPerteneciente))
-                put(TareaJsonFields.ID_USUARIO_ASIGNADO.nombreCampo, JsonPrimitive(tarea.idUsuarioAsignado))
-                put(TareaJsonFields.ID_SUBTAREAS.nombreCampo, JsonPrimitive(tarea.idSubtareas.toString()))
-            }.toString()
+            return Json.encodeToString(tarea)
         }
     }
 }

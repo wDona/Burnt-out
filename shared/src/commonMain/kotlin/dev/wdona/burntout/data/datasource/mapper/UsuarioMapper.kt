@@ -1,10 +1,9 @@
 package dev.wdona.burntout.data.datasource.mapper
 
-import dev.wdona.burntout.domain.json.UsuarioJsonFields
 import dev.wdona.burntout.shared.domain.Usuario
 import dev.wdona.burntout.shared.db.UsuarioEntity
-import kotlinx.serialization.json.JsonPrimitive
-import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 
 object UsuarioMapper {
     fun toDomain(entity: UsuarioEntity, idEquipo: Long): Usuario {
@@ -33,14 +32,6 @@ object UsuarioMapper {
     }
 
     fun toJson(usuario: Usuario): String {
-        return buildJsonObject {
-            put(UsuarioJsonFields.ID.nombreCampo, JsonPrimitive(usuario.idUsuario))
-            put(UsuarioJsonFields.USERNAME.nombreCampo, JsonPrimitive(usuario.username))
-            put(UsuarioJsonFields.CONTRASENA.nombreCampo, JsonPrimitive(usuario.password))
-            put(UsuarioJsonFields.NOMBRE.nombreCampo, JsonPrimitive(usuario.nombre))
-            usuario.riesgoBurnout?.let { put(UsuarioJsonFields.RIESGO_BURNOUT.nombreCampo, JsonPrimitive(it)) }
-            put(UsuarioJsonFields.DESCRIPCION.nombreCampo, JsonPrimitive(usuario.descripcion ?: ""))
-            put(UsuarioJsonFields.ID_ORGANIZACION.nombreCampo, JsonPrimitive(usuario.idOrganizacion))
-        }.toString()
+        return Json.encodeToString(usuario)
     }
 }

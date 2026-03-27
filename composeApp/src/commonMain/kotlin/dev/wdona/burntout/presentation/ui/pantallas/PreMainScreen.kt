@@ -24,8 +24,10 @@ import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.FormularioVi
 import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.LeaderboardViewModelFactory
 import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.MiEquipoViewModelFactory
 import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.MiPerfilViewModelFactory
+import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.OperacionesPendientesViewModelFactory
 import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.TablerosViewModelFactory
 import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.TareasViewModelFactory
+import dev.wdona.burntout.shared.utils.SettingsManager
 
 class PreMainScreen(
     private val tareaFactory: TareasViewModelFactory,
@@ -34,7 +36,8 @@ class PreMainScreen(
     private val tableroFactory: TablerosViewModelFactory,
     private val leaderboardFactory: LeaderboardViewModelFactory,
     private val ajustesFactory: AjustesViewModelFactory,
-    private val formularioFactory: FormularioViewModelFactory
+    private val formularioFactory: FormularioViewModelFactory,
+    private val operacionesPendientesFactory: OperacionesPendientesViewModelFactory
 ) : Screen {
     override val key: ScreenKey = uniqueScreenKey
 
@@ -44,6 +47,12 @@ class PreMainScreen(
 
         val settingsViewModel = rememberScreenModel { ajustesFactory.create() }
         val uiState by settingsViewModel.ajustesUiState.collectAsStateWithLifecycle()
+
+        val syncViewModel = rememberScreenModel { operacionesPendientesFactory.create() }
+
+        LaunchedEffect(Unit) {
+            syncViewModel.sincronizarAlIniciar()
+        }
 
         Scaffold { paddingValues ->
             Box(

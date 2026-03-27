@@ -53,6 +53,7 @@ fun SettingsContent(viewModel: AjustesViewModel, onVolver: () -> Unit) {
             FilaAjusteInfo("Organizacion de usuario: " + ajustes.idOrganizacion)
             FilaAjusteInfo("Equipo de usuario: " + ajustes.idEquipo)
             FilaAjusteInfo("Version de app: " + ajustes.versionApp)
+            FilaAjusteInfo("Sincronizado en esta apertura: " + if (ajustes.syncOk) "Sí" else "No")
 
             TextButton(
                 onClick = { viewModel.resetSettings() }

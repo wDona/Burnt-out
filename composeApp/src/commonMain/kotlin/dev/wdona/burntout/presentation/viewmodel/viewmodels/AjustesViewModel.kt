@@ -23,15 +23,17 @@ data class AjustesUiState(
     val nombreUsuario: String = "Offline",
     val versionApp: String = AppInfo.version,
     // w.x.yz -> w. major version, x. centena de commits, yz. -> decena/ud de commit
-    val hoyHecho: Boolean = false
+    val hoyHecho: Boolean = false,
+    val syncOk: Boolean = true
 )
 
 class AjustesViewModel(private val repository: AjusteRepository) : ScreenModel {
     
     val ajustesUiState = combine(
         SettingsManager.primerCuestionarioHechoFlow,
-        SettingsManager.cuestionarioHoyHechoFlow
-    ) { primerCuestionario, hoyHecho ->
+        SettingsManager.cuestionarioHoyHechoFlow,
+        SettingsManager.sincronizadoEnEstaAperturaFlow
+    ) { primerCuestionario, hoyHecho, sincronizado ->
         AjustesUiState(
             primerCuestionarioHecho = primerCuestionario,
             hoyHecho = hoyHecho,
@@ -40,6 +42,7 @@ class AjustesViewModel(private val repository: AjusteRepository) : ScreenModel {
             idOrganizacion = SettingsManager.getIdOrganizacionActual(),
             idEquipo = SettingsManager.getIdEquipoActual(),
             nombreUsuario = SettingsManager.getNombreUsuario(),
+            syncOk = sincronizado
         )
     }.stateIn(
         scope = screenModelScope,
@@ -52,6 +55,7 @@ class AjustesViewModel(private val repository: AjusteRepository) : ScreenModel {
             idOrganizacion = SettingsManager.getIdOrganizacionActual(),
             idEquipo = SettingsManager.getIdEquipoActual(),
             nombreUsuario = SettingsManager.getNombreUsuario(),
+            syncOk = SettingsManager.getSincronizadoEnEstaApertura()
         )
     )
 

@@ -90,7 +90,8 @@ fun main() = application {
                         tablerosViewModelFactory = TablerosViewModelFactory(),
                         leaderboardViewModelFactory = LeaderboardViewModelFactory(),
                         formularioViewModelFactory = FormularioViewModelFactory(),
-                        ajustesViewModelFactory = AjustesViewModelFactory()
+                        ajustesViewModelFactory = AjustesViewModelFactory(),
+                        operacionesPendientesViewModelFactory = OperacionesPendientesViewModelFactory()
                     )
                 } else {
                     Box(
