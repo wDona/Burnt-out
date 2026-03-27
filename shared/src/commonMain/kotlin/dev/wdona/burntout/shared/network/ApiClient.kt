@@ -11,7 +11,6 @@ import io.ktor.http.contentType
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 
-
 object ApiClient {
     val client = HttpClient {
         install(ContentNegotiation) {
@@ -20,6 +19,8 @@ object ApiClient {
                 useAlternativeNames = false
             })
         }
+
+        expectSuccess = true
 
         install(HttpTimeout) {
             requestTimeoutMillis = 5000 // FIXME

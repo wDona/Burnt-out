@@ -23,6 +23,9 @@ class UsuarioRepositoryImpl(
     private val repositoryScope = CoroutineScope(Dispatchers.Default)
 
     override suspend fun getUserById(idUsuario: Long): Usuario = withContext(Dispatchers.IO) {
+        if (idUsuario < 0L) {
+            return@withContext local.getUserById(idUsuario)
+        }
         try {
             val usuario = remote.getUserById(idUsuario)
             if (usuario != null) {

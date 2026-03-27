@@ -1,0 +1,70 @@
+package dev.wdona.burntout.api.latest
+import dev.wdona.burntout.db.DatabaseFactory.dbQuery
+import dev.wdona.burntout.db.tables.AjustesTable
+import dev.wdona.burntout.domain.model.Ajuste
+import io.ktor.http.HttpStatusCode
+import io.ktor.server.request.receive
+import io.ktor.server.response.respond
+import io.ktor.server.routing.*
+import org.jetbrains.exposed.sql.*
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.and
+fun Route.ajustesRoutes() {
+    route("/ajustes/{idUsuario}") {
+        get {
+            val idUsuario = call.parameters["idUsuario"]?.toLongOrNull()
+                ?: return@get call.respond(HttpStatusCode.BadRequest)
+            val ajustes = dbQuery {
+                AjustesTable .selectAll().where { AjustesTable.idUsuario eq idUsuario }.map {
+                    Ajuste(
+                        idAjuste = it[AjustesTable.id],
+                        nombre = it[AjustesTable.nombre],
+                        valorAjuste = it[AjustesTable.valorAjuste]
+                    )
+                }
+            }
+            call.respond(ajustes)
+        }
+        post {
+            val idUsuario = call.parameters["idUsuario"]?.toLongOrNull()
+                ?: return@post call.respond(HttpStatusCode.BadRequest)
+            val ajuste = call.receive<Ajuste>()
+            val nuevoId = dbQuery {
+                AjustesTable.insert {
+                    it[AjustesTable.idUsuario] = idUsuario
+                    it[nombre] = ajuste.nombre
+                    it[valorAjuste] = ajuste.valorAjuste
+                }[AjustesTable.id]
+            }
+            call.respond(HttpStatusCode.Created, Ajuste(nuevoId, ajuste.nombre, ajuste.valorAjuste))
+        }
+        route("/{id}") {
+            put {
+                val idUsuario = call.parameters["idUsuario"]?.toLongOrNull()
+                    ?: return@put call.respond(HttpStatusCode.BadRequest)
+                val id = call.parameters["id"]?.toLongOrNull()
+                    ?: return@put call.respond(HttpStatusCode.BadRequest)
+                val ajuste = call.receive<Ajuste>()
+                val updatedCount = dbQuery {
+                    AjustesTable.update({ (AjustesTable.id eq id) and (AjustesTable.idUsuario eq idUsuario) }) {
+                        it[nombre] = ajuste.nombre
+                        it[valorAjuste] = ajuste.valorAjuste
+                    }
+                }
+                if (updatedCount == 0) return@put call.respond(HttpStatusCode.NotFound)
+                call.respond(Ajuste(id, ajuste.nombre, ajuste.valorAjuste))
+            }
+            delete {
+                val idUsuario = call.parameters["idUsuario"]?.toLongOrNull()
+                    ?: return@delete call.respond(HttpStatusCode.BadRequest)
+                val id = call.parameters["id"]?.toLongOrNull()
+                    ?: return@delete call.respond(HttpStatusCode.BadRequest)
+                val deletedCount = dbQuery {
+                    AjustesTable.deleteWhere { (AjustesTable.id eq id) and (AjustesTable.idUsuario eq idUsuario) }
+                }
+                if (deletedCount == 0) return@delete call.respond(HttpStatusCode.NotFound)
+                call.respond(HttpStatusCode.NoContent)
+            }
+        }
+    }
+}

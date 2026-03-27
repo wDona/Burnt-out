@@ -1,19 +1,20 @@
 package dev.wdona.burntout
 
-import dev.wdona.burntout.latest.ajustesRoutes
-import dev.wdona.burntout.latest.equiposRoutes
-import dev.wdona.burntout.latest.organizacionesRoutes
-import dev.wdona.burntout.latest.preguntasRespuestasRoutes
-import dev.wdona.burntout.latest.subtareasRoutes
-import dev.wdona.burntout.latest.tablerosRoutes
-import dev.wdona.burntout.latest.tareasRoutes
-import dev.wdona.burntout.latest.usuariosRoutes
+import dev.wdona.burntout.api.latest.ajustesRoutes
+import dev.wdona.burntout.api.latest.equiposRoutes
+import dev.wdona.burntout.api.latest.organizacionesRoutes
+import dev.wdona.burntout.api.latest.preguntasRespuestasRoutes
+import dev.wdona.burntout.api.latest.subtareasRoutes
+import dev.wdona.burntout.api.latest.tablerosRoutes
+import dev.wdona.burntout.api.latest.tareasRoutes
+import dev.wdona.burntout.api.latest.usuariosRoutes
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.routing.*
+import dev.wdona.burntout.db.DatabaseFactory
 
 fun main() {
     embeddedServer(
@@ -29,7 +30,7 @@ fun Application.module() {
         json()
     }
 
-    // TODO: USAR Exposed (ORM de jetbrains) para db en lugar de sqdelight
+    DatabaseFactory.init()
 
     routing {
         // v1
