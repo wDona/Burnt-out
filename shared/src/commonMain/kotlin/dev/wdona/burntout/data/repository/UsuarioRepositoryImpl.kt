@@ -11,6 +11,7 @@ import dev.wdona.burntout.shared.domain.Usuario
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -69,27 +70,24 @@ class UsuarioRepositoryImpl(
 
         if (usuario.idUsuario == Long.MIN_VALUE) return
 
-        repositoryScope.launch {
+        withContext(NonCancellable + Dispatchers.IO) {
             var exito = false
             try {
                 exito = remote.crearUsuario(usuario)
             } catch (e: Exception) {
                 println("Servidor offline al crear usuario: ${e.message}")
             }
-
-            withContext(Dispatchers.IO) {
-                try {
-                    pendiente.insertOperacionPendiente(
-                        TipoAccion.CREACION.getNombreAccion(),
-                        Entity.USUARIO.getNombreEntity(),
-                        usuario.idUsuario,
-                        UsuarioMapper.toJson(usuario),
-                        System.currentTimeMillis(),
-                        if (exito) 1L else 0L
-                    )
-                } catch (e: Exception) {
-                    println("Error al registrar operación pendiente: ${e.message}")
-                }
+            try {
+                pendiente.insertOperacionPendiente(
+                    TipoAccion.CREACION.getNombreAccion(),
+                    Entity.USUARIO.getNombreEntity(),
+                    usuario.idUsuario,
+                    UsuarioMapper.toJson(usuario),
+                    System.currentTimeMillis(),
+                    if (exito) 1L else 0L
+                )
+            } catch (e: Exception) {
+                println("Error al registrar operación pendiente: ${e.message}")
             }
         }
     }
@@ -105,27 +103,24 @@ class UsuarioRepositoryImpl(
 
         if (usuario.idUsuario == Long.MIN_VALUE) return
 
-        repositoryScope.launch {
+        withContext(NonCancellable + Dispatchers.IO) {
             var exito = false
             try {
                 exito = remote.actualizarUsuario(usuario)
             } catch (e: Exception) {
                 println("Servidor offline al actualizar usuario: ${e.message}")
             }
-
-            withContext(Dispatchers.IO) {
-                try {
-                    pendiente.insertOperacionPendiente(
-                        TipoAccion.ACTUALIZACION.getNombreAccion(),
-                        Entity.USUARIO.getNombreEntity(),
-                        usuario.idUsuario,
-                        UsuarioMapper.toJson(usuario),
-                        System.currentTimeMillis(),
-                        if (exito) 1L else 0L
-                    )
-                } catch (e: Exception) {
-                    println("Error al registrar operación pendiente: ${e.message}")
-                }
+            try {
+                pendiente.insertOperacionPendiente(
+                    TipoAccion.ACTUALIZACION.getNombreAccion(),
+                    Entity.USUARIO.getNombreEntity(),
+                    usuario.idUsuario,
+                    UsuarioMapper.toJson(usuario),
+                    System.currentTimeMillis(),
+                    if (exito) 1L else 0L
+                )
+            } catch (e: Exception) {
+                println("Error al registrar operación pendiente: ${e.message}")
             }
         }
     }
@@ -141,27 +136,24 @@ class UsuarioRepositoryImpl(
 
         if (idUsuario == Long.MIN_VALUE) return
 
-        repositoryScope.launch {
+        withContext(NonCancellable + Dispatchers.IO) {
             var exito = false
             try {
                 exito = remote.eliminarUsuario(idUsuario)
             } catch (e: Exception) {
                 println("Servidor offline al eliminar usuario: ${e.message}")
             }
-
-            withContext(Dispatchers.IO) {
-                try {
-                    pendiente.insertOperacionPendiente(
-                        TipoAccion.ELIMINACION.getNombreAccion(),
-                        Entity.USUARIO.getNombreEntity(),
-                        idUsuario,
-                        "",
-                        System.currentTimeMillis(),
-                        if (exito) 1L else 0L
-                    )
-                } catch (e: Exception) {
-                    println("Error al registrar operación pendiente: ${e.message}")
-                }
+            try {
+                pendiente.insertOperacionPendiente(
+                    TipoAccion.ELIMINACION.getNombreAccion(),
+                    Entity.USUARIO.getNombreEntity(),
+                    idUsuario,
+                    "",
+                    System.currentTimeMillis(),
+                    if (exito) 1L else 0L
+                )
+            } catch (e: Exception) {
+                println("Error al registrar operación pendiente: ${e.message}")
             }
         }
     }

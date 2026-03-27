@@ -51,16 +51,16 @@ fun Application.module() {
             usuariosRoutes()
         }
 
-        // Latest
-        route(API_PATH) {
-            ajustesRoutes()
-            equiposRoutes()
-            organizacionesRoutes()
-            preguntasRespuestasRoutes()
-            subtareasRoutes()
-            tablerosRoutes()
-            tareasRoutes()
-            usuariosRoutes()
-        }
+//        // Latest
+//        route(API_PATH) {
+//            ajustesRoutes()
+//            equiposRoutes()
+//            organizacionesRoutes()
+//            preguntasRespuestasRoutes()
+//            subtareasRoutes()
+//            tablerosRoutes()
+//            tareasRoutes()
+//            usuariosRoutes()
+//        }
     }
 }

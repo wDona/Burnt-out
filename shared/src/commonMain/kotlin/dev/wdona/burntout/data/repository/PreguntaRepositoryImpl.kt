@@ -12,6 +12,7 @@ import dev.wdona.burntout.shared.domain.Pregunta
 import dev.wdona.burntout.domain.model.Respuesta
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -27,7 +28,7 @@ class PreguntaRespuestaRepositoryImpl(
         repositoryScope.launch {
             try {
                 val remoteList = remote.getPreguntasByOrg(idOrg)
-                remoteList.forEach { 
+                remoteList.forEach {
                      local.upsertPregunta(it)
                 }
             } catch (e: Exception) {
@@ -94,7 +95,7 @@ class PreguntaRespuestaRepositoryImpl(
                 println("Error local: ${e.message}")
             }
         }
-        repositoryScope.launch {
+        withContext(NonCancellable + Dispatchers.IO) {
             var exito = false
             var idRemoto: Long = -1
             try {
@@ -103,11 +104,10 @@ class PreguntaRespuestaRepositoryImpl(
             } catch (e: Exception) {
                 println("Servidor offline: ${e.message}")
             }
-            
             savePendingOp(
-                TipoAccion.CREACION, 
+                TipoAccion.CREACION,
                 Entity.PREGUNTA,
-                if(exito) idRemoto else 0L,
+                if (exito) idRemoto else 0L,
                 PreguntaMapper.toJson(pregunta),
                 exito
             )
@@ -122,7 +122,7 @@ class PreguntaRespuestaRepositoryImpl(
                 println("Error local al actualizar pregunta: ${e.message}")
             }
         }
-        repositoryScope.launch {
+        withContext(NonCancellable + Dispatchers.IO) {
             var exito = false
             try {
                 exito = remote.actualizarPregunta(pregunta)
@@ -147,12 +147,12 @@ class PreguntaRespuestaRepositoryImpl(
                 println("Error local al eliminar pregunta: ${e.message}")
             }
         }
-        repositoryScope.launch {
+        withContext(NonCancellable + Dispatchers.IO) {
             var exito = false
             try {
                 exito = remote.eliminarPregunta(idPregunta)
             } catch (e: Exception) {
-                 println("Servidor offline: ${e.message}")
+                println("Servidor offline: ${e.message}")
             }
             savePendingOp(
                 TipoAccion.ELIMINACION,
@@ -172,13 +172,13 @@ class PreguntaRespuestaRepositoryImpl(
                 println("Error local al responder pregunta: ${e.message}")
             }
         }
-        repositoryScope.launch {
+        withContext(NonCancellable + Dispatchers.IO) {
             var exito = false
             try {
                 remote.responderPregunta(respuesta)
                 exito = true
             } catch (e: Exception) {
-                 println("Servidor offline: ${e.message}")
+                println("Servidor offline: ${e.message}")
             }
             savePendingOp(
                 TipoAccion.CREACION,
@@ -189,7 +189,7 @@ class PreguntaRespuestaRepositoryImpl(
             )
         }
     }
-    
+
     private suspend fun savePendingOp(tipo: TipoAccion, entity: Entity, id: Long, json: String, success: Boolean) {
         withContext(Dispatchers.IO) {
              pendiente.insertOperacionPendiente(

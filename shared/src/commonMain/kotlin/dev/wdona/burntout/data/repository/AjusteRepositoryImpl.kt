@@ -12,6 +12,7 @@ import dev.wdona.burntout.data.datasource.mapper.AjusteMapper
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -32,7 +33,7 @@ class AjusteRepositoryImpl(
             }
         }
 
-        repositoryScope.launch {
+        withContext(NonCancellable + Dispatchers.IO) {
             var exito = false
             try {
                 remoteDataSource.modificarAjuste(ajuste)
@@ -40,20 +41,17 @@ class AjusteRepositoryImpl(
             } catch (e: Exception) {
                 println("Servidor offline al modificar ajuste: ${e.message}")
             }
-
-            withContext(Dispatchers.IO) {
-                try {
-                    pendienteDataSource.insertOperacionPendiente(
-                        TipoAccion.ACTUALIZACION.getNombreAccion(),
-                        Entity.AJUSTE.getNombreEntity(),
-                        ajuste.idAjuste,
-                        AjusteMapper.toJson(ajuste),
-                        System.currentTimeMillis(),
-                        if (exito) 1L else 0L
-                    )
-                } catch (e: Exception) {
-                    println("Error al registrar operación pendiente: ${e.message}")
-                }
+            try {
+                pendienteDataSource.insertOperacionPendiente(
+                    TipoAccion.ACTUALIZACION.getNombreAccion(),
+                    Entity.AJUSTE.getNombreEntity(),
+                    ajuste.idAjuste,
+                    AjusteMapper.toJson(ajuste),
+                    System.currentTimeMillis(),
+                    if (exito) 1L else 0L
+                )
+            } catch (e: Exception) {
+                println("Error al registrar operación pendiente: ${e.message}")
             }
         }
     }
@@ -86,7 +84,7 @@ class AjusteRepositoryImpl(
         if (idUsuario == Long.MIN_VALUE) {
             return@withContext localDataSource.getAjusteByIdYUsuario(idAjuste, idUsuario)
         }
-        
+
         repositoryScope.launch {
             try {
                 val ajusteRemoto = remoteDataSource.getAjusteByIdYUsuario(idAjuste, idUsuario)
@@ -95,7 +93,7 @@ class AjusteRepositoryImpl(
                 println("Servidor offline (getAjusteByIdYUsuario): ${e.message}")
             }
         }
-        
+
         localDataSource.getAjusteByIdYUsuario(idAjuste, idUsuario)
     }
 

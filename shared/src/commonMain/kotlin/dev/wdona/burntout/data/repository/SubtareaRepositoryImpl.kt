@@ -10,6 +10,7 @@ import dev.wdona.burntout.domain.model.TipoAccion
 import dev.wdona.burntout.shared.domain.Subtarea
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -46,7 +47,7 @@ class SubtareaRepositoryImpl(
             }
         }
 
-        repositoryScope.launch {
+        withContext(NonCancellable + Dispatchers.IO) {
             var exito = false
             var idRemoto: Long = -1
             try {
@@ -55,20 +56,17 @@ class SubtareaRepositoryImpl(
             } catch (e: Exception) {
                 println("Servidor offline al crear subtarea: ${e.message}")
             }
-
-            withContext(Dispatchers.IO) {
-                try {
-                    pendiente.insertOperacionPendiente(
-                        TipoAccion.CREACION.getNombreAccion(),
-                        Entity.SUBTAREA.getNombreEntity(),
-                        if (exito) idRemoto else 0L,
-                        SubtareaMapper.toJson(subtarea),
-                        System.currentTimeMillis(),
-                        if (exito) 1L else 0L
-                    )
-                } catch (e: Exception) {
-                    println("Error al registrar operación pendiente: ${e.message}")
-                }
+            try {
+                pendiente.insertOperacionPendiente(
+                    TipoAccion.CREACION.getNombreAccion(),
+                    Entity.SUBTAREA.getNombreEntity(),
+                    if (exito) idRemoto else 0L,
+                    SubtareaMapper.toJson(subtarea),
+                    System.currentTimeMillis(),
+                    if (exito) 1L else 0L
+                )
+            } catch (e: Exception) {
+                println("Error al registrar operación pendiente: ${e.message}")
             }
         }
     }
@@ -82,27 +80,24 @@ class SubtareaRepositoryImpl(
             }
         }
 
-        repositoryScope.launch {
+        withContext(NonCancellable + Dispatchers.IO) {
             var exito = false
             try {
                 exito = remote.actualizarSubtarea(subtarea)
             } catch (e: Exception) {
                 println("Servidor offline al actualizar subtarea: ${e.message}")
             }
-
-            withContext(Dispatchers.IO) {
-                try {
-                    pendiente.insertOperacionPendiente(
-                        TipoAccion.ACTUALIZACION.getNombreAccion(),
-                        Entity.SUBTAREA.getNombreEntity(),
-                        subtarea.idSubtarea,
-                        SubtareaMapper.toJson(subtarea),
-                        System.currentTimeMillis(),
-                        if (exito) 1L else 0L
-                    )
-                } catch (e: Exception) {
-                    println("Error al registrar operación pendiente: ${e.message}")
-                }
+            try {
+                pendiente.insertOperacionPendiente(
+                    TipoAccion.ACTUALIZACION.getNombreAccion(),
+                    Entity.SUBTAREA.getNombreEntity(),
+                    subtarea.idSubtarea,
+                    SubtareaMapper.toJson(subtarea),
+                    System.currentTimeMillis(),
+                    if (exito) 1L else 0L
+                )
+            } catch (e: Exception) {
+                println("Error al registrar operación pendiente: ${e.message}")
             }
         }
     }
@@ -116,27 +111,24 @@ class SubtareaRepositoryImpl(
             }
         }
 
-        repositoryScope.launch {
+        withContext(NonCancellable + Dispatchers.IO) {
             var exito = false
             try {
                 exito = remote.eliminarSubtarea(idSubtarea)
             } catch (e: Exception) {
                 println("Servidor offline al eliminar subtarea: ${e.message}")
             }
-
-            withContext(Dispatchers.IO) {
-                try {
-                    pendiente.insertOperacionPendiente(
-                        TipoAccion.ELIMINACION.getNombreAccion(),
-                        Entity.SUBTAREA.getNombreEntity(),
-                        idSubtarea,
-                        "",
-                        System.currentTimeMillis(),
-                        if (exito) 1L else 0L
-                    )
-                } catch (e: Exception) {
-                    println("Error al registrar operación pendiente: ${e.message}")
-                }
+            try {
+                pendiente.insertOperacionPendiente(
+                    TipoAccion.ELIMINACION.getNombreAccion(),
+                    Entity.SUBTAREA.getNombreEntity(),
+                    idSubtarea,
+                    "",
+                    System.currentTimeMillis(),
+                    if (exito) 1L else 0L
+                )
+            } catch (e: Exception) {
+                println("Error al registrar operación pendiente: ${e.message}")
             }
         }
     }

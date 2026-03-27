@@ -10,6 +10,7 @@ import dev.wdona.burntout.domain.repository.OrganizacionRepository
 import dev.wdona.burntout.shared.domain.Organizacion
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -62,7 +63,7 @@ class OrganizacionRepositoryImpl(
             }
         }
 
-        repositoryScope.launch {
+        withContext(NonCancellable + Dispatchers.IO) {
             var exito = false
             var idRemoto: Long = -1
             try {
@@ -71,20 +72,17 @@ class OrganizacionRepositoryImpl(
             } catch (e: Exception) {
                 println("Servidor offline al crear organización: ${e.message}")
             }
-
-            withContext(Dispatchers.IO) {
-                try {
-                    pendiente.insertOperacionPendiente(
-                        TipoAccion.CREACION.getNombreAccion(),
-                        Entity.ORGANIZACION.getNombreEntity(),
-                        if (exito) idRemoto else 0L,
-                        OrganizacionMapper.toJson(organizacion),
-                        System.currentTimeMillis(),
-                        if (exito) 1L else 0L
-                    )
-                } catch (e: Exception) {
-                    println("Error al registrar operación pendiente: ${e.message}")
-                }
+            try {
+                pendiente.insertOperacionPendiente(
+                    TipoAccion.CREACION.getNombreAccion(),
+                    Entity.ORGANIZACION.getNombreEntity(),
+                    if (exito) idRemoto else 0L,
+                    OrganizacionMapper.toJson(organizacion),
+                    System.currentTimeMillis(),
+                    if (exito) 1L else 0L
+                )
+            } catch (e: Exception) {
+                println("Error al registrar operación pendiente: ${e.message}")
             }
         }
     }
@@ -98,27 +96,24 @@ class OrganizacionRepositoryImpl(
             }
         }
 
-        repositoryScope.launch {
+        withContext(NonCancellable + Dispatchers.IO) {
             var exito = false
             try {
                 exito = remote.actualizarOrganizacion(organizacion)
             } catch (e: Exception) {
                 println("Servidor offline al actualizar organización: ${e.message}")
             }
-
-            withContext(Dispatchers.IO) {
-                try {
-                    pendiente.insertOperacionPendiente(
-                        TipoAccion.ACTUALIZACION.getNombreAccion(),
-                        Entity.ORGANIZACION.getNombreEntity(),
-                        organizacion.idOrganizacion,
-                        OrganizacionMapper.toJson(organizacion),
-                        System.currentTimeMillis(),
-                        if (exito) 1L else 0L
-                    )
-                } catch (e: Exception) {
-                    println("Error al registrar operación pendiente: ${e.message}")
-                }
+            try {
+                pendiente.insertOperacionPendiente(
+                    TipoAccion.ACTUALIZACION.getNombreAccion(),
+                    Entity.ORGANIZACION.getNombreEntity(),
+                    organizacion.idOrganizacion,
+                    OrganizacionMapper.toJson(organizacion),
+                    System.currentTimeMillis(),
+                    if (exito) 1L else 0L
+                )
+            } catch (e: Exception) {
+                println("Error al registrar operación pendiente: ${e.message}")
             }
         }
     }
@@ -132,27 +127,24 @@ class OrganizacionRepositoryImpl(
             }
         }
 
-        repositoryScope.launch {
+        withContext(NonCancellable + Dispatchers.IO) {
             var exito = false
             try {
                 exito = remote.eliminarOrganizacion(idOrg)
             } catch (e: Exception) {
                 println("Servidor offline al eliminar organización: ${e.message}")
             }
-
-            withContext(Dispatchers.IO) {
-                try {
-                    pendiente.insertOperacionPendiente(
-                        TipoAccion.ELIMINACION.getNombreAccion(),
-                        Entity.ORGANIZACION.getNombreEntity(),
-                        idOrg,
-                        "",
-                        System.currentTimeMillis(),
-                        if (exito) 1L else 0L
-                    )
-                } catch (e: Exception) {
-                    println("Error al registrar operación pendiente: ${e.message}")
-                }
+            try {
+                pendiente.insertOperacionPendiente(
+                    TipoAccion.ELIMINACION.getNombreAccion(),
+                    Entity.ORGANIZACION.getNombreEntity(),
+                    idOrg,
+                    "",
+                    System.currentTimeMillis(),
+                    if (exito) 1L else 0L
+                )
+            } catch (e: Exception) {
+                println("Error al registrar operación pendiente: ${e.message}")
             }
         }
     }
