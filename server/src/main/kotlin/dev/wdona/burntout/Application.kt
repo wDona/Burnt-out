@@ -13,6 +13,8 @@ import io.ktor.server.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.server.request.httpMethod
+import io.ktor.server.request.uri
 import io.ktor.server.routing.*
 import dev.wdona.burntout.db.DatabaseFactory
 
@@ -28,6 +30,10 @@ fun main() {
 fun Application.module() {
     install(ContentNegotiation) {
         json()
+    }
+
+    intercept(ApplicationCallPipeline.Call) {
+        println("Peticion a ${call.request.uri} con metodo ${call.request.httpMethod.value}")
     }
 
     DatabaseFactory.init()
