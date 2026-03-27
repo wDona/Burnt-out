@@ -34,7 +34,14 @@ fun Application.module() {
     routing {
         // v1
         route("/api/v1") {
-
+            ajustesRoutes()
+            equiposRoutes()
+            organizacionesRoutes()
+            preguntasRespuestasRoutes()
+            subtareasRoutes()
+            tablerosRoutes()
+            tareasRoutes()
+            usuariosRoutes()
         }
 
         // Latest
