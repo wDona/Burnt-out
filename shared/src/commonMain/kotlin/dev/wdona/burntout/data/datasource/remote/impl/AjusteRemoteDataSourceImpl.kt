@@ -5,19 +5,20 @@ import dev.wdona.burntout.data.datasource.remote.AjusteRemoteDataSource
 import dev.wdona.burntout.domain.model.Ajuste
 
 class AjusteRemoteDataSourceImpl(private val api: AjusteApi) : AjusteRemoteDataSource {
-    override suspend fun modificarAjuste(ajuste: Ajuste) {
-        TODO("Not yet implemented")
+    override suspend fun modificarAjuste(idUsuario: Long, ajuste: Ajuste) {
+        api.modificarAjuste(idUsuario, ajuste)
     }
 
     override suspend fun getAjustesByUsuario(idUsuario: Long): List<Ajuste> {
-        TODO("Not yet implemented")
+        return api.getAjustes(idUsuario)
     }
 
     override suspend fun getAjusteByIdYUsuario(
         idAjuste: Long,
         idUsuario: Long
     ): Ajuste {
-        TODO("Not yet implemented")
+        val ajustes = api.getAjustes(idUsuario)
+        return ajustes.first { it.idAjuste == idAjuste }
     }
 
 }

@@ -69,14 +69,6 @@ class PreMainScreen(
                 uiState.hoyHecho,
                 settingsViewModel.uiStateUsuarioActual
             ) {
-                if (settingsViewModel.uiStateUsuarioActual.value == null) {
-                    navigator.replace(
-                        LoginScreen(
-                            factory = loginFactory
-                        )
-                    )
-                }
-
                 if (!uiState.primerCuestionarioHecho) {
                     navigator.replace(
                         PreguntasInicialesScreen(

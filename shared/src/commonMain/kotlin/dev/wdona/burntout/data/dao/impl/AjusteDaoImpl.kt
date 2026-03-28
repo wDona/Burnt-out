@@ -12,7 +12,7 @@ class AjusteDaoImpl(appDatabase: AppDatabase) : AjusteDao {
         TODO()
     }
 
-    override fun modificarAjuste(ajuste: Ajuste) {
+    override fun modificarAjuste(idUsuario: Long, ajuste: Ajuste) {
         TODO("Not yet implemented")
     }
 

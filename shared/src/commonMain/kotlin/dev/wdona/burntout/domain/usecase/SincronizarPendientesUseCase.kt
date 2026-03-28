@@ -1,6 +1,7 @@
 package dev.wdona.burntout.domain.usecase
 
 import com.russhwolf.settings.Settings
+import dev.wdona.burntout.data.datasource.mapper.AjusteMapper
 import dev.wdona.burntout.data.datasource.remote.AjusteRemoteDataSource
 import dev.wdona.burntout.data.datasource.remote.EquipoRemoteDataSource
 import dev.wdona.burntout.data.datasource.remote.OrganizacionRemoteDataSource
@@ -72,7 +73,9 @@ class SincronizarPendientesUseCase(
             Entity.EQUIPO.getNombreEntity() -> ejecutarEquipo(op)
             Entity.USUARIO.getNombreEntity() -> ejecutarUsuario(op)
             Entity.PREGUNTA.getNombreEntity() -> ejecutarPregunta(op)
-            Entity.AJUSTE.getNombreEntity(), Entity.AJUSTE_USER.getNombreEntity() -> ejecutarAjuste(op)
+            Entity.AJUSTE.getNombreEntity(), Entity.AJUSTE_USER.getNombreEntity() -> {
+                ejecutarAjuste(op)
+            }
             Entity.SUBTAREA.getNombreEntity() -> ejecutarSubtarea(op)
             Entity.ORGANIZACION.getNombreEntity() -> ejecutarOrganizacion(op)
             Entity.RESPONDER.getNombreEntity() -> ejecutarRespuesta(op)
@@ -158,7 +161,8 @@ class SincronizarPendientesUseCase(
     private suspend fun ejecutarAjuste(op: OperacionPendiente): Boolean {
         return try {
             val ajuste = json.decodeFromString<Ajuste>(op.datosJson)
-            ajusteRemote.modificarAjuste(ajuste)
+            val idUsuario = SettingsManager.getIdUsuarioActual()
+            ajusteRemote.modificarAjuste(idUsuario, ajuste)
             true
         } catch (e: Exception) {
             false

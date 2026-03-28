@@ -30,16 +30,26 @@ object SettingsManager {
     private val _sincronizadoEnEstaAperturaFlow = MutableStateFlow(getSincronizadoEnEstaApertura())
     val sincronizadoEnEstaAperturaFlow = _sincronizadoEnEstaAperturaFlow.asStateFlow()
 
+    private val _isAutenticadoFlow = MutableStateFlow(isAutenticado())
+    val isAutenticadoFlow = _isAutenticadoFlow.asStateFlow()
+
+    private val _idUsuarioActualFlow = MutableStateFlow(getIdUsuarioActual())
+    val idUsuarioActualFlow = _idUsuarioActualFlow.asStateFlow()
+
     fun clearAll() {
         settings.clear()
 
         _primerCuestionarioHechoFlow.value = false
         _cuestionarioHoyHechoFlow.value = false
-
+        _idUsuarioActualFlow.value = Long.MIN_VALUE
+        _isAutenticadoFlow.value = false
     }
 
     fun setIdUsuarioActual(id: Long?) {
-        settings.putLong(KEY_ID_USUARIO_ACTUAL, id ?: Long.MIN_VALUE)
+        val safeId = id ?: Long.MIN_VALUE
+        settings.putLong(KEY_ID_USUARIO_ACTUAL, safeId)
+        _idUsuarioActualFlow.value = safeId
+        _isAutenticadoFlow.value = true
     }
 
     fun getIdUsuarioActual(): Long {
@@ -148,6 +158,10 @@ object SettingsManager {
     fun setSincronizadoEnEstaApertura(sincronizado: Boolean) {
         settings.putBoolean(KEY_SINCRONIZADO_EN_ESTA_APERTURA, sincronizado)
         _sincronizadoEnEstaAperturaFlow.value = sincronizado
+    }
+
+    fun isAutenticado(): Boolean {
+        return settings.hasKey(KEY_ID_USUARIO_ACTUAL)
     }
 
     fun setUsuarioActual(usuario: Usuario) {

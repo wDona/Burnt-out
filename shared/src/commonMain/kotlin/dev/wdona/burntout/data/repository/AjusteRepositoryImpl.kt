@@ -20,36 +20,36 @@ import kotlinx.coroutines.withContext
 class AjusteRepositoryImpl(
     private val localDataSource: AjusteLocalDataSource,
     private val remoteDataSource: AjusteRemoteDataSource,
-    private val pendienteDataSource: OperacionPendienteLocalDataSource
+    private val operacionesPendientesDatasource: OperacionPendienteLocalDataSource
 ) : AjusteRepository {
 
-    private val repositoryScope = CoroutineScope(Dispatchers.Default)
-
-    override suspend fun modificarAjuste(ajuste: Ajuste) {
+    override suspend fun modificarAjuste(idUsuario: Long, ajuste: Ajuste) {
         withContext(Dispatchers.IO) {
             try {
-                localDataSource.modificarAjuste(ajuste)
+                localDataSource.modificarAjuste(idUsuario, ajuste)
             } catch (e: Exception) {
-                println("Error local al modificar ajuste: ${e.message}")
+                println("Error al intentar modificar ajuste en local: ${e.message}")
             }
         }
+
         if (SettingsManager.isUsuarioInvitado()) return
         withContext(NonCancellable + Dispatchers.IO) {
-            var exito = false
+            var isSincronizado = false
             try {
-                remoteDataSource.modificarAjuste(ajuste)
-                exito = true
+                remoteDataSource.modificarAjuste(idUsuario, ajuste)
+                isSincronizado = true
             } catch (e: Exception) {
-                println("Servidor invitado al modificar ajuste: ${e.message}")
+                println("No se ha podido modificar ajuste remoto: ${e.message}")
             }
+
             try {
-                pendienteDataSource.insertOperacionPendiente(
+                operacionesPendientesDatasource.insertOperacionPendiente(
                     TipoAccion.ACTUALIZACION.getNombreAccion(),
                     Entity.AJUSTE.getNombreEntity(),
                     ajuste.idAjuste,
                     AjusteMapper.toJson(ajuste),
                     System.currentTimeMillis(),
-                    if (exito) 1L else 0L
+                    if (isSincronizado) 1L else 0L
                 )
             } catch (e: Exception) {
                 println("Error al registrar operación pendiente: ${e.message}")
@@ -62,10 +62,10 @@ class AjusteRepositoryImpl(
             return@withContext localDataSource.getAjustesByUsuario(idUsuario)
         }
 
-        repositoryScope.launch {
+        CoroutineScope(Dispatchers.Default).launch {
             try {
                 val ajustesRemotos = remoteDataSource.getAjustesByUsuario(idUsuario)
-                ajustesRemotos.forEach { localDataSource.modificarAjuste(it) }
+                ajustesRemotos.forEach { localDataSource.modificarAjuste(idUsuario, it) }
             } catch (e: Exception) {
                 println("Servidor invitado (getAjustesByUsuario): ${e.message}")
             }
@@ -86,10 +86,10 @@ class AjusteRepositoryImpl(
             return@withContext localDataSource.getAjusteByIdYUsuario(idAjuste, idUsuario)
         }
 
-        repositoryScope.launch {
+        CoroutineScope(Dispatchers.Default).launch {
             try {
                 val ajusteRemoto = remoteDataSource.getAjusteByIdYUsuario(idAjuste, idUsuario)
-                localDataSource.modificarAjuste(ajusteRemoto)
+                localDataSource.modificarAjuste(idUsuario, ajusteRemoto)
             } catch (e: Exception) {
                 println("Servidor invitado (getAjusteByIdYUsuario): ${e.message}")
             }

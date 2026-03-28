@@ -172,22 +172,7 @@ fun PerfilContent(viewModel: PerfilViewModel, onAjustes: () -> Unit, onVolver: (
                     if (usuario.idUsuario == SettingsManager.getIdUsuarioActual()) { // FIXME??
                         OutlinedButton(
                             onClick = {
-//                                TODO: ELIMINAR DATOS DE SESION DE SETTINGS Y POP UNTIL ROOT
-                                SettingsManager.setUsuarioActual(
-                                    Usuario(
-                                        idUsuario = -1,
-                                        username = "",
-                                        password = "",
-                                        nombre = "",
-                                        riesgoBurnout = -1.0,
-                                        descripcion = "",
-                                        idOrganizacion = -1,
-                                        idEquipo = -1,
-                                    )
-                                )
-                                SettingsManager.setTokenUsuario("")
-                                onLogout()
-
+                                SettingsManager.clearAll()
                             },
                             modifier = Modifier
                                 .padding(top = 32.dp)

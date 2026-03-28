@@ -13,8 +13,8 @@ class AjusteLocalDataSourceImpl(private val dao: AjusteDao) : AjusteLocalDataSou
         dao.anadirAjuste(ajuste)
     }
 
-    override suspend fun modificarAjuste(ajuste: Ajuste) {
-        dao.modificarAjuste(ajuste)
+    override suspend fun modificarAjuste(idUsuario: Long, ajuste: Ajuste) {
+        dao.modificarAjuste(idUsuario, ajuste)
     }
 
     override suspend fun getAjustesByUsuario(idUsuario: Long): List<Ajuste> {
