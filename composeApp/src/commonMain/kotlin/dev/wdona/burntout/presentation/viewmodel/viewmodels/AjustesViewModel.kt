@@ -22,7 +22,6 @@ data class AjustesUiState(
     val idEquipo: Long = Long.MIN_VALUE,
     val nombreUsuario: String = "Invitado",
     val versionApp: String = AppInfo.version,
-    // w.x.yz -> w. major version, x. centena de commits, yz. -> decena/ud de commit
     val hoyHecho: Boolean = false,
     val syncOk: Boolean = true
 )
