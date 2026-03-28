@@ -10,6 +10,7 @@ import dev.wdona.burntout.domain.entity.Entity
 import dev.wdona.burntout.domain.model.TipoAccion
 import dev.wdona.burntout.shared.domain.Pregunta
 import dev.wdona.burntout.domain.model.Respuesta
+import dev.wdona.burntout.shared.utils.SettingsManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
@@ -25,42 +26,48 @@ class PreguntaRespuestaRepositoryImpl(
     private val repositoryScope = CoroutineScope(Dispatchers.Default)
 
     override suspend fun getPreguntasByOrg(idOrg: Long): List<Pregunta> = withContext(Dispatchers.IO) {
-        repositoryScope.launch {
-            try {
-                val remoteList = remote.getPreguntasByOrg(idOrg)
-                remoteList.forEach {
-                     local.upsertPregunta(it)
+        if (!SettingsManager.isOfflineUser()) {
+            repositoryScope.launch {
+                try {
+                    val remoteList = remote.getPreguntasByOrg(idOrg)
+                    remoteList.forEach {
+                         local.upsertPregunta(it)
+                    }
+                } catch (e: Exception) {
+                    println("Servidor offline (getPreguntas): ${e.message}")
                 }
-            } catch (e: Exception) {
-                println("Servidor offline (getPreguntas): ${e.message}")
             }
         }
         local.getPreguntasByOrg(idOrg)
     }
 
     override suspend fun getRespuestasByPregunta(idPregunta: Long): List<Respuesta> = withContext(Dispatchers.IO) {
-        repositoryScope.launch {
-            try {
-                val remoteList = remote.getRespuestasByPregunta(idPregunta)
-                remoteList.forEach {
-                    local.responderPregunta(it)
+        if (!SettingsManager.isOfflineUser()) {
+            repositoryScope.launch {
+                try {
+                    val remoteList = remote.getRespuestasByPregunta(idPregunta)
+                    remoteList.forEach {
+                        local.responderPregunta(it)
+                    }
+                } catch (e: Exception) {
+                    println("Servidor offline (getRespuestas): ${e.message}")
                 }
-            } catch (e: Exception) {
-                println("Servidor offline (getRespuestas): ${e.message}")
             }
         }
         local.getRespuestasByPregunta(idPregunta)
     }
 
     override suspend fun getRespuestasByIdUsuario(idUser: Long): List<Respuesta> = withContext(Dispatchers.IO) {
-        repositoryScope.launch {
-            try {
-                val remoteList = remote.getRespuestasByIdUsuario(idUser)
-                remoteList.forEach {
-                    local.responderPregunta(it)
+        if (!SettingsManager.isOfflineUser()) {
+            repositoryScope.launch {
+                try {
+                    val remoteList = remote.getRespuestasByIdUsuario(idUser)
+                    remoteList.forEach {
+                        local.responderPregunta(it)
+                    }
+                } catch (e: Exception) {
+                    println("Servidor offline (getRespuestasByIdUsuario): ${e.message}")
                 }
-            } catch (e: Exception) {
-                println("Servidor offline (getRespuestasByIdUsuario): ${e.message}")
             }
         }
         local.getRespuestasByIdUsuario(idUser)
@@ -74,14 +81,16 @@ class PreguntaRespuestaRepositoryImpl(
     }
 
     override suspend fun getRespuestasByIdUsuarioAndDate(idUser: Long, date: Long): List<Respuesta> = withContext(Dispatchers.IO) {
-        repositoryScope.launch {
-            try {
-                val remoteList = remote.getRespuestasByIdUsuarioAndDate(idUser, date)
-                remoteList.forEach {
-                    local.responderPregunta(it)
+        if (!SettingsManager.isOfflineUser()) {
+            repositoryScope.launch {
+                try {
+                    val remoteList = remote.getRespuestasByIdUsuarioAndDate(idUser, date)
+                    remoteList.forEach {
+                        local.responderPregunta(it)
+                    }
+                } catch (e: Exception) {
+                    println("Servidor offline (getRespuestasByIdUsuarioAndDate): ${e.message}")
                 }
-            } catch (e: Exception) {
-                println("Servidor offline (getRespuestasByIdUsuarioAndDate): ${e.message}")
             }
         }
         local.getRespuestasByIdUsuarioAndDate(idUser, date)
@@ -95,6 +104,7 @@ class PreguntaRespuestaRepositoryImpl(
                 println("Error local: ${e.message}")
             }
         }
+        if (SettingsManager.isOfflineUser()) return
         withContext(NonCancellable + Dispatchers.IO) {
             var exito = false
             var idRemoto: Long = -1
@@ -122,6 +132,7 @@ class PreguntaRespuestaRepositoryImpl(
                 println("Error local al actualizar pregunta: ${e.message}")
             }
         }
+        if (SettingsManager.isOfflineUser()) return
         withContext(NonCancellable + Dispatchers.IO) {
             var exito = false
             try {
@@ -147,6 +158,7 @@ class PreguntaRespuestaRepositoryImpl(
                 println("Error local al eliminar pregunta: ${e.message}")
             }
         }
+        if (SettingsManager.isOfflineUser()) return
         withContext(NonCancellable + Dispatchers.IO) {
             var exito = false
             try {
@@ -172,6 +184,7 @@ class PreguntaRespuestaRepositoryImpl(
                 println("Error local al responder pregunta: ${e.message}")
             }
         }
+        if (SettingsManager.isOfflineUser()) return
         withContext(NonCancellable + Dispatchers.IO) {
             var exito = false
             try {

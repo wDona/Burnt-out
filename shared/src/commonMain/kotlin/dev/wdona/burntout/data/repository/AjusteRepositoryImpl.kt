@@ -9,6 +9,7 @@ import dev.wdona.burntout.domain.model.Ajuste
 import dev.wdona.burntout.domain.repository.AjusteRepository
 import dev.wdona.burntout.domain.model.TipoAccion
 import dev.wdona.burntout.data.datasource.mapper.AjusteMapper
+import dev.wdona.burntout.shared.utils.SettingsManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
@@ -32,7 +33,7 @@ class AjusteRepositoryImpl(
                 println("Error local al modificar ajuste: ${e.message}")
             }
         }
-
+        if (SettingsManager.isOfflineUser()) return
         withContext(NonCancellable + Dispatchers.IO) {
             var exito = false
             try {

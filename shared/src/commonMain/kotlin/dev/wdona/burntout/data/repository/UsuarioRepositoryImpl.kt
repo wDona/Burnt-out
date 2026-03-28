@@ -8,6 +8,7 @@ import dev.wdona.burntout.domain.entity.Entity
 import dev.wdona.burntout.domain.model.TipoAccion
 import dev.wdona.burntout.domain.repository.UsuarioRepository
 import dev.wdona.burntout.shared.domain.Usuario
+import dev.wdona.burntout.shared.utils.SettingsManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
@@ -42,13 +43,15 @@ class UsuarioRepositoryImpl(
     }
 
     override suspend fun getUsuariosByOrg(idOrg: Long): List<Usuario> = withContext(Dispatchers.IO) {
-        repositoryScope.launch {
-            try {
-                val usuarios = remote.getUsuariosByOrg(idOrg)
-                local.eliminarUsuariosPorOrg(idOrg)
-                usuarios.forEach { local.crearUsuario(it) }
-            } catch (e: Exception) {
-                println("Servidor offline (getUsuariosByOrg): ${e.message}")
+        if (!SettingsManager.isOfflineUser()) {
+            repositoryScope.launch {
+                try {
+                    val usuarios = remote.getUsuariosByOrg(idOrg)
+                    local.eliminarUsuariosPorOrg(idOrg)
+                    usuarios.forEach { local.crearUsuario(it) }
+                } catch (e: Exception) {
+                    println("Servidor offline (getUsuariosByOrg): ${e.message}")
+                }
             }
         }
         local.getUsuariosByOrg(idOrg)
@@ -56,6 +59,9 @@ class UsuarioRepositoryImpl(
 
     override suspend fun getUsuariosByEquipo(idEquipo: Long): List<Usuario> = withContext(Dispatchers.IO) {
         // FIXME: Sincronizar remote si existe endpoint
+        if (!SettingsManager.isOfflineUser()) {
+            // TODO
+        }
         local.getUsuariosByEquipo(idEquipo)
     }
 
@@ -68,8 +74,7 @@ class UsuarioRepositoryImpl(
             }
         }
 
-        if (usuario.idUsuario == Long.MIN_VALUE) return
-
+        if (SettingsManager.isOfflineUser()) return
         withContext(NonCancellable + Dispatchers.IO) {
             var exito = false
             try {
@@ -101,8 +106,7 @@ class UsuarioRepositoryImpl(
             }
         }
 
-        if (usuario.idUsuario == Long.MIN_VALUE) return
-
+        if (SettingsManager.isOfflineUser()) return
         withContext(NonCancellable + Dispatchers.IO) {
             var exito = false
             try {
@@ -134,8 +138,7 @@ class UsuarioRepositoryImpl(
             }
         }
 
-        if (idUsuario == Long.MIN_VALUE) return
-
+        if (SettingsManager.isOfflineUser()) return
         withContext(NonCancellable + Dispatchers.IO) {
             var exito = false
             try {

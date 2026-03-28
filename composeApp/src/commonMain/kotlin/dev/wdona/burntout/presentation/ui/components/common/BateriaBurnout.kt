@@ -38,9 +38,9 @@ fun BateriaBurnout(riesgo: Double, mostrarTexto: Boolean = true, size: Int = 24,
             modifier = modifier.size(size.dp).rotate(90f)
         )
         if (mostrarTexto) {
-            val riesgoVisual = round(riesgo * 100) / 100.0
+            val riesgoVisual = (riesgo * 100).toInt()
             Text(
-                text = "$text ($riesgoVisual)",
+                text = "$text ($riesgoVisual/100)",
                 style = MaterialTheme.typography.bodyMedium,
                 color = color,
                 modifier = Modifier.padding(start = 8.dp)

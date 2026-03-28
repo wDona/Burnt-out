@@ -64,6 +64,10 @@ object SettingsManager {
         return settings.getBoolean(KEY_PRIMER_CUESTIONARIO_HECHO, false)
     }
 
+    fun isOfflineUser(): Boolean {
+        return getIdUsuarioActual() == Long.MIN_VALUE
+    }
+
     fun getIdEquipoActual(): Long {
         val id = settings.getLong(KEY_ID_EQUIPO_ACTUAL, Long.MIN_VALUE)
         return id

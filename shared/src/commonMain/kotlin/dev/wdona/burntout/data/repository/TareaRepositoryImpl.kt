@@ -8,6 +8,7 @@ import dev.wdona.burntout.data.datasource.remote.TareaRemoteDataSource
 import dev.wdona.burntout.domain.entity.Entity
 import dev.wdona.burntout.domain.model.TipoAccion
 import dev.wdona.burntout.shared.domain.Tarea
+import dev.wdona.burntout.shared.utils.SettingsManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
@@ -23,26 +24,30 @@ class TareaRepositoryImpl(
     private val repositoryScope = CoroutineScope(Dispatchers.Default)
 
     override suspend fun getTareasByTableroId(tableroId: Long): List<Tarea> = withContext(Dispatchers.IO) {
-        repositoryScope.launch {
-            try {
-                val tareas = remote.getTareasByTablero(tableroId)
-                local.eliminarTareasPorTablero(tableroId)
-                tareas.forEach { local.crearTarea(it) }
-            } catch (e: Exception) {
-                println("Servidor offline (getTareas): ${e.message}")
+        if (!SettingsManager.isOfflineUser()) {
+            repositoryScope.launch {
+                try {
+                    val tareas = remote.getTareasByTablero(tableroId)
+                    local.eliminarTareasPorTablero(tableroId)
+                    tareas.forEach { local.crearTarea(it) }
+                } catch (e: Exception) {
+                    println("Servidor offline (getTareas): ${e.message}")
+                }
             }
         }
         local.getTareasByTablero(tableroId)
     }
 
     override suspend fun getTareaById(idTarea: Long, idTablero: Long): Tarea? = withContext(Dispatchers.IO) {
-        repositoryScope.launch {
-            try {
-                val tarea = remote.getTareaById(idTarea, idTablero)
-                local.eliminarTarea(tarea.idTarea)
-                local.crearTarea(tarea)
-            } catch (e: Exception) {
-                println("Servidor offline (getTareaById): ${e.message}")
+        if (!SettingsManager.isOfflineUser()) {
+            repositoryScope.launch {
+                try {
+                    val tarea = remote.getTareaById(idTarea, idTablero)
+                    local.eliminarTarea(tarea.idTarea)
+                    local.crearTarea(tarea)
+                } catch (e: Exception) {
+                    println("Servidor offline (getTareaById): ${e.message}")
+                }
             }
         }
         local.getTareaById(idTarea, idTablero)
@@ -56,6 +61,8 @@ class TareaRepositoryImpl(
                 println("Error local al crear tarea: ${e.message}")
             }
         }
+
+        if (SettingsManager.isOfflineUser()) return
 
         withContext(NonCancellable + Dispatchers.IO) {
             var exitoRemoto = false
@@ -90,6 +97,8 @@ class TareaRepositoryImpl(
             }
         }
 
+        if (SettingsManager.isOfflineUser()) return
+
         withContext(NonCancellable + Dispatchers.IO) {
             var exito = false
             try {
@@ -120,6 +129,8 @@ class TareaRepositoryImpl(
                 println("Error local al eliminar tarea: ${e.message}")
             }
         }
+
+        if (SettingsManager.isOfflineUser()) return
 
         withContext(NonCancellable + Dispatchers.IO) {
             var exito = false

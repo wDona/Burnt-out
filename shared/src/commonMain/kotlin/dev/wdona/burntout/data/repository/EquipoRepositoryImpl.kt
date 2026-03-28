@@ -10,6 +10,7 @@ import dev.wdona.burntout.domain.model.TipoAccion
 import dev.wdona.burntout.domain.repository.EquipoRepository
 import dev.wdona.burntout.shared.domain.Equipo
 import dev.wdona.burntout.shared.domain.Usuario
+import dev.wdona.burntout.shared.utils.SettingsManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
@@ -25,14 +26,16 @@ class EquipoRepositoryImpl(
     private val repositoryScope = CoroutineScope(Dispatchers.Default)
 
     override suspend fun getEquiposByOrg(idOrg: Long): List<Equipo> = withContext(Dispatchers.IO) {
-        repositoryScope.launch {
-            try {
-                val equiposRemotos = remote.getEquiposByOrg(idOrg)
-                if (equiposRemotos.isNotEmpty()) {
-                    equiposRemotos.forEach { local.insertOrUpdateEquipo(it) }
+        if (!SettingsManager.isOfflineUser()) {
+            repositoryScope.launch {
+                try {
+                    val equiposRemotos = remote.getEquiposByOrg(idOrg)
+                    if (equiposRemotos.isNotEmpty()) {
+                        equiposRemotos.forEach { local.insertOrUpdateEquipo(it) }
+                    }
+                } catch (e: Exception) {
+                    println("Error al sincronizar equipos")
                 }
-            } catch (e: Exception) {
-                println("Error al sincronizar equipos")
             }
         }
         try {
@@ -43,7 +46,7 @@ class EquipoRepositoryImpl(
     }
 
     override suspend fun getEquipoById(idEquipo: Long): Equipo? = withContext(Dispatchers.IO) {
-        repositoryScope.launch {
+        if (!SettingsManager.isOfflineUser()) {
             try {
                 val equipoRemoto = remote.getEquipoById(idEquipo)
                 local.insertOrUpdateEquipo(equipoRemoto)
@@ -66,6 +69,8 @@ class EquipoRepositoryImpl(
                 println("Error local al crear equipo: ${e.message}")
             }
         }
+
+        if (SettingsManager.isOfflineUser()) return
 
         withContext(NonCancellable + Dispatchers.IO) {
             var exito = false
@@ -98,6 +103,8 @@ class EquipoRepositoryImpl(
             }
         }
 
+        if (SettingsManager.isOfflineUser()) return
+
         withContext(NonCancellable + Dispatchers.IO) {
             var exito = false
             try {
@@ -128,6 +135,8 @@ class EquipoRepositoryImpl(
                 println("Error local al eliminar equipo: ${e.message}")
             }
         }
+
+        if (SettingsManager.isOfflineUser()) return
 
         withContext(NonCancellable + Dispatchers.IO) {
             var exito = false

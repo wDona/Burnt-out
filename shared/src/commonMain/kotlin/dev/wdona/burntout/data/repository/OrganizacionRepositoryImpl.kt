@@ -8,6 +8,7 @@ import dev.wdona.burntout.domain.entity.Entity
 import dev.wdona.burntout.domain.model.TipoAccion
 import dev.wdona.burntout.domain.repository.OrganizacionRepository
 import dev.wdona.burntout.shared.domain.Organizacion
+import dev.wdona.burntout.shared.utils.SettingsManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
@@ -23,12 +24,14 @@ class OrganizacionRepositoryImpl(
     private val repositoryScope = CoroutineScope(Dispatchers.Default)
 
     override suspend fun getOrganizacionById(idOrg: Long): Organizacion? = withContext(Dispatchers.IO) {
-        repositoryScope.launch {
-            try {
-                val org = remote.getOrganizacionById(idOrg)
-                if (org != null) local.insertOrUpdateOrganizacion(org)
-            } catch (e: Exception) {
-                println("Servidor offline (getOrganizacionById): ${e.message}")
+        if (!SettingsManager.isOfflineUser()) {
+            repositoryScope.launch {
+                try {
+                    val org = remote.getOrganizacionById(idOrg)
+                    if (org != null) local.insertOrUpdateOrganizacion(org)
+                } catch (e: Exception) {
+                    println("Servidor offline (getOrganizacionById): ${e.message}")
+                }
             }
         }
         try {
@@ -39,12 +42,14 @@ class OrganizacionRepositoryImpl(
     }
 
     override suspend fun getAllOrganizaciones(): List<Organizacion> = withContext(Dispatchers.IO) {
-        repositoryScope.launch {
-            try {
-                val orgs = remote.getAllOrganizaciones()
-                orgs.forEach { local.insertOrUpdateOrganizacion(it) }
-            } catch (e: Exception) {
-                println("Servidor offline (getAllOrganizaciones): ${e.message}")
+        if (!SettingsManager.isOfflineUser()) {
+            repositoryScope.launch {
+                try {
+                    val orgs = remote.getAllOrganizaciones()
+                    orgs.forEach { local.insertOrUpdateOrganizacion(it) }
+                } catch (e: Exception) {
+                    println("Servidor offline (getAllOrganizaciones): ${e.message}")
+                }
             }
         }
         try {
@@ -62,7 +67,7 @@ class OrganizacionRepositoryImpl(
                 println("Error local al crear organización: ${e.message}")
             }
         }
-
+        if (SettingsManager.isOfflineUser()) return
         withContext(NonCancellable + Dispatchers.IO) {
             var exito = false
             var idRemoto: Long = -1
@@ -95,7 +100,7 @@ class OrganizacionRepositoryImpl(
                 println("Error local al actualizar organización: ${e.message}")
             }
         }
-
+        if (SettingsManager.isOfflineUser()) return
         withContext(NonCancellable + Dispatchers.IO) {
             var exito = false
             try {
@@ -126,7 +131,7 @@ class OrganizacionRepositoryImpl(
                 println("Error local al eliminar organización: ${e.message}")
             }
         }
-
+        if (SettingsManager.isOfflineUser()) return
         withContext(NonCancellable + Dispatchers.IO) {
             var exito = false
             try {

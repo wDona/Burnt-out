@@ -8,6 +8,7 @@ import dev.wdona.burntout.data.datasource.remote.SubtareaRemoteDataSource
 import dev.wdona.burntout.domain.entity.Entity
 import dev.wdona.burntout.domain.model.TipoAccion
 import dev.wdona.burntout.shared.domain.Subtarea
+import dev.wdona.burntout.shared.utils.SettingsManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
@@ -23,12 +24,14 @@ class SubtareaRepositoryImpl(
     private val repositoryScope = CoroutineScope(Dispatchers.Default)
 
     override suspend fun getSubtareasByTarea(idTarea: Long): List<Subtarea> = withContext(Dispatchers.IO) {
-        repositoryScope.launch {
-            try {
-                val subtareasRemotas = remote.getSubtareasByTarea(idTarea)
-                subtareasRemotas.forEach { local.insertOrUpdateSubtarea(it) }
-            } catch (e: Exception) {
-                println("Servidor offline (getSubtareasByTarea): ${e.message}")
+        if (!SettingsManager.isOfflineUser()) {
+            repositoryScope.launch {
+                try {
+                    val subtareasRemotas = remote.getSubtareasByTarea(idTarea)
+                    subtareasRemotas.forEach { local.insertOrUpdateSubtarea(it) }
+                } catch (e: Exception) {
+                    println("Servidor offline (getSubtareasByTarea): ${e.message}")
+                }
             }
         }
         try {
@@ -46,6 +49,8 @@ class SubtareaRepositoryImpl(
                 println("Error local al crear subtarea: ${e.message}")
             }
         }
+
+        if (SettingsManager.isOfflineUser()) return
 
         withContext(NonCancellable + Dispatchers.IO) {
             var exito = false
@@ -80,6 +85,8 @@ class SubtareaRepositoryImpl(
             }
         }
 
+        if (SettingsManager.isOfflineUser()) return
+
         withContext(NonCancellable + Dispatchers.IO) {
             var exito = false
             try {
@@ -110,6 +117,8 @@ class SubtareaRepositoryImpl(
                 println("Error local al eliminar subtarea: ${e.message}")
             }
         }
+
+        if (SettingsManager.isOfflineUser()) return
 
         withContext(NonCancellable + Dispatchers.IO) {
             var exito = false

@@ -8,6 +8,7 @@ import dev.wdona.burntout.domain.entity.Entity
 import dev.wdona.burntout.domain.model.TipoAccion
 import dev.wdona.burntout.domain.repository.TableroRepository
 import dev.wdona.burntout.shared.domain.Tablero
+import dev.wdona.burntout.shared.utils.SettingsManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.NonCancellable
@@ -20,22 +21,26 @@ class TableroRepositoryImpl(
 ) : TableroRepository {
 
     override suspend fun getTablerosByOrg(idOrg: Long): List<Tablero> = withContext(Dispatchers.IO) {
-        try {
-            val tableros = remote.getTablerosByOrg(idOrg)
-            local.eliminarTablerosPorOrg(idOrg)
-            tableros.forEach { local.insertOrUpdateTablero(it) }
-        } catch (e: Exception) {
-            println("Servidor offline (getTablerosByOrg): ${e.message}")
+        if (!SettingsManager.isOfflineUser()) {
+            try {
+                val tableros = remote.getTablerosByOrg(idOrg)
+                local.eliminarTablerosPorOrg(idOrg)
+                tableros.forEach { local.insertOrUpdateTablero(it) }
+            } catch (e: Exception) {
+                println("Servidor offline (getTablerosByOrg): ${e.message}")
+            }
         }
         local.getTablerosByOrg(idOrg)
     }
 
     override suspend fun getTableroById(idTablero: Long): Tablero? = withContext(Dispatchers.IO) {
-        try {
-            val tablero = remote.getTableroById(idTablero)
-            local.insertOrUpdateTablero(tablero)
-        } catch (e: Exception) {
-            println("Servidor offline (getTableroById): ${e.message}")
+        if (!SettingsManager.isOfflineUser()) {
+            try {
+                val tablero = remote.getTableroById(idTablero)
+                local.insertOrUpdateTablero(tablero)
+            } catch (e: Exception) {
+                println("Servidor offline (getTableroById): ${e.message}")
+            }
         }
         local.getTableroById(idTablero)
     }
@@ -48,6 +53,8 @@ class TableroRepositoryImpl(
                 println("Error local al crear tablero: ${e.message}")
             }
         }
+
+        if (SettingsManager.isOfflineUser()) return
 
         withContext(NonCancellable + Dispatchers.IO) {
             var exito = false
@@ -80,6 +87,8 @@ class TableroRepositoryImpl(
             }
         }
 
+        if (SettingsManager.isOfflineUser()) return
+
         withContext(NonCancellable + Dispatchers.IO) {
             var exito = false
             try {
@@ -110,6 +119,8 @@ class TableroRepositoryImpl(
                 println("Error local al eliminar tablero: ${e.message}")
             }
         }
+
+        if (SettingsManager.isOfflineUser()) return
 
         withContext(NonCancellable + Dispatchers.IO) {
             var exito = false
