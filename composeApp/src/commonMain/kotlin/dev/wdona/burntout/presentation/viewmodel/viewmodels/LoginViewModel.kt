@@ -57,7 +57,7 @@ class LoginViewModel(private val usuarioRepository: UsuarioRepository) : ScreenM
                     riesgoBurnout = 0.0,
                     descripcion = "",
                     idOrganizacion = 1L, // Default
-                    idEquipo = 1L // Default
+                    idEquipo = 0L
                 )
                 
                 usuarioRepository.crearUsuario(nuevoUsuario)

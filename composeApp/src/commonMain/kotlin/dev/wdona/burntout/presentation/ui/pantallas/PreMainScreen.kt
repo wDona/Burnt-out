@@ -69,7 +69,12 @@ class PreMainScreen(
                 uiState.hoyHecho,
                 settingsViewModel.uiStateUsuarioActual
             ) {
-                if (!uiState.primerCuestionarioHecho) {
+                // Usamos SettingsManager directamente para leer el estado de forma síncrona
+                // porque AjustesUiState puede tardar unos ms en emitir al cambiar de usuario
+                val primerCuestionarioHechoSync = SettingsManager.getPrimerCuestionarioHecho()
+                val hoyHechoSync = SettingsManager.esCuestionarioHoyHecho()
+
+                if (!primerCuestionarioHechoSync) {
                     navigator.replace(
                         PreguntasInicialesScreen(
                             formularioFactory,
@@ -82,7 +87,7 @@ class PreMainScreen(
                             leaderboardFactory = leaderboardFactory
                         )
                     )
-                } else if (!uiState.hoyHecho) {
+                } else if (!hoyHechoSync) {
                     navigator.replace(
                         PreguntasInicialesScreen(
                             formularioFactory,

@@ -1,6 +1,8 @@
 package dev.wdona.burntout.api.latest
 import dev.wdona.burntout.db.DatabaseFactory.dbQuery
 import dev.wdona.burntout.db.tables.UsuariosTable
+import dev.wdona.burntout.db.tables.EquiposTable
+import dev.wdona.burntout.db.tables.EquipoMiembrosTable
 import dev.wdona.burntout.shared.domain.Usuario
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.request.receive
@@ -42,18 +44,36 @@ fun Route.usuariosRoutes() {
         }
         post {
             val usuario = call.receive<Usuario>()
+            var createdEquipoId = usuario.idEquipo
             val nuevoId = dbQuery {
-                UsuariosTable.insert {
+                var equipoId = usuario.idEquipo
+                if (equipoId <= 0L) {
+                    equipoId = EquiposTable.insert {
+                        it[titulo] = "Equipo de ${usuario.nombre}"
+                        it[puntuacion] = 0L
+                        it[idOrganizacion] = usuario.idOrganizacion
+                    }[EquiposTable.id]
+                }
+                createdEquipoId = equipoId
+                
+                val nuevoUserId = UsuariosTable.insert {
                     it[username] = usuario.username
                     it[password] = usuario.password
                     it[nombre] = usuario.nombre
                     it[riesgoBurnout] = usuario.riesgoBurnout
                     it[descripcion] = usuario.descripcion
                     it[idOrganizacion] = usuario.idOrganizacion
-                    it[idEquipo] = usuario.idEquipo
+                    it[idEquipo] = equipoId
                 }[UsuariosTable.id]
+                
+                EquipoMiembrosTable.insert {
+                    it[this.idEquipo] = equipoId
+                    it[this.idMiembro] = nuevoUserId
+                }
+                
+                nuevoUserId
             }
-            call.respond(HttpStatusCode.Created, usuario.copy(idUsuario = nuevoId))
+            call.respond(HttpStatusCode.Created, usuario.copy(idUsuario = nuevoId, idEquipo = createdEquipoId))
         }
         post("/login") {
             val request = call.receive<LoginRequest>()

@@ -8,7 +8,6 @@ import kotlinx.coroutines.flow.asStateFlow
 object SettingsManager {
     // TODO: Hardcodear usuario invitado
     private val settings = createSettings()
-    private const val KEY_PRIMER_CUESTIONARIO_HECHO = "cuestionario_inicial_hecho"
     private const val KEY_ID_USUARIO_ACTUAL = "id_usuario_actual"
     private const val KEY_NOMBRE_USUARIO = "nombre_usuario"
     private const val KEY_ID_ORGANIZACION_ACTUAL = "id_organizacion"
@@ -18,8 +17,9 @@ object SettingsManager {
     private const val KEY_RIESGO_CE_USUARIO_ACTUAL = "riesgo_ce_usuario_actual"
     private const val KEY_RIESGO_D_USUARIO_ACTUAL = "riesgo_d_usuario_actual"
     private const val KEY_RIESGO_RP_USUARIO_ACTUAL = "riesgo_rp_usuario_actual"
-    private const val KEY_ULTIMA_FECHA_CUESTIONARIO = "ultima_fecha_cuestionario"
+    private val KEY_ULTIMA_FECHA_CUESTIONARIO get() = "ultima_fecha_cuestionario_${getIdUsuarioActual()}"
     private const val KEY_SINCRONIZADO_EN_ESTA_APERTURA = "sincronizado_en_esta_apertura"
+    private val KEY_PRIMER_CUESTIONARIO_HECHO get() = "cuestionario_inicial_hecho_${getIdUsuarioActual()}"
 
     private val _primerCuestionarioHechoFlow = MutableStateFlow(getPrimerCuestionarioHecho())
     val primerCuestionarioHechoFlow = _primerCuestionarioHechoFlow.asStateFlow()
@@ -48,6 +48,11 @@ object SettingsManager {
     fun setIdUsuarioActual(id: Long?) {
         val safeId = id ?: Long.MIN_VALUE
         settings.putLong(KEY_ID_USUARIO_ACTUAL, safeId)
+        
+        // Actualizar flujos para el nuevo usuario ANTES de que se lance isAutenticado=true
+        _primerCuestionarioHechoFlow.value = getPrimerCuestionarioHecho()
+        _cuestionarioHoyHechoFlow.value = esCuestionarioHoyHecho()
+
         _idUsuarioActualFlow.value = safeId
         _isAutenticadoFlow.value = true
     }
