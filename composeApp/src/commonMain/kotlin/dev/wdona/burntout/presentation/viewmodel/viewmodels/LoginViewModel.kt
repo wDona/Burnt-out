@@ -64,8 +64,10 @@ class LoginViewModel(private val usuarioRepository: UsuarioRepository) : ScreenM
                 
                 // Login automatico tras registro
                 val usuarioLogeado = usuarioRepository.login(username, contrasena)
-                SettingsManager.setUsuarioActual(usuarioLogeado)
                 
+                SettingsManager.setUsuarioActual(usuarioLogeado)
+                SettingsManager.setPrimerCuestionarioHecho(false)
+
                 _uiState.update { it.copy(isLoading = false, success = true) }
             } catch (e: Exception) {
                 _uiState.update { it.copy(isLoading = false, error = "Error al registrar: ${e.message}") }

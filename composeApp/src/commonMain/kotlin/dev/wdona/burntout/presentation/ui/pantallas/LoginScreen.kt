@@ -12,7 +12,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
@@ -22,13 +21,22 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.LoginViewModelFactory
 import dev.wdona.burntout.presentation.viewmodel.viewmodels.LoginViewModel
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.type
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.wdona.burntout.presentation.ui.components.template.ScaffoldBase
@@ -63,6 +71,16 @@ fun LoginContent(
     val isError = uiState.error != null
     val success = uiState.success
 
+    val focusManager = LocalFocusManager.current
+
+    val enviarAccion = {
+        if (uiState.isLogin) {
+            viewModel.login(textStateUsuario, textStatePassword)
+        } else {
+            viewModel.register(textStateUsuario, textStatePassword, textStateNombre.trim())
+        }
+    }
+
     ScaffoldBase {
         Column (
             horizontalAlignment = CenterHorizontally,
@@ -86,18 +104,47 @@ fun LoginContent(
                     OutlinedTextField(
                         value = textStateNombre,
                         onValueChange = { textStateNombre = it },
-                        label = { Text("Nombre") }
+                        label = { Text("Nombre") },
+                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                        keyboardActions = KeyboardActions(onNext = { focusManager.moveFocus(FocusDirection.Down) }),
+                        modifier = Modifier.onKeyEvent {
+                            if (it.type == KeyEventType.KeyUp && (it.key == Key.Tab || it.key == Key.Enter || it.key == Key.NumPadEnter)) {
+                                focusManager.moveFocus(FocusDirection.Down)
+                                true
+                            } else false
+                        },
+                        singleLine = true
                     )
                 }
                 OutlinedTextField(
                     value = textStateUsuario,
-                    onValueChange = { textStateUsuario = it },
-                    label = { Text("Usuario") }
+                    onValueChange = {
+                        if (it.contains(' ')) return@OutlinedTextField
+                        textStateUsuario = it.trim() },
+                    label = { Text("Usuario") },
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                    keyboardActions = KeyboardActions(onNext = { focusManager.moveFocus(FocusDirection.Down) }),
+                    modifier = Modifier.onKeyEvent {
+                        if (it.type == KeyEventType.KeyUp && (it.key == Key.Tab || it.key == Key.Enter || it.key == Key.NumPadEnter)) {
+                            focusManager.moveFocus(FocusDirection.Down)
+                            true
+                        } else false
+                    },
+                    singleLine = true
                 )
                 OutlinedTextField(
                     value = textStatePassword,
-                    onValueChange = { textStatePassword = it }, // FIXME ASTERISCOS
-                    label = { Text("Password") }
+                    onValueChange = { textStatePassword = it.trim() }, // FIXME ASTERISCOS
+                    label = { Text("Password") },
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                    keyboardActions = KeyboardActions(onDone = { enviarAccion() }),
+                    modifier = Modifier.onKeyEvent {
+                        if (it.type == KeyEventType.KeyUp && (it.key == Key.Enter || it.key == Key.NumPadEnter)) {
+                            enviarAccion()
+                            true
+                        } else false
+                    },
+                    singleLine = true
                 )
 
                 if (uiState.isLoading) {
@@ -128,16 +175,9 @@ fun LoginContent(
                 }
 
                 Button(
-                    onClick = {
-                        if (uiState.isLogin) {
-                            viewModel.login(textStateUsuario, textStatePassword)
-                        } else {
-                            viewModel.register(textStateUsuario, textStatePassword, textStateNombre)
-                        }
-                    },
+                    onClick = enviarAccion,
                     enabled = !uiState.isLoading && textStateUsuario.isNotBlank() && textStatePassword.isNotBlank()
-                            || (!uiState.isLogin && textStateNombre.isNotBlank()) && !uiState.isLoading && textStateUsuario.isNotBlank()
-                                && textStatePassword.isNotBlank()
+                            && (uiState.isLogin || textStateNombre.isNotBlank())
                 ) {
                     Text(if (uiState.isLogin) "Login" else "Registrate")
                 }
