@@ -26,7 +26,7 @@ jobs:
             echo "should_release=false" >> $GITHUB_OUTPUT
           fi
 
-  build-unix:
+  build-android:
     needs: check
     if: ${{ needs.check.outputs.should_release == 'true' || github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
@@ -49,10 +49,52 @@ jobs:
           java-version: '17'
           distribution: 'zulu'
           cache: 'gradle'
-      - name: Build Android & Linux
+      - name: Build Android
         run: |
           chmod +x gradlew
-          ./gradlew :composeApp:assembleDebug :composeApp:packageDeb -PappVersion=${{ steps.vars.outputs.version }}
+          ./gradlew :composeApp:assembleDebug -PappVersion=${{ steps.vars.outputs.version }}
+      - name: Prepare Files
+        run: |
+          mkdir -p release-artifacts
+          cp composeApp/build/outputs/apk/debug/*.apk \
+            release-artifacts/burnt-out-${{ steps.vars.outputs.version }}-installer.apk
+      - name: Upload Android
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.vars.outputs.version }}
+          name: Burn t out ${{ steps.vars.outputs.version }}
+          prerelease: ${{ startsWith(steps.vars.outputs.version, '1.') }}
+          files: release-artifacts/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  build-linux:
+    needs: check
+    if: ${{ needs.check.outputs.should_release == 'true' || github.event_name == 'workflow_dispatch' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Calculate Version
+        id: vars
+        run: |
+          COUNT=$(git rev-list --count HEAD)
+          MAJOR_PART=$((COUNT / 100))
+          MINOR_PART=$(printf "%02d" $((COUNT % 100)))
+          echo "version=1.$MAJOR_PART.$MINOR_PART" >> $GITHUB_OUTPUT
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'zulu'
+          cache: 'gradle'
+      - name: Build Linux & Server
+        run: |
+          chmod +x gradlew
+          ./gradlew :composeApp:packageDeb :server:buildFatJar -PappVersion=${{ steps.vars.outputs.version }}
       - name: Find .deb file
         id: deb
         run: |
@@ -64,11 +106,11 @@ jobs:
       - name: Prepare Files
         run: |
           mkdir -p release-artifacts
-          cp composeApp/build/outputs/apk/debug/*.apk \
-            release-artifacts/burnt-out-${{ steps.vars.outputs.version }}-installer.apk
           cp "${{ steps.deb.outputs.path }}" \
             release-artifacts/burnt-out-${{ steps.vars.outputs.version }}-installer.deb
-      - name: Upload Linux & Android
+          cp server/build/libs/*-all.jar \
+            release-artifacts/burnt-out-server-${{ steps.vars.outputs.version }}.jar
+      - name: Upload Linux & Server
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ steps.vars.outputs.version }}
@@ -79,12 +121,13 @@ jobs:
             ## 📦 Instalación
             Descarga el archivo correspondiente a tu plataforma:
 
-            | Plataforma | Instalacion |
+            | Plataforma | Instalación |
             | --- | --- |
             | Windows | .msi |
             | Linux (Debian) | .deb |
             | Android | .apk |
-            | Arch | yay -S burnt-out |
+            | Arch | `yay -S burnt-out` |
+            | Servidor | .jar — `java -jar burnt-out-server-${{ steps.vars.outputs.version }}.jar` |
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -129,10 +172,10 @@ jobs:
           prerelease: ${{ startsWith(steps.vars.outputs.version, '1.') }}
           files: release-artifacts/*
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
-      
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
   deploy-aur:
-    needs: [build-unix, build-windows]
+    needs: [build-linux]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -160,13 +203,26 @@ jobs:
              chown -R builder /pkg && \
              su builder -c 'cd /pkg && makepkg --printsrcinfo > .SRCINFO'"
 
-      - name: Deploy to AUR
+      - name: Deploy desktop app to AUR
         uses: KSXGitHub/github-actions-deploy-aur@v2.7.2
         with:
           pkgname: burnt-out
           pkgbuild: ./PKGBUILD
-          commit_username: ${{ github.actor }}
-          commit_email: tu@email.com
+          commit_username: wDona
+          commit_email: donanferyt@gmail.com
           ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
           commit_message: "Update to ${{ steps.vars.outputs.version }}"
           force_push: true
+          ssh_keyscan_types: rsa,ecdsa,ed25519
+
+      - name: Deploy server to AUR
+        uses: KSXGitHub/github-actions-deploy-aur@v2.7.2
+        with:
+          pkgname: burnt-out-server
+          pkgbuild: ./burnt-out-server/PKGBUILD
+          commit_username: wDona
+          commit_email: donanferyt@gmail.com
+          ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
+          commit_message: "Update to ${{ steps.vars.outputs.version }}"
+          force_push: true
+          ssh_keyscan_types: rsa,ecdsa,ed25519
