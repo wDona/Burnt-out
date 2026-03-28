@@ -19,6 +19,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
@@ -34,7 +35,7 @@ fun BateriaBurnout(riesgo: Double, mostrarTexto: Boolean = true, size: Int = 24,
             imageVector = icon,
             contentDescription = text,
             tint = color,
-            modifier = modifier.size(size.dp)
+            modifier = modifier.size(size.dp).rotate(90f)
         )
         if (mostrarTexto) {
             val riesgoVisual = round(riesgo * 100) / 100.0
