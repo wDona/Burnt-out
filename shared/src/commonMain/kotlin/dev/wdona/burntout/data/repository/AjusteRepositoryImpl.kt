@@ -40,7 +40,7 @@ class AjusteRepositoryImpl(
                 remoteDataSource.modificarAjuste(ajuste)
                 exito = true
             } catch (e: Exception) {
-                println("Servidor offline al modificar ajuste: ${e.message}")
+                println("Servidor invitado al modificar ajuste: ${e.message}")
             }
             try {
                 pendienteDataSource.insertOperacionPendiente(
@@ -67,7 +67,7 @@ class AjusteRepositoryImpl(
                 val ajustesRemotos = remoteDataSource.getAjustesByUsuario(idUsuario)
                 ajustesRemotos.forEach { localDataSource.modificarAjuste(it) }
             } catch (e: Exception) {
-                println("Servidor offline (getAjustesByUsuario): ${e.message}")
+                println("Servidor invitado (getAjustesByUsuario): ${e.message}")
             }
         }
 
@@ -91,7 +91,7 @@ class AjusteRepositoryImpl(
                 val ajusteRemoto = remoteDataSource.getAjusteByIdYUsuario(idAjuste, idUsuario)
                 localDataSource.modificarAjuste(ajusteRemoto)
             } catch (e: Exception) {
-                println("Servidor offline (getAjusteByIdYUsuario): ${e.message}")
+                println("Servidor invitado (getAjusteByIdYUsuario): ${e.message}")
             }
         }
 

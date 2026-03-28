@@ -32,6 +32,9 @@ class UsuarioApiImpl(private val client: HttpClient = ApiClient.client) : Usuari
     override suspend fun eliminarUsuario(idUsuario: Long): Boolean =
         client.delete("usuarios/$idUsuario").status.isSuccess()
 
+    override suspend fun existeUsuario(username: String): Boolean =
+        client.get("usuarios/existe/$username").body()
+
     override suspend fun login(username: String, contrasena: String): Usuario =
         client.post("usuarios/login") { setBody(LoginRequest(username, contrasena)) }.body()
 }

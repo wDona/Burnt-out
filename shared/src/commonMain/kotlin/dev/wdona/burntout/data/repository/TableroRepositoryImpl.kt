@@ -27,7 +27,7 @@ class TableroRepositoryImpl(
                 local.eliminarTablerosPorOrg(idOrg)
                 tableros.forEach { local.insertOrUpdateTablero(it) }
             } catch (e: Exception) {
-                println("Servidor offline (getTablerosByOrg): ${e.message}")
+                println("Servidor invitado (getTablerosByOrg): ${e.message}")
             }
         }
         local.getTablerosByOrg(idOrg)
@@ -39,7 +39,7 @@ class TableroRepositoryImpl(
                 val tablero = remote.getTableroById(idTablero)
                 local.insertOrUpdateTablero(tablero)
             } catch (e: Exception) {
-                println("Servidor offline (getTableroById): ${e.message}")
+                println("Servidor invitado (getTableroById): ${e.message}")
             }
         }
         local.getTableroById(idTablero)
@@ -61,7 +61,7 @@ class TableroRepositoryImpl(
             try {
                 exito = remote.crearTablero(tablero)
             } catch (e: Exception) {
-                println("Servidor offline al crear tablero: ${e.message}")
+                println("Servidor invitado al crear tablero: ${e.message}")
             }
             try {
                 pendiente.insertOperacionPendiente(
@@ -94,7 +94,7 @@ class TableroRepositoryImpl(
             try {
                 exito = remote.actualizarTablero(tablero)
             } catch (e: Exception) {
-                println("Servidor offline al actualizar tablero: ${e.message}")
+                println("Servidor invitado al actualizar tablero: ${e.message}")
             }
             try {
                 pendiente.insertOperacionPendiente(
@@ -127,7 +127,7 @@ class TableroRepositoryImpl(
             try {
                 exito = remote.eliminarTablero(idTablero)
             } catch (e: Exception) {
-                println("Servidor offline al eliminar tablero: ${e.message}")
+                println("Servidor invitado al eliminar tablero: ${e.message}")
             }
             try {
                 pendiente.insertOperacionPendiente(

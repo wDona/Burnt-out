@@ -34,7 +34,7 @@ class PreguntaRespuestaRepositoryImpl(
                          local.upsertPregunta(it)
                     }
                 } catch (e: Exception) {
-                    println("Servidor offline (getPreguntas): ${e.message}")
+                    println("Servidor invitado (getPreguntas): ${e.message}")
                 }
             }
         }
@@ -50,7 +50,7 @@ class PreguntaRespuestaRepositoryImpl(
                         local.responderPregunta(it)
                     }
                 } catch (e: Exception) {
-                    println("Servidor offline (getRespuestas): ${e.message}")
+                    println("Servidor invitado (getRespuestas): ${e.message}")
                 }
             }
         }
@@ -66,7 +66,7 @@ class PreguntaRespuestaRepositoryImpl(
                         local.responderPregunta(it)
                     }
                 } catch (e: Exception) {
-                    println("Servidor offline (getRespuestasByIdUsuario): ${e.message}")
+                    println("Servidor invitado (getRespuestasByIdUsuario): ${e.message}")
                 }
             }
         }
@@ -89,7 +89,7 @@ class PreguntaRespuestaRepositoryImpl(
                         local.responderPregunta(it)
                     }
                 } catch (e: Exception) {
-                    println("Servidor offline (getRespuestasByIdUsuarioAndDate): ${e.message}")
+                    println("Servidor invitado (getRespuestasByIdUsuarioAndDate): ${e.message}")
                 }
             }
         }
@@ -112,7 +112,7 @@ class PreguntaRespuestaRepositoryImpl(
                 idRemoto = remote.crearPregunta(pregunta)
                 exito = idRemoto != -1L
             } catch (e: Exception) {
-                println("Servidor offline: ${e.message}")
+                println("Servidor invitado: ${e.message}")
             }
             savePendingOp(
                 TipoAccion.CREACION,
@@ -138,7 +138,7 @@ class PreguntaRespuestaRepositoryImpl(
             try {
                 exito = remote.actualizarPregunta(pregunta)
             } catch (e: Exception) {
-                println("Servidor offline: ${e.message}")
+                println("Servidor invitado: ${e.message}")
             }
             savePendingOp(
                 TipoAccion.ACTUALIZACION,
@@ -164,7 +164,7 @@ class PreguntaRespuestaRepositoryImpl(
             try {
                 exito = remote.eliminarPregunta(idPregunta)
             } catch (e: Exception) {
-                println("Servidor offline: ${e.message}")
+                println("Servidor invitado: ${e.message}")
             }
             savePendingOp(
                 TipoAccion.ELIMINACION,
@@ -191,7 +191,7 @@ class PreguntaRespuestaRepositoryImpl(
                 remote.responderPregunta(respuesta)
                 exito = true
             } catch (e: Exception) {
-                println("Servidor offline: ${e.message}")
+                println("Servidor invitado: ${e.message}")
             }
             savePendingOp(
                 TipoAccion.CREACION,

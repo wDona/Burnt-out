@@ -22,6 +22,7 @@ import dev.wdona.burntout.presentation.ui.pantallas.formulario.PreguntasIniciale
 import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.AjustesViewModelFactory
 import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.FormularioViewModelFactory
 import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.LeaderboardViewModelFactory
+import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.LoginViewModelFactory
 import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.MiEquipoViewModelFactory
 import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.MiPerfilViewModelFactory
 import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.OperacionesPendientesViewModelFactory
@@ -37,7 +38,8 @@ class PreMainScreen(
     private val leaderboardFactory: LeaderboardViewModelFactory,
     private val ajustesFactory: AjustesViewModelFactory,
     private val formularioFactory: FormularioViewModelFactory,
-    private val operacionesPendientesFactory: OperacionesPendientesViewModelFactory
+    private val operacionesPendientesFactory: OperacionesPendientesViewModelFactory,
+    private val loginFactory: LoginViewModelFactory
 ) : Screen {
     override val key: ScreenKey = uniqueScreenKey
 
@@ -51,7 +53,7 @@ class PreMainScreen(
         val syncViewModel = rememberScreenModel { operacionesPendientesFactory.create() }
 
         LaunchedEffect(Unit) {
-            syncViewModel.sincronizarAlIniciar()
+                syncViewModel.sincronizarAlIniciar()
         }
 
         Scaffold { paddingValues ->
@@ -62,7 +64,19 @@ class PreMainScreen(
                     .background(MaterialTheme.colorScheme.background)
             )
 
-            LaunchedEffect(uiState.primerCuestionarioHecho, uiState.hoyHecho) {
+            LaunchedEffect(
+                uiState.primerCuestionarioHecho,
+                uiState.hoyHecho,
+                settingsViewModel.uiStateUsuarioActual
+            ) {
+                if (settingsViewModel.uiStateUsuarioActual.value == null) {
+                    navigator.replace(
+                        LoginScreen(
+                            factory = loginFactory
+                        )
+                    )
+                }
+
                 if (!uiState.primerCuestionarioHecho) {
                     navigator.replace(
                         PreguntasInicialesScreen(

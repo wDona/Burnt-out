@@ -17,6 +17,10 @@ class UsuarioLocalDataSourceImpl(private val usuarioDao: UsuarioDao) : UsuarioLo
         return usuarioDao.getUsuariosByEquipo(idEquipo)
     }
 
+    override suspend fun getUsuarioByUsername(username: String): Usuario {
+        return usuarioDao.getUsuarioByUsername(username)
+    }
+
     override suspend fun crearUsuario(usuario: Usuario): Long {
         return usuarioDao.crearUsuario(usuario)
     }

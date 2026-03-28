@@ -163,17 +163,44 @@ class UsuarioRepositoryImpl(
 
     override suspend fun updateRiesgoBurnout(idUsuario: Long, riesgo: Double) {
         withContext(Dispatchers.IO) {
+            val usuario = getUserById(idUsuario)
+            actualizarUsuario(usuario.copy(riesgoBurnout = riesgo))
+            local.updateRiesgoBurnout(idUsuario, riesgo)
+        }
+    }
+
+    override suspend fun existeUsuario(username: String): Boolean = withContext(Dispatchers.IO) {
+        try {
+            remote.existeUsuario(username)
+        } catch (e: Exception) {
+            println("Servidor offline (existeUsuario): ${e.message}")
             try {
-                local.updateRiesgoBurnout(idUsuario, riesgo)
-            } catch (e: Exception) {
-                println("Error al actualizar riesgo: ${e.message}")
+                local.getUsuarioByUsername(username)
+                true
+            } catch (localE: Exception) {
+                false
             }
         }
     }
 
     override suspend fun login(username: String, contrasena: String): Usuario = withContext(Dispatchers.IO) {
-        val usuario = remote.login(username, contrasena)
-        local.crearUsuario(usuario) // FIXME?
-        usuario
+        try {
+            val usuario = remote.login(username, contrasena)
+            local.eliminarUsuario(usuario.idUsuario)
+            local.crearUsuario(usuario)
+            usuario
+        } catch (e: Exception) {
+            println("Servidor offline (login): ${e.message}")
+            try {
+                val usuarioLocal = local.getUsuarioByUsername(username)
+                if (usuarioLocal.password == contrasena) {
+                    return@withContext usuarioLocal
+                } else {
+                    throw Exception("Contraseña incorrecta")
+                }
+            } catch (localE: Exception) {
+                throw e
+            }
+        }
     }
 }

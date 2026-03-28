@@ -8,5 +8,6 @@ interface UsuarioApi {
     suspend fun crearUsuario(usuario: Usuario): Boolean
     suspend fun actualizarUsuario(usuario: Usuario): Boolean
     suspend fun eliminarUsuario(idUsuario: Long): Boolean
+    suspend fun existeUsuario(username: String): Boolean
     suspend fun login(username: String, contrasena: String): Usuario
 }

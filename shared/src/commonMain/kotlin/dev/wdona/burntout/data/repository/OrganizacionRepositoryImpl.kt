@@ -30,7 +30,7 @@ class OrganizacionRepositoryImpl(
                     val org = remote.getOrganizacionById(idOrg)
                     if (org != null) local.insertOrUpdateOrganizacion(org)
                 } catch (e: Exception) {
-                    println("Servidor offline (getOrganizacionById): ${e.message}")
+                    println("Servidor invitado (getOrganizacionById): ${e.message}")
                 }
             }
         }
@@ -48,7 +48,7 @@ class OrganizacionRepositoryImpl(
                     val orgs = remote.getAllOrganizaciones()
                     orgs.forEach { local.insertOrUpdateOrganizacion(it) }
                 } catch (e: Exception) {
-                    println("Servidor offline (getAllOrganizaciones): ${e.message}")
+                    println("Servidor invitado (getAllOrganizaciones): ${e.message}")
                 }
             }
         }
@@ -75,7 +75,7 @@ class OrganizacionRepositoryImpl(
                 idRemoto = remote.crearOrganizacion(organizacion)
                 exito = idRemoto != -1L
             } catch (e: Exception) {
-                println("Servidor offline al crear organización: ${e.message}")
+                println("Servidor invitado al crear organización: ${e.message}")
             }
             try {
                 pendiente.insertOperacionPendiente(
@@ -106,7 +106,7 @@ class OrganizacionRepositoryImpl(
             try {
                 exito = remote.actualizarOrganizacion(organizacion)
             } catch (e: Exception) {
-                println("Servidor offline al actualizar organización: ${e.message}")
+                println("Servidor invitado al actualizar organización: ${e.message}")
             }
             try {
                 pendiente.insertOperacionPendiente(
@@ -137,7 +137,7 @@ class OrganizacionRepositoryImpl(
             try {
                 exito = remote.eliminarOrganizacion(idOrg)
             } catch (e: Exception) {
-                println("Servidor offline al eliminar organización: ${e.message}")
+                println("Servidor invitado al eliminar organización: ${e.message}")
             }
             try {
                 pendiente.insertOperacionPendiente(

@@ -25,7 +25,8 @@ fun App(
     leaderboardViewModelFactory: LeaderboardViewModelFactory,
     ajustesViewModelFactory: AjustesViewModelFactory,
     formularioViewModelFactory: FormularioViewModelFactory,
-    operacionesPendientesViewModelFactory: OperacionesPendientesViewModelFactory
+    operacionesPendientesViewModelFactory: OperacionesPendientesViewModelFactory,
+    loginViewModelFactory: LoginViewModelFactory
 ) {
     BurntOutMaterialTheme {
         Surface(
@@ -41,7 +42,8 @@ fun App(
                     leaderboardFactory = leaderboardViewModelFactory,
                     formularioFactory = formularioViewModelFactory,
                     ajustesFactory = ajustesViewModelFactory,
-                    operacionesPendientesFactory = operacionesPendientesViewModelFactory
+                    operacionesPendientesFactory = operacionesPendientesViewModelFactory,
+                    loginFactory = loginViewModelFactory
                 )
             ) { navigator ->
                 PressBackHandler(enabled = navigator.canPop) {

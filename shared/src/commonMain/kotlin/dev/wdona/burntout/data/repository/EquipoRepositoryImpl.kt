@@ -77,7 +77,7 @@ class EquipoRepositoryImpl(
             try {
                 exito = remote.crearEquipo(equipo)
             } catch (e: Exception) {
-                println("Servidor offline al crear equipo: ${e.message}")
+                println("Servidor invitado al crear equipo: ${e.message}")
             }
             try {
                 pendiente.insertOperacionPendiente(
@@ -110,7 +110,7 @@ class EquipoRepositoryImpl(
             try {
                 exito = remote.actualizarEquipo(equipo)
             } catch (e: Exception) {
-                println("Servidor offline al actualizar equipo: ${e.message}")
+                println("Servidor invitado al actualizar equipo: ${e.message}")
             }
             try {
                 pendiente.insertOperacionPendiente(
@@ -143,7 +143,7 @@ class EquipoRepositoryImpl(
             try {
                 exito = remote.eliminarEquipo(idEquipo)
             } catch (e: Exception) {
-                println("Servidor offline al eliminar equipo: ${e.message}")
+                println("Servidor invitado al eliminar equipo: ${e.message}")
             }
             try {
                 pendiente.insertOperacionPendiente(

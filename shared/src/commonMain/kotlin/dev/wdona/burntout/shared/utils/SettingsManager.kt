@@ -1,11 +1,12 @@
 package dev.wdona.burntout.shared.utils
 
 import com.russhwolf.settings.Settings
+import dev.wdona.burntout.shared.domain.Usuario
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 object SettingsManager {
-    // TODO: Hardcodear usuario offline
+    // TODO: Hardcodear usuario invitado
     private val settings = createSettings()
     private const val KEY_PRIMER_CUESTIONARIO_HECHO = "cuestionario_inicial_hecho"
     private const val KEY_ID_USUARIO_ACTUAL = "id_usuario_actual"
@@ -147,5 +148,14 @@ object SettingsManager {
     fun setSincronizadoEnEstaApertura(sincronizado: Boolean) {
         settings.putBoolean(KEY_SINCRONIZADO_EN_ESTA_APERTURA, sincronizado)
         _sincronizadoEnEstaAperturaFlow.value = sincronizado
+    }
+
+    fun setUsuarioActual(usuario: Usuario) {
+        setIdUsuarioActual(usuario.idUsuario)
+        setNombreUsuario(usuario.username)
+        setIdEquipoActual(usuario.idEquipo)
+        setIdOrganizacionActual(usuario.idOrganizacion)
+        setTokenUsuario("token_${usuario.idUsuario}")
+        setRolActual(1L) // FIXME
     }
 }

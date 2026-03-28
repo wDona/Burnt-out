@@ -25,6 +25,10 @@ class UsuarioRemoteDataSourceImpl(private val usuarioApi: UsuarioApi) : UsuarioR
         return usuarioApi.eliminarUsuario(idUsuario)
     }
 
+    override suspend fun existeUsuario(username: String): Boolean {
+        return usuarioApi.existeUsuario(username)
+    }
+
     override suspend fun login(username: String, contrasena: String): Usuario {
         return usuarioApi.login(username, contrasena)
     }

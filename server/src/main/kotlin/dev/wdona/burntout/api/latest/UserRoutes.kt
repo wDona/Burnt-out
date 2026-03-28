@@ -75,6 +75,13 @@ fun Route.usuariosRoutes() {
             } ?: return@post call.respond(HttpStatusCode.Unauthorized)
             call.respond(usuario)
         }
+        get("/existe/{username}") {
+            val username = call.parameters["username"] ?: return@get call.respond(HttpStatusCode.BadRequest)
+            val existe = dbQuery {
+                UsuariosTable.selectAll().where { UsuariosTable.username eq username }.count() > 0
+            }
+            call.respond(existe)
+        }
         route("/{id}") {
             get {
                 val id = call.parameters["id"]?.toLongOrNull()

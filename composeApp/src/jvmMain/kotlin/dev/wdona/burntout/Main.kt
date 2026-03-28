@@ -91,7 +91,8 @@ fun main() = application {
                         leaderboardViewModelFactory = LeaderboardViewModelFactory(),
                         formularioViewModelFactory = FormularioViewModelFactory(),
                         ajustesViewModelFactory = AjustesViewModelFactory(),
-                        operacionesPendientesViewModelFactory = OperacionesPendientesViewModelFactory()
+                        operacionesPendientesViewModelFactory = OperacionesPendientesViewModelFactory(),
+                        loginViewModelFactory = LoginViewModelFactory()
                     )
                 } else {
                     Box(
