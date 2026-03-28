@@ -26,7 +26,7 @@ class PreguntaRespuestaRepositoryImpl(
     private val repositoryScope = CoroutineScope(Dispatchers.Default)
 
     override suspend fun getPreguntasByOrg(idOrg: Long): List<Pregunta> = withContext(Dispatchers.IO) {
-        if (!SettingsManager.isOfflineUser()) {
+        if (!SettingsManager.isUsuarioInvitado()) {
             repositoryScope.launch {
                 try {
                     val remoteList = remote.getPreguntasByOrg(idOrg)
@@ -42,7 +42,7 @@ class PreguntaRespuestaRepositoryImpl(
     }
 
     override suspend fun getRespuestasByPregunta(idPregunta: Long): List<Respuesta> = withContext(Dispatchers.IO) {
-        if (!SettingsManager.isOfflineUser()) {
+        if (!SettingsManager.isUsuarioInvitado()) {
             repositoryScope.launch {
                 try {
                     val remoteList = remote.getRespuestasByPregunta(idPregunta)
@@ -58,7 +58,7 @@ class PreguntaRespuestaRepositoryImpl(
     }
 
     override suspend fun getRespuestasByIdUsuario(idUser: Long): List<Respuesta> = withContext(Dispatchers.IO) {
-        if (!SettingsManager.isOfflineUser()) {
+        if (!SettingsManager.isUsuarioInvitado()) {
             repositoryScope.launch {
                 try {
                     val remoteList = remote.getRespuestasByIdUsuario(idUser)
@@ -81,7 +81,7 @@ class PreguntaRespuestaRepositoryImpl(
     }
 
     override suspend fun getRespuestasByIdUsuarioAndDate(idUser: Long, date: Long): List<Respuesta> = withContext(Dispatchers.IO) {
-        if (!SettingsManager.isOfflineUser()) {
+        if (!SettingsManager.isUsuarioInvitado()) {
             repositoryScope.launch {
                 try {
                     val remoteList = remote.getRespuestasByIdUsuarioAndDate(idUser, date)
@@ -104,7 +104,7 @@ class PreguntaRespuestaRepositoryImpl(
                 println("Error local: ${e.message}")
             }
         }
-        if (SettingsManager.isOfflineUser()) return
+        if (SettingsManager.isUsuarioInvitado()) return
         withContext(NonCancellable + Dispatchers.IO) {
             var exito = false
             var idRemoto: Long = -1
@@ -132,7 +132,7 @@ class PreguntaRespuestaRepositoryImpl(
                 println("Error local al actualizar pregunta: ${e.message}")
             }
         }
-        if (SettingsManager.isOfflineUser()) return
+        if (SettingsManager.isUsuarioInvitado()) return
         withContext(NonCancellable + Dispatchers.IO) {
             var exito = false
             try {
@@ -158,7 +158,7 @@ class PreguntaRespuestaRepositoryImpl(
                 println("Error local al eliminar pregunta: ${e.message}")
             }
         }
-        if (SettingsManager.isOfflineUser()) return
+        if (SettingsManager.isUsuarioInvitado()) return
         withContext(NonCancellable + Dispatchers.IO) {
             var exito = false
             try {
@@ -184,7 +184,7 @@ class PreguntaRespuestaRepositoryImpl(
                 println("Error local al responder pregunta: ${e.message}")
             }
         }
-        if (SettingsManager.isOfflineUser()) return
+        if (SettingsManager.isUsuarioInvitado()) return
         withContext(NonCancellable + Dispatchers.IO) {
             var exito = false
             try {

@@ -64,7 +64,7 @@ object SettingsManager {
         return settings.getBoolean(KEY_PRIMER_CUESTIONARIO_HECHO, false)
     }
 
-    fun isOfflineUser(): Boolean {
+    fun isUsuarioInvitado(): Boolean {
         return getIdUsuarioActual() == Long.MIN_VALUE
     }
 

@@ -24,7 +24,7 @@ class SubtareaRepositoryImpl(
     private val repositoryScope = CoroutineScope(Dispatchers.Default)
 
     override suspend fun getSubtareasByTarea(idTarea: Long): List<Subtarea> = withContext(Dispatchers.IO) {
-        if (!SettingsManager.isOfflineUser()) {
+        if (!SettingsManager.isUsuarioInvitado()) {
             repositoryScope.launch {
                 try {
                     val subtareasRemotas = remote.getSubtareasByTarea(idTarea)
@@ -50,7 +50,7 @@ class SubtareaRepositoryImpl(
             }
         }
 
-        if (SettingsManager.isOfflineUser()) return
+        if (SettingsManager.isUsuarioInvitado()) return
 
         withContext(NonCancellable + Dispatchers.IO) {
             var exito = false
@@ -85,7 +85,7 @@ class SubtareaRepositoryImpl(
             }
         }
 
-        if (SettingsManager.isOfflineUser()) return
+        if (SettingsManager.isUsuarioInvitado()) return
 
         withContext(NonCancellable + Dispatchers.IO) {
             var exito = false
@@ -118,7 +118,7 @@ class SubtareaRepositoryImpl(
             }
         }
 
-        if (SettingsManager.isOfflineUser()) return
+        if (SettingsManager.isUsuarioInvitado()) return
 
         withContext(NonCancellable + Dispatchers.IO) {
             var exito = false

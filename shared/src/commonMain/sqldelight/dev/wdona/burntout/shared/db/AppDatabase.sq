@@ -120,7 +120,7 @@ insertEquipoBase:
 INSERT OR IGNORE INTO EquipoEntity(ID_Equipo, Titulo, FK_ID_Org) VALUES(-9223372036854775808, 'Equipo predeterminado', -9223372036854775808);
 
 insertUsuarioBase:
-INSERT OR IGNORE INTO UsuarioEntity(ID_Usuario, Username, Contrasena, Nombre, FK_ID_Organizacion) VALUES(-9223372036854775808, 'Offline', '********', 'Usuario offline', -9223372036854775808);
+INSERT OR IGNORE INTO UsuarioEntity(ID_Usuario, Username, Contrasena, Nombre, FK_ID_Organizacion) VALUES(-9223372036854775808, 'Invitado', '********', 'Usuario invitado', -9223372036854775808);
 INSERT OR IGNORE INTO User_TeamEntity(ID_Usuario, ID_Equipo) VALUES(-9223372036854775808, -9223372036854775808);
 
 -- BASADAS EN EL MBI (Maslach Burnout Inventory)

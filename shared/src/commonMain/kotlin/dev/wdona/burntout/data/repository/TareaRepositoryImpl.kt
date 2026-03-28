@@ -24,7 +24,7 @@ class TareaRepositoryImpl(
     private val repositoryScope = CoroutineScope(Dispatchers.Default)
 
     override suspend fun getTareasByTableroId(tableroId: Long): List<Tarea> = withContext(Dispatchers.IO) {
-        if (!SettingsManager.isOfflineUser()) {
+        if (!SettingsManager.isUsuarioInvitado()) {
             repositoryScope.launch {
                 try {
                     val tareas = remote.getTareasByTablero(tableroId)
@@ -39,7 +39,7 @@ class TareaRepositoryImpl(
     }
 
     override suspend fun getTareaById(idTarea: Long, idTablero: Long): Tarea? = withContext(Dispatchers.IO) {
-        if (!SettingsManager.isOfflineUser()) {
+        if (!SettingsManager.isUsuarioInvitado()) {
             repositoryScope.launch {
                 try {
                     val tarea = remote.getTareaById(idTarea, idTablero)
@@ -62,7 +62,7 @@ class TareaRepositoryImpl(
             }
         }
 
-        if (SettingsManager.isOfflineUser()) return
+        if (SettingsManager.isUsuarioInvitado()) return
 
         withContext(NonCancellable + Dispatchers.IO) {
             var exitoRemoto = false
@@ -97,7 +97,7 @@ class TareaRepositoryImpl(
             }
         }
 
-        if (SettingsManager.isOfflineUser()) return
+        if (SettingsManager.isUsuarioInvitado()) return
 
         withContext(NonCancellable + Dispatchers.IO) {
             var exito = false
@@ -130,7 +130,7 @@ class TareaRepositoryImpl(
             }
         }
 
-        if (SettingsManager.isOfflineUser()) return
+        if (SettingsManager.isUsuarioInvitado()) return
 
         withContext(NonCancellable + Dispatchers.IO) {
             var exito = false

@@ -21,7 +21,7 @@ class TableroRepositoryImpl(
 ) : TableroRepository {
 
     override suspend fun getTablerosByOrg(idOrg: Long): List<Tablero> = withContext(Dispatchers.IO) {
-        if (!SettingsManager.isOfflineUser()) {
+        if (!SettingsManager.isUsuarioInvitado()) {
             try {
                 val tableros = remote.getTablerosByOrg(idOrg)
                 local.eliminarTablerosPorOrg(idOrg)
@@ -34,7 +34,7 @@ class TableroRepositoryImpl(
     }
 
     override suspend fun getTableroById(idTablero: Long): Tablero? = withContext(Dispatchers.IO) {
-        if (!SettingsManager.isOfflineUser()) {
+        if (!SettingsManager.isUsuarioInvitado()) {
             try {
                 val tablero = remote.getTableroById(idTablero)
                 local.insertOrUpdateTablero(tablero)
@@ -54,7 +54,7 @@ class TableroRepositoryImpl(
             }
         }
 
-        if (SettingsManager.isOfflineUser()) return
+        if (SettingsManager.isUsuarioInvitado()) return
 
         withContext(NonCancellable + Dispatchers.IO) {
             var exito = false
@@ -87,7 +87,7 @@ class TableroRepositoryImpl(
             }
         }
 
-        if (SettingsManager.isOfflineUser()) return
+        if (SettingsManager.isUsuarioInvitado()) return
 
         withContext(NonCancellable + Dispatchers.IO) {
             var exito = false
@@ -120,7 +120,7 @@ class TableroRepositoryImpl(
             }
         }
 
-        if (SettingsManager.isOfflineUser()) return
+        if (SettingsManager.isUsuarioInvitado()) return
 
         withContext(NonCancellable + Dispatchers.IO) {
             var exito = false

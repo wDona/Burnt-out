@@ -33,7 +33,7 @@ class AjusteRepositoryImpl(
                 println("Error local al modificar ajuste: ${e.message}")
             }
         }
-        if (SettingsManager.isOfflineUser()) return
+        if (SettingsManager.isUsuarioInvitado()) return
         withContext(NonCancellable + Dispatchers.IO) {
             var exito = false
             try {

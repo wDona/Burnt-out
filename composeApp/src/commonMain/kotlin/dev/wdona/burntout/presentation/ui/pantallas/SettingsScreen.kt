@@ -49,7 +49,7 @@ fun SettingsContent(viewModel: AjustesViewModel, onVolver: () -> Unit) {
             )
             FilaAjusteInfo("Id de usuario: " + ajustes.idUsuario)
             FilaAjusteInfo("Token de usuario: " + ajustes.token.ifEmpty { "No hay token" })
-            FilaAjusteInfo("Nombre de usuario: " + ajustes.nombreUsuario.ifEmpty { "Offline" })
+            FilaAjusteInfo("Nombre de usuario: " + ajustes.nombreUsuario.ifEmpty { "Invitado" })
             FilaAjusteInfo("Organizacion de usuario: " + ajustes.idOrganizacion)
             FilaAjusteInfo("Equipo de usuario: " + ajustes.idEquipo)
             FilaAjusteInfo("Version de app: " + ajustes.versionApp)

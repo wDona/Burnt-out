@@ -24,7 +24,7 @@ class OrganizacionRepositoryImpl(
     private val repositoryScope = CoroutineScope(Dispatchers.Default)
 
     override suspend fun getOrganizacionById(idOrg: Long): Organizacion? = withContext(Dispatchers.IO) {
-        if (!SettingsManager.isOfflineUser()) {
+        if (!SettingsManager.isUsuarioInvitado()) {
             repositoryScope.launch {
                 try {
                     val org = remote.getOrganizacionById(idOrg)
@@ -42,7 +42,7 @@ class OrganizacionRepositoryImpl(
     }
 
     override suspend fun getAllOrganizaciones(): List<Organizacion> = withContext(Dispatchers.IO) {
-        if (!SettingsManager.isOfflineUser()) {
+        if (!SettingsManager.isUsuarioInvitado()) {
             repositoryScope.launch {
                 try {
                     val orgs = remote.getAllOrganizaciones()
@@ -67,7 +67,7 @@ class OrganizacionRepositoryImpl(
                 println("Error local al crear organización: ${e.message}")
             }
         }
-        if (SettingsManager.isOfflineUser()) return
+        if (SettingsManager.isUsuarioInvitado()) return
         withContext(NonCancellable + Dispatchers.IO) {
             var exito = false
             var idRemoto: Long = -1
@@ -100,7 +100,7 @@ class OrganizacionRepositoryImpl(
                 println("Error local al actualizar organización: ${e.message}")
             }
         }
-        if (SettingsManager.isOfflineUser()) return
+        if (SettingsManager.isUsuarioInvitado()) return
         withContext(NonCancellable + Dispatchers.IO) {
             var exito = false
             try {
@@ -131,7 +131,7 @@ class OrganizacionRepositoryImpl(
                 println("Error local al eliminar organización: ${e.message}")
             }
         }
-        if (SettingsManager.isOfflineUser()) return
+        if (SettingsManager.isUsuarioInvitado()) return
         withContext(NonCancellable + Dispatchers.IO) {
             var exito = false
             try {

@@ -26,7 +26,7 @@ class EquipoRepositoryImpl(
     private val repositoryScope = CoroutineScope(Dispatchers.Default)
 
     override suspend fun getEquiposByOrg(idOrg: Long): List<Equipo> = withContext(Dispatchers.IO) {
-        if (!SettingsManager.isOfflineUser()) {
+        if (!SettingsManager.isUsuarioInvitado()) {
             repositoryScope.launch {
                 try {
                     val equiposRemotos = remote.getEquiposByOrg(idOrg)
@@ -46,7 +46,7 @@ class EquipoRepositoryImpl(
     }
 
     override suspend fun getEquipoById(idEquipo: Long): Equipo? = withContext(Dispatchers.IO) {
-        if (!SettingsManager.isOfflineUser()) {
+        if (!SettingsManager.isUsuarioInvitado()) {
             try {
                 val equipoRemoto = remote.getEquipoById(idEquipo)
                 local.insertOrUpdateEquipo(equipoRemoto)
@@ -70,7 +70,7 @@ class EquipoRepositoryImpl(
             }
         }
 
-        if (SettingsManager.isOfflineUser()) return
+        if (SettingsManager.isUsuarioInvitado()) return
 
         withContext(NonCancellable + Dispatchers.IO) {
             var exito = false
@@ -103,7 +103,7 @@ class EquipoRepositoryImpl(
             }
         }
 
-        if (SettingsManager.isOfflineUser()) return
+        if (SettingsManager.isUsuarioInvitado()) return
 
         withContext(NonCancellable + Dispatchers.IO) {
             var exito = false
@@ -136,7 +136,7 @@ class EquipoRepositoryImpl(
             }
         }
 
-        if (SettingsManager.isOfflineUser()) return
+        if (SettingsManager.isUsuarioInvitado()) return
 
         withContext(NonCancellable + Dispatchers.IO) {
             var exito = false

@@ -20,7 +20,7 @@ data class AjustesUiState(
     val idUsuario: Long = Long.MIN_VALUE,
     val idOrganizacion: Long = Long.MIN_VALUE,
     val idEquipo: Long = Long.MIN_VALUE,
-    val nombreUsuario: String = "Offline",
+    val nombreUsuario: String = "Invitado",
     val versionApp: String = AppInfo.version,
     // w.x.yz -> w. major version, x. centena de commits, yz. -> decena/ud de commit
     val hoyHecho: Boolean = false,

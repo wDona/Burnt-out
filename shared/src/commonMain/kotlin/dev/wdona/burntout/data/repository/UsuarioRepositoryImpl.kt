@@ -43,7 +43,7 @@ class UsuarioRepositoryImpl(
     }
 
     override suspend fun getUsuariosByOrg(idOrg: Long): List<Usuario> = withContext(Dispatchers.IO) {
-        if (!SettingsManager.isOfflineUser()) {
+        if (!SettingsManager.isUsuarioInvitado()) {
             repositoryScope.launch {
                 try {
                     val usuarios = remote.getUsuariosByOrg(idOrg)
@@ -59,7 +59,7 @@ class UsuarioRepositoryImpl(
 
     override suspend fun getUsuariosByEquipo(idEquipo: Long): List<Usuario> = withContext(Dispatchers.IO) {
         // FIXME: Sincronizar remote si existe endpoint
-        if (!SettingsManager.isOfflineUser()) {
+        if (!SettingsManager.isUsuarioInvitado()) {
             // TODO
         }
         local.getUsuariosByEquipo(idEquipo)
@@ -74,7 +74,7 @@ class UsuarioRepositoryImpl(
             }
         }
 
-        if (SettingsManager.isOfflineUser()) return
+        if (SettingsManager.isUsuarioInvitado()) return
         withContext(NonCancellable + Dispatchers.IO) {
             var exito = false
             try {
@@ -106,7 +106,7 @@ class UsuarioRepositoryImpl(
             }
         }
 
-        if (SettingsManager.isOfflineUser()) return
+        if (SettingsManager.isUsuarioInvitado()) return
         withContext(NonCancellable + Dispatchers.IO) {
             var exito = false
             try {
@@ -138,7 +138,7 @@ class UsuarioRepositoryImpl(
             }
         }
 
-        if (SettingsManager.isOfflineUser()) return
+        if (SettingsManager.isUsuarioInvitado()) return
         withContext(NonCancellable + Dispatchers.IO) {
             var exito = false
             try {

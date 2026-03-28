@@ -50,7 +50,7 @@ fun CardTarea(tarea: Tarea, onClick: () -> Unit, onCompletar: () -> Unit) {
             modifier = Modifier.weight(1f)
         )
         Text(
-            text =  if (tarea.idUsuarioAsignado == Long.MIN_VALUE) "Usuario offline" else "${tarea.idUsuarioAsignado}",
+            text =  if (tarea.idUsuarioAsignado == Long.MIN_VALUE) "Usuario invitado" else "${tarea.idUsuarioAsignado}",
             textAlign = TextAlign.End,
         )
     }
