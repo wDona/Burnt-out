@@ -3,6 +3,7 @@ import dev.wdona.burntout.db.DatabaseFactory.dbQuery
 import dev.wdona.burntout.db.tables.UsuariosTable
 import dev.wdona.burntout.db.tables.EquiposTable
 import dev.wdona.burntout.db.tables.EquipoMiembrosTable
+import dev.wdona.burntout.db.tables.RespuestasTable
 import dev.wdona.burntout.shared.domain.Usuario
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.plugins.origin
@@ -13,6 +14,8 @@ import kotlinx.serialization.Serializable
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.and
+import kotlin.collections.toSet
+
 @Serializable
 internal data class LoginRequest(val username: String, val contrasena: String)
 fun Route.usuariosRoutes() {
@@ -73,7 +76,17 @@ fun Route.usuariosRoutes() {
                     it[this.idEquipo] = equipoId
                     it[this.idMiembro] = nuevoUserId
                 }
-                
+
+                val preguntas = RespuestasTable.selectAll().map { it[RespuestasTable.idPregunta] }.toSet()
+
+                preguntas.forEach { preguntaId ->
+                    RespuestasTable.insert {
+                        it[this.idPregunta] = preguntaId
+                        it[this.idUsuario] = nuevoUserId
+                        it[this.respuesta] = -1
+                    }
+                }
+
                 nuevoUserId
             }
             call.respond(HttpStatusCode.Created, usuario.copy(idUsuario = nuevoId, idEquipo = createdEquipoId))

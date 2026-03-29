@@ -79,6 +79,7 @@ class PreguntasInicialesScreen(
     private val tableroFactory: TablerosViewModelFactory,
     private val leaderboardFactory: LeaderboardViewModelFactory,
     private val ajustesFactory: AjustesViewModelFactory,
+    private val idEquipo: Long = SettingsManager.getIdEquipoActual()
 ) : Screen {
     override val key: ScreenKey = uniqueScreenKey
 
@@ -94,7 +95,8 @@ class PreguntasInicialesScreen(
                     tableroFactory = tableroFactory,
                     leaderboardFactory = leaderboardFactory,
                     ajustesFactory = ajustesFactory,
-                    formularioFactory = viewModelFactory
+                    formularioFactory = viewModelFactory,
+                    idEquipo = idEquipo
                 )
             )
         }

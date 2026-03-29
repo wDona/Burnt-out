@@ -67,7 +67,8 @@ class PreMainScreen(
             LaunchedEffect(
                 uiState.primerCuestionarioHecho,
                 uiState.hoyHecho,
-                settingsViewModel.uiStateUsuarioActual
+                settingsViewModel.uiStateUsuarioActual,
+                uiState.idEquipo
             ) {
                 // Usamos SettingsManager directamente para leer el estado de forma síncrona
                 // porque AjustesUiState puede tardar unos ms en emitir al cambiar de usuario
@@ -84,7 +85,8 @@ class PreMainScreen(
                             perfilFactory = perfilFactory,
                             tableroFactory = tableroFactory,
                             ajustesFactory = ajustesFactory,
-                            leaderboardFactory = leaderboardFactory
+                            leaderboardFactory = leaderboardFactory,
+                            idEquipo = uiState.idEquipo
                         )
                     )
                 } else if (!hoyHechoSync) {
@@ -97,7 +99,8 @@ class PreMainScreen(
                             perfilFactory = perfilFactory,
                             tableroFactory = tableroFactory,
                             ajustesFactory = ajustesFactory,
-                            leaderboardFactory = leaderboardFactory
+                            leaderboardFactory = leaderboardFactory,
+                            idEquipo = uiState.idEquipo
                         )
                     )
                 } else {
@@ -109,7 +112,8 @@ class PreMainScreen(
                             perfilFactory = perfilFactory,
                             tableroFactory = tableroFactory,
                             ajustesFactory = ajustesFactory,
-                            leaderboardFactory = leaderboardFactory
+                            leaderboardFactory = leaderboardFactory,
+                            idEquipo = uiState.idEquipo,
                         )
                     )
                 }

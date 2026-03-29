@@ -44,7 +44,8 @@ class MainScreen(
     private val tableroFactory: TablerosViewModelFactory,
     private val leaderboardFactory: LeaderboardViewModelFactory,
     private val ajustesFactory: AjustesViewModelFactory,
-    private val formularioFactory: FormularioViewModelFactory
+    private val formularioFactory: FormularioViewModelFactory,
+    private val idEquipo: Long
 ) : Screen {
     override val key: ScreenKey = uniqueScreenKey
 
@@ -57,7 +58,7 @@ class MainScreen(
 
         TabNavigator(tablerosTab) { tabNavigator ->
             val equipoTab = remember { 
-                EquipoTab(equipoFactory, perfilFactory, ajustesFactory)
+                EquipoTab(equipoFactory, perfilFactory, ajustesFactory, idEquipo)
             }
 
             Scaffold(
@@ -125,6 +126,7 @@ private class EquipoTab(
     val factory: MiEquipoViewModelFactory,
     val perfilFactory: MiPerfilViewModelFactory,
     val settingsFactory: AjustesViewModelFactory,
+    val idEquipoActual: Long = SettingsManager.getIdEquipoActual()
 ) : Tab {
     override val key = "EquipoTab"
     @get:Composable
@@ -133,7 +135,7 @@ private class EquipoTab(
 
     @Composable
     override fun Content() {
-        Navigator(EquipoScreen(factory, perfilFactory, settingsFactory)) { navigator ->
+        Navigator(EquipoScreen(factory, perfilFactory, settingsFactory, idEquipo = idEquipoActual)) { navigator ->
             CrossfadeTransition(navigator)
         }
     }

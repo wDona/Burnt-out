@@ -29,18 +29,18 @@ import androidx.compose.foundation.layout.Arrangement
 import cafe.adriel.voyager.core.screen.ScreenKey
 import cafe.adriel.voyager.core.screen.uniqueScreenKey
 import dev.wdona.burntout.presentation.ui.components.common.FilaTextoPlaceholder
+import androidx.compose.runtime.collectAsState
 
-class EquipoScreen(val factory: MiEquipoViewModelFactory, val perfilFactory: MiPerfilViewModelFactory, val ajustesFactory: AjustesViewModelFactory, val onVolver: (() -> Unit)? = null) : Screen {
+class EquipoScreen(val factory: MiEquipoViewModelFactory, val perfilFactory: MiPerfilViewModelFactory, val ajustesFactory: AjustesViewModelFactory, val onVolver: (() -> Unit)? = null, val idEquipo: Long) : Screen {
     override val key: ScreenKey = uniqueScreenKey
 
     @Composable
     override fun Content() {
-
-
         val navigator = LocalNavigator.currentOrThrow // Para poder volver o ir a otra
 
+        val ajustesViewModel = rememberScreenModel { ajustesFactory.create() }
+
         val viewModel = rememberScreenModel { factory.create() }
-        val idEquipo = SettingsManager.getIdEquipoActual()
         val perfilViewModel = rememberScreenModel { perfilFactory.create() }
 
         LaunchedEffect(idEquipo) {
@@ -63,12 +63,10 @@ class EquipoScreen(val factory: MiEquipoViewModelFactory, val perfilFactory: MiP
 @Composable
 fun EquipoContent(viewModel: EquipoViewModel, onVolver: (() -> Unit)? = null, onClickUsuario: (Long) -> Unit, perfilViewModel: PerfilViewModel) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val equipo = uiState.equipo
-    val miembros = uiState.miembros
-    val isLoading = uiState.isLoading
+    // TODO COGER MIEMBROS
 
-    val titulo = if (isLoading) "" else (equipo?.titulo ?: "Mi equipo (off)")
-    val subtitulo = "" + (equipo?.puntuacion ?: "0") + "pts"
+    val titulo = if (uiState.isLoading) "" else (uiState.equipo?.titulo ?: "Mi equipo (off)")
+    val subtitulo = "" + (uiState.equipo?.puntuacion ?: "0") + "pts"
 
     ScaffoldBase(
         titulo = titulo,
@@ -76,7 +74,7 @@ fun EquipoContent(viewModel: EquipoViewModel, onVolver: (() -> Unit)? = null, on
         onVolver = onVolver
     ) {
          Box(modifier = Modifier.fillMaxSize()) {
-            if (isLoading) {
+            if (uiState.isLoading) {
                 Column {
                     (0..3).forEach { _ ->
                         FilaTextoPlaceholder(

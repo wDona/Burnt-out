@@ -32,4 +32,8 @@ class UsuarioRemoteDataSourceImpl(private val usuarioApi: UsuarioApi) : UsuarioR
     override suspend fun login(username: String, contrasena: String): Usuario {
         return usuarioApi.login(username, contrasena)
     }
+
+    override suspend fun getMiembrosEquipo(idEquipo: Long): List<Usuario> {
+        return usuarioApi.getMiembrosEquipo(idEquipo)
+    }
 }

@@ -10,4 +10,5 @@ interface UsuarioApi {
     suspend fun eliminarUsuario(idUsuario: Long): Boolean
     suspend fun existeUsuario(username: String): Boolean
     suspend fun login(username: String, contrasena: String): Usuario
+    suspend fun getMiembrosEquipo(idEquipo: Long): List<Usuario>
 }

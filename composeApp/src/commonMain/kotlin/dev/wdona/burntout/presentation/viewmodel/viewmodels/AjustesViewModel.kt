@@ -31,15 +31,16 @@ class AjustesViewModel(private val repository: AjusteRepository) : ScreenModel {
     val ajustesUiState = combine(
         SettingsManager.primerCuestionarioHechoFlow,
         SettingsManager.cuestionarioHoyHechoFlow,
-        SettingsManager.sincronizadoEnEstaAperturaFlow
-    ) { primerCuestionario, hoyHecho, sincronizado ->
+        SettingsManager.sincronizadoEnEstaAperturaFlow,
+        SettingsManager.idEquipoActualFlow
+    ) { primerCuestionario, hoyHecho, sincronizado, idEquipoActual ->
         AjustesUiState(
             primerCuestionarioHecho = primerCuestionario,
             hoyHecho = hoyHecho,
             token = SettingsManager.getTokenUsuario(),
             idUsuario = SettingsManager.getIdUsuarioActual(),
+            idEquipo = idEquipoActual,
             idOrganizacion = SettingsManager.getIdOrganizacionActual(),
-            idEquipo = SettingsManager.getIdEquipoActual(),
             nombreUsuario = SettingsManager.getNombreUsuario(),
             syncOk = sincronizado
         )

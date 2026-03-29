@@ -36,6 +36,9 @@ object SettingsManager {
     private val _idUsuarioActualFlow = MutableStateFlow(getIdUsuarioActual())
     val idUsuarioActualFlow = _idUsuarioActualFlow.asStateFlow()
 
+    private val _idEquipoActualFlow = MutableStateFlow(getIdEquipoActual())
+    val idEquipoActualFlow = _idEquipoActualFlow.asStateFlow()
+
     fun clearAll() {
         settings.clear()
 

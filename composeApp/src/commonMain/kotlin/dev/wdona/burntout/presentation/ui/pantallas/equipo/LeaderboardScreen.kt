@@ -54,7 +54,7 @@ class LeaderboardScreen(
         LeaderboardContent(
             leaderboardViewModel = viewModel,
             onEquipoClick = { idEquipo ->
-                navigator.push(EquipoScreen(equipoFactory, perfilFactory, ajustesFactory, onVolver = { navigator.pop() }))
+                navigator.push(EquipoScreen(equipoFactory, perfilFactory, ajustesFactory, onVolver = { navigator.pop() }, idEquipo = idEquipo))
             }
         )
     }

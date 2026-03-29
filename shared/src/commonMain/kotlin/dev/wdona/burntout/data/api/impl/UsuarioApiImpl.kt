@@ -48,4 +48,8 @@ class UsuarioApiImpl(private val client: HttpClient = ApiClient.client) : Usuari
             contentType(ContentType.Application.Json)
             setBody(LoginRequest(username, contrasena))
         }.body()
+
+    override suspend fun getMiembrosEquipo(idEquipo: Long): List<Usuario> {
+        return client.get("equipos/$idEquipo/miembros").body()
+    }
 }

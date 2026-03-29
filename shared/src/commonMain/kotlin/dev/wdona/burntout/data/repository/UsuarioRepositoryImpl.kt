@@ -58,9 +58,16 @@ class UsuarioRepositoryImpl(
     }
 
     override suspend fun getUsuariosByEquipo(idEquipo: Long): List<Usuario> = withContext(NonCancellable + Dispatchers.IO) {
-        // FIXME: Sincronizar remote si existe endpoint
         if (!SettingsManager.isUsuarioInvitado()) {
-            // TODO
+            try {
+                val usuarios = remote.getMiembrosEquipo(idEquipo)
+
+                usuarios.forEach { local.eliminarUsuario(it.idUsuario) }
+                usuarios.forEach { local.insertOrUpdateUsuario(it) }
+
+            } catch (e: Exception) {
+                println("Error (getUsuariosByEquipo): ${e.message}")
+            }
         }
         local.getUsuariosByEquipo(idEquipo)
     }
