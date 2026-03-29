@@ -79,7 +79,7 @@ fun Route.usuariosRoutes() {
             call.respond(HttpStatusCode.Created, usuario.copy(idUsuario = nuevoId, idEquipo = createdEquipoId))
         }
         post("/login") {
-            println("[${call.request.origin.remoteHost}] POST /usuarios/login - ContentType: ${call.request.contentType()}")
+            println("[${call.request.origin.remoteHost}] POST /usuarios/login - ContentType: ${call.request.headers["Content-Type"]}")
             val request = try {
                 call.receive<LoginRequest>()
             } catch (e: Exception) {
