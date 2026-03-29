@@ -84,6 +84,7 @@ fun Route.usuariosRoutes() {
                 call.receive<LoginRequest>()
             } catch (e: Exception) {
                 println("[LOGIN ERROR] ${e::class.simpleName}: ${e.message}")
+                println("[LOGIN ERROR CAUSE] ${e.cause?.message}")
                 return@post call.respond(HttpStatusCode.BadRequest)
             }
             println("[${call.request.origin.remoteHost}] POST /usuarios/login username=${request.username}")
