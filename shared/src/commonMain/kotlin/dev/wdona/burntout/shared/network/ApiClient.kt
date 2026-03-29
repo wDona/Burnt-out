@@ -23,9 +23,9 @@ object ApiClient {
         expectSuccess = true
 
         install(HttpTimeout) {
-            requestTimeoutMillis = 1200 // FIXME
-            connectTimeoutMillis = 1200
-            socketTimeoutMillis = 1200
+            requestTimeoutMillis = 15000 
+            connectTimeoutMillis = 15000
+            socketTimeoutMillis = 15000
         }
 
         defaultRequest {
