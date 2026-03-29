@@ -10,6 +10,8 @@ import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.request.put
 import io.ktor.client.request.setBody
+import io.ktor.http.ContentType
+import io.ktor.http.contentType
 import io.ktor.http.isSuccess
 import kotlinx.serialization.Serializable
 
@@ -24,10 +26,16 @@ class UsuarioApiImpl(private val client: HttpClient = ApiClient.client) : Usuari
         client.get("usuarios?idOrg=$idOrg").body()
 
     override suspend fun crearUsuario(usuario: Usuario): Boolean =
-        client.post("usuarios") { setBody(usuario) }.status.isSuccess()
+        client.post("usuarios") {
+            contentType(ContentType.Application.Json)
+            setBody(usuario)
+        }.status.isSuccess()
 
     override suspend fun actualizarUsuario(usuario: Usuario): Boolean =
-        client.put("usuarios/${usuario.idUsuario}") { setBody(usuario) }.status.isSuccess()
+        client.put("usuarios/${usuario.idUsuario}") {
+            contentType(ContentType.Application.Json)
+            setBody(usuario)
+        }.status.isSuccess()
 
     override suspend fun eliminarUsuario(idUsuario: Long): Boolean =
         client.delete("usuarios/$idUsuario").status.isSuccess()
@@ -36,5 +44,8 @@ class UsuarioApiImpl(private val client: HttpClient = ApiClient.client) : Usuari
         client.get("usuarios/existe/$username").body()
 
     override suspend fun login(username: String, contrasena: String): Usuario =
-        client.post("usuarios/login") { setBody(LoginRequest(username, contrasena)) }.body()
+        client.post("usuarios/login") {
+            contentType(ContentType.Application.Json)
+            setBody(LoginRequest(username, contrasena))
+        }.body()
 }

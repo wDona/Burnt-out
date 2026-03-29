@@ -10,6 +10,8 @@ import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.request.put
 import io.ktor.client.request.setBody
+import io.ktor.http.ContentType
+import io.ktor.http.contentType
 import io.ktor.client.statement.HttpResponse
 
 class TareaApiImpl(private val client: HttpClient = ApiClient.client) : TareaApi {
@@ -20,10 +22,16 @@ class TareaApiImpl(private val client: HttpClient = ApiClient.client) : TareaApi
         client.get("tareas/$idTarea").body()
 
     override suspend fun crearTarea(tarea: Tarea): HttpResponse =
-        client.post("tareas") { setBody(tarea) }
+        client.post("tareas") {
+            contentType(ContentType.Application.Json)
+            setBody(tarea)
+        }
 
     override suspend fun actualizarTarea(tarea: Tarea): HttpResponse =
-        client.put("tareas/${tarea.idTarea}") { setBody(tarea) }
+        client.put("tareas/${tarea.idTarea}") {
+            contentType(ContentType.Application.Json)
+            setBody(tarea)
+        }
 
     override suspend fun eliminarTarea(idTarea: Long): HttpResponse =
         client.delete("tareas/$idTarea")

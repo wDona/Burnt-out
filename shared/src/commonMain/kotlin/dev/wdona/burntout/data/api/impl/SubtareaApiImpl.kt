@@ -10,6 +10,8 @@ import io.ktor.client.request.get
 import io.ktor.client.request.patch
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
+import io.ktor.http.ContentType
+import io.ktor.http.contentType
 import io.ktor.client.statement.HttpResponse
 import kotlinx.serialization.Serializable
 
@@ -22,10 +24,14 @@ class SubtareaApiImpl(private val client: HttpClient = ApiClient.client) : Subta
         client.get("subtareas?idTarea=$idTarea").body()
 
     override suspend fun crearSubtarea(subtarea: Subtarea): HttpResponse =
-        client.post("subtareas") { setBody(subtarea) }
+        client.post("subtareas") {
+            contentType(ContentType.Application.Json)
+            setBody(subtarea)
+        }
 
     override suspend fun actualizarSubtarea(subtarea: Subtarea): HttpResponse =
         client.patch("subtareas/${subtarea.idSubtarea}") {
+            contentType(ContentType.Application.Json)
             setBody(CompletadoRequest(subtarea.completado))
         }
 

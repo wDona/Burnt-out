@@ -10,6 +10,8 @@ import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.request.put
 import io.ktor.client.request.setBody
+import io.ktor.http.ContentType
+import io.ktor.http.contentType
 import io.ktor.client.statement.HttpResponse
 
 class TableroApiImpl(private val client: HttpClient = ApiClient.client) : TableroApi {
@@ -20,10 +22,16 @@ class TableroApiImpl(private val client: HttpClient = ApiClient.client) : Tabler
         client.get("tableros?idOrg=$idOrg").body()
 
     override suspend fun crearTablero(tablero: Tablero): HttpResponse =
-        client.post("tableros") { setBody(tablero) }
+        client.post("tableros") {
+            contentType(ContentType.Application.Json)
+            setBody(tablero)
+        }
 
     override suspend fun actualizarTablero(tablero: Tablero): HttpResponse =
-        client.put("tableros/${tablero.idTablero}") { setBody(tablero) }
+        client.put("tableros/${tablero.idTablero}") {
+            contentType(ContentType.Application.Json)
+            setBody(tablero)
+        }
 
     override suspend fun eliminarTablero(idTablero: Long): HttpResponse =
         client.delete("tableros/$idTablero")

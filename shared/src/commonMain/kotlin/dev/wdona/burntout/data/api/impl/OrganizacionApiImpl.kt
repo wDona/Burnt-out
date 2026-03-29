@@ -10,6 +10,8 @@ import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.request.put
 import io.ktor.client.request.setBody
+import io.ktor.http.ContentType
+import io.ktor.http.contentType
 import io.ktor.client.statement.HttpResponse
 
 class OrganizacionApiImpl(private val client: HttpClient = ApiClient.client) : OrganizacionApi {
@@ -21,10 +23,16 @@ class OrganizacionApiImpl(private val client: HttpClient = ApiClient.client) : O
         client.get("organizaciones").body()
 
     override suspend fun crearOrganizacion(organizacion: Organizacion): HttpResponse =
-        client.post("organizaciones") { setBody(organizacion) }
+        client.post("organizaciones") {
+            contentType(ContentType.Application.Json)
+            setBody(organizacion)
+        }
 
     override suspend fun actualizarOrganizacion(organizacion: Organizacion): HttpResponse =
-        client.put("organizaciones/${organizacion.idOrganizacion}") { setBody(organizacion) }
+        client.put("organizaciones/${organizacion.idOrganizacion}") {
+            contentType(ContentType.Application.Json)
+            setBody(organizacion)
+        }
 
     override suspend fun eliminarOrganizacion(idOrg: Long): HttpResponse =
         client.delete("organizaciones/$idOrg")

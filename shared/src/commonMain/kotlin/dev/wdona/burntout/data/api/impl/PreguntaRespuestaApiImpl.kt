@@ -11,6 +11,8 @@ import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.request.put
 import io.ktor.client.request.setBody
+import io.ktor.http.ContentType
+import io.ktor.http.contentType
 import io.ktor.client.statement.HttpResponse
 
 class PreguntaRespuestaApiImpl(private val client: HttpClient = ApiClient.client) : PreguntaRespuestaApi {
@@ -18,16 +20,25 @@ class PreguntaRespuestaApiImpl(private val client: HttpClient = ApiClient.client
         client.get("preguntas?idOrg=$idOrg").body()
 
     override suspend fun crearPregunta(pregunta: Pregunta): HttpResponse =
-        client.post("preguntas") { setBody(pregunta) }
+        client.post("preguntas") {
+            contentType(ContentType.Application.Json)
+            setBody(pregunta)
+        }
 
     override suspend fun actualizarPregunta(pregunta: Pregunta): HttpResponse =
-        client.put("preguntas/${pregunta.idPregunta}") { setBody(pregunta) }
+        client.put("preguntas/${pregunta.idPregunta}") {
+            contentType(ContentType.Application.Json)
+            setBody(pregunta)
+        }
 
     override suspend fun eliminarPregunta(idPregunta: Long): HttpResponse =
         client.delete("preguntas/$idPregunta")
 
     override suspend fun responderPregunta(respuesta: Respuesta): HttpResponse =
-        client.post("respuestas") { setBody(respuesta) }
+        client.post("respuestas") {
+            contentType(ContentType.Application.Json)
+            setBody(respuesta)
+        }
 
     override suspend fun getRespuestasByPregunta(idPregunta: Long): List<Respuesta> =
         client.get("respuestas?idPregunta=$idPregunta").body()

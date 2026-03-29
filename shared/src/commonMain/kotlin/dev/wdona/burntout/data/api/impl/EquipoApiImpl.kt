@@ -11,6 +11,8 @@ import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.request.put
 import io.ktor.client.request.setBody
+import io.ktor.http.ContentType
+import io.ktor.http.contentType
 import io.ktor.http.isSuccess
 
 class EquipoApiImpl(private val client: HttpClient = ApiClient.client) : EquipoApi {
@@ -21,10 +23,16 @@ class EquipoApiImpl(private val client: HttpClient = ApiClient.client) : EquipoA
         client.get("equipos?idOrg=$idOrg").body()
 
     override suspend fun crearEquipo(equipo: Equipo): Boolean =
-        client.post("equipos") { setBody(equipo) }.status.isSuccess()
+        client.post("equipos") {
+            contentType(ContentType.Application.Json)
+            setBody(equipo)
+        }.status.isSuccess()
 
     override suspend fun actualizarEquipo(equipo: Equipo): Boolean =
-        client.put("equipos/${equipo.idEquipo}") { setBody(equipo) }.status.isSuccess()
+        client.put("equipos/${equipo.idEquipo}") {
+            contentType(ContentType.Application.Json)
+            setBody(equipo)
+        }.status.isSuccess()
 
     override suspend fun eliminarEquipo(idEquipo: Long): Boolean =
         client.delete("equipos/$idEquipo").status.isSuccess()
