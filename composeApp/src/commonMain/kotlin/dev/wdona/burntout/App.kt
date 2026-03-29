@@ -1,6 +1,5 @@
 package dev.wdona.burntout
 
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Surface
@@ -9,14 +8,10 @@ import androidx.compose.ui.Modifier
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.transitions.CrossfadeTransition
 import dev.wdona.burntout.presentation.ui.pantallas.LoginScreen
-import dev.wdona.burntout.presentation.ui.pantallas.MainScreen
 import dev.wdona.burntout.presentation.ui.pantallas.PreMainScreen
 import dev.wdona.burntout.presentation.ui.theme.BurntOutMaterialTheme
-import dev.wdona.burntout.presentation.ui.theme.DarkColorScheme
-import dev.wdona.burntout.presentation.ui.theme.LightColorScheme
 import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.*
 import dev.wdona.burntout.shared.utils.SettingsManager
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
@@ -24,7 +19,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 @Composable
 fun App(
     tareaFactory: TareasViewModelFactory,
-    miEquipoViewModelFactory: MiEquipoViewModelFactory,
+    equipoViewModelFactory: EquipoViewModelFactory,
     miPerfilViewModelFactory: MiPerfilViewModelFactory,
     tablerosViewModelFactory: TablerosViewModelFactory,
     leaderboardViewModelFactory: LeaderboardViewModelFactory,
@@ -53,7 +48,7 @@ fun App(
                 Navigator(
                     PreMainScreen(
                         tareaFactory = tareaFactory,
-                        equipoFactory = miEquipoViewModelFactory,
+                        equipoFactory = equipoViewModelFactory,
                         perfilFactory = miPerfilViewModelFactory,
                         tableroFactory = tablerosViewModelFactory,
                         leaderboardFactory = leaderboardViewModelFactory,

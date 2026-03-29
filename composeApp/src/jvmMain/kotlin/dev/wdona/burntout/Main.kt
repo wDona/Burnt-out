@@ -85,7 +85,7 @@ fun main() = application {
                 } else if (isDatabaseReady) {
                     App(
                         tareaFactory = TareasViewModelFactory(),
-                        miEquipoViewModelFactory = MiEquipoViewModelFactory(),
+                        equipoViewModelFactory = EquipoViewModelFactory(),
                         miPerfilViewModelFactory = MiPerfilViewModelFactory(),
                         tablerosViewModelFactory = TablerosViewModelFactory(),
                         leaderboardViewModelFactory = LeaderboardViewModelFactory(),

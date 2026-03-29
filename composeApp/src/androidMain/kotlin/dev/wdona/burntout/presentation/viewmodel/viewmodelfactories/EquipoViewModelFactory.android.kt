@@ -24,7 +24,7 @@ import dev.wdona.burntout.shared.db.AppDatabase
 import java.io.Serializable
 import kotlin.jvm.Transient
 
-actual class MiEquipoViewModelFactory(@Transient private val context: Context) : Serializable {
+actual class EquipoViewModelFactory(@Transient private val context: Context) : Serializable {
     actual fun create(): EquipoViewModel {
         val driverFactory = DatabaseDriverFactory(context)
         val database = AppDatabase(driverFactory.createDriver())

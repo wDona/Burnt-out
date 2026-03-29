@@ -13,7 +13,7 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.AjustesViewModelFactory
-import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.MiEquipoViewModelFactory
+import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.EquipoViewModelFactory
 import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.MiPerfilViewModelFactory
 import dev.wdona.burntout.presentation.viewmodel.viewmodels.EquipoViewModel
 import dev.wdona.burntout.presentation.viewmodel.viewmodels.PerfilViewModel
@@ -35,36 +35,46 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import dev.wdona.burntout.shared.utils.SettingsManager
 
-class EquipoScreen(val factory: MiEquipoViewModelFactory, val perfilFactory: MiPerfilViewModelFactory, val ajustesFactory: AjustesViewModelFactory, val onVolver: (() -> Unit)? = null, val idEquipo: Long) : Screen {
+class EquipoScreen(val factory: EquipoViewModelFactory, val perfilFactory: MiPerfilViewModelFactory, val ajustesFactory: AjustesViewModelFactory, val onVolver: (() -> Unit)? = null, val idEquipo: Long? = null) : Screen {
     override val key: ScreenKey = uniqueScreenKey
 
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow // Para poder volver o ir a otra
 
-        val ajustesViewModel = rememberScreenModel { ajustesFactory.create() }
         val viewModel = rememberScreenModel { factory.create() }
         val perfilViewModel = rememberScreenModel { perfilFactory.create() }
 
-        val ajustesState by ajustesViewModel.ajustesUiState.collectAsStateWithLifecycle()
-        val esMiEquipo = ajustesState.idEquipo == idEquipo
+        val idEquipoActual by SettingsManager.idEquipoActualFlow.collectAsState()
+        val targetIdEquipo = idEquipo ?: idEquipoActual
+
+        val esMiEquipo = targetIdEquipo == idEquipoActual
 
         var mostrarAnadirUsuarioDialog by remember { mutableStateOf(false) }
 
-        LaunchedEffect(idEquipo) {
-            viewModel.cargarEquipoPorId(idEquipo)
-            viewModel.cargarMiembrosEquipo(idEquipo)
+        LaunchedEffect(targetIdEquipo) {
+            viewModel.cargarEquipoPorId(targetIdEquipo)
+            viewModel.cargarMiembrosEquipo(targetIdEquipo)
         }
         
         if (mostrarAnadirUsuarioDialog) {
             AnadirUsuarioDialog(
                 onDismiss = { mostrarAnadirUsuarioDialog = false },
-                onAddUsuario = { idUsuario ->
-                    viewModel.anadirUsuarioAlEquipo(idEquipo, idUsuario)
+                onAddUsuario = { input ->
+                    val idLong = input.toLongOrNull()
+                    if (idLong != null) {
+                        viewModel.addUsuarioAlEquipo(targetIdEquipo, idLong)
+                        println("Se ha añadido el usuario con id $idLong al equipo $targetIdEquipo")
+                    } else {
+                        viewModel.anadirUsuarioAlEquipoPorNombre(targetIdEquipo, input)
+                        println("No se ha podido añadir el usuario")
+                    }
                     mostrarAnadirUsuarioDialog = false
                 }
             )
@@ -86,30 +96,30 @@ class EquipoScreen(val factory: MiEquipoViewModelFactory, val perfilFactory: MiP
 }
 
 @Composable
-fun AnadirUsuarioDialog(onDismiss: () -> Unit, onAddUsuario: (Long) -> Unit) {
-    var idUsuario by remember { mutableStateOf("") }
+fun AnadirUsuarioDialog(onDismiss: () -> Unit, onAddUsuario: (String) -> Unit) {
+    var input by remember { mutableStateOf("") }
     
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Anadir usuario al equipo") },
+        title = { Text("Añadir usuario al equipo") },
         text = {
             Column {
-                Text("Introduce el id usuario de la persona que quieres anadir:")
+                Text("Introduce el ID o el nombre de usuario de la persona que quieres añadir:")
                 Spacer(modifier = Modifier.height(8.dp))
                 OutlinedTextField(
-                    value = idUsuario,
-                    onValueChange = { idUsuario = it },
-                    label = { Text("ID de usuario") },
+                    value = input,
+                    onValueChange = { input = it },
+                    label = { Text("ID o Nombre de usuario") },
                     singleLine = true
                 )
             }
         },
         confirmButton = {
             TextButton(
-                onClick = { onAddUsuario(idUsuario.toLongOrNull() ?: -1L) },
-                enabled = idUsuario.isNotBlank()
+                onClick = { onAddUsuario(input) },
+                enabled = input.isNotBlank()
             ) {
-                Text("Anadir")
+                Text("Añadir")
             }
         },
         dismissButton = {
@@ -126,7 +136,7 @@ fun EquipoContent(viewModel: EquipoViewModel, esMiEquipo: Boolean, onVolver: (()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     val titulo = if (uiState.isLoading) "" else (uiState.equipo?.titulo ?: "Mi equipo (off)")
-    val subtitulo = "" + (uiState.equipo?.puntuacion ?: "0") + "pts"
+    val subtitulo = if (uiState.isLoading) "" else "" + (uiState.equipo?.puntuacion ?: "0") + "pts"
 
     ScaffoldBase(
         titulo = titulo,
@@ -148,7 +158,7 @@ fun EquipoContent(viewModel: EquipoViewModel, esMiEquipo: Boolean, onVolver: (()
                 }
             } else {
                 LazyVerticalGrid(
-                    columns = GridCells.Adaptive(minSize = 400.dp), // el min size es el tamanio ancho de cada tarjeta
+                    columns = GridCells.Adaptive(minSize = 400.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                     modifier = Modifier

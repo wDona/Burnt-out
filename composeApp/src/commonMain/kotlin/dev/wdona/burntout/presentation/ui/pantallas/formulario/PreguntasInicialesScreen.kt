@@ -61,7 +61,7 @@ import dev.wdona.burntout.presentation.ui.components.common.FilaTextoPlaceholder
 import dev.wdona.burntout.presentation.ui.pantallas.MainScreen
 import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.AjustesViewModelFactory
 import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.LeaderboardViewModelFactory
-import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.MiEquipoViewModelFactory
+import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.EquipoViewModelFactory
 import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.MiPerfilViewModelFactory
 import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.TablerosViewModelFactory
 import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.TareasViewModelFactory
@@ -74,7 +74,7 @@ class PreguntasInicialesScreen(
     private val nPreguntas: Int,
 
     private val tareaFactory: TareasViewModelFactory,
-    private val equipoFactory: MiEquipoViewModelFactory,
+    private val equipoFactory: EquipoViewModelFactory,
     private val perfilFactory: MiPerfilViewModelFactory,
     private val tableroFactory: TablerosViewModelFactory,
     private val leaderboardFactory: LeaderboardViewModelFactory,

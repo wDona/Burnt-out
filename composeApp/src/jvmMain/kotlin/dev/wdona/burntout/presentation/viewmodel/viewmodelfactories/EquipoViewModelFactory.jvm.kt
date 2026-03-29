@@ -20,7 +20,7 @@ import dev.wdona.burntout.domain.usecase.GetUsuarioByUsernameUseCase
 import dev.wdona.burntout.presentation.viewmodel.viewmodels.EquipoViewModel
 import dev.wdona.burntout.shared.db.DatabaseInit
 
-actual class MiEquipoViewModelFactory {
+actual class EquipoViewModelFactory {
     actual fun create(): EquipoViewModel {
         val database = DatabaseInit.getDatabase()
 

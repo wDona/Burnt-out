@@ -2,10 +2,8 @@ package dev.wdona.burntout.presentation.ui.pantallas.equipo
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -28,14 +26,14 @@ import dev.wdona.burntout.presentation.ui.components.equipo.EquipoCard
 import dev.wdona.burntout.presentation.ui.components.template.ScaffoldBase
 import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.AjustesViewModelFactory
 import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.LeaderboardViewModelFactory
-import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.MiEquipoViewModelFactory
+import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.EquipoViewModelFactory
 import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.MiPerfilViewModelFactory
 import dev.wdona.burntout.presentation.viewmodel.viewmodels.LeaderboardViewModel
 
 class LeaderboardScreen(
     val factory: LeaderboardViewModelFactory,
     val idOrg: Long,
-    val equipoFactory: MiEquipoViewModelFactory,
+    val equipoFactory: EquipoViewModelFactory,
     val perfilFactory: MiPerfilViewModelFactory,
     val ajustesFactory: AjustesViewModelFactory,
     val onVolver: (() -> Unit)? = null

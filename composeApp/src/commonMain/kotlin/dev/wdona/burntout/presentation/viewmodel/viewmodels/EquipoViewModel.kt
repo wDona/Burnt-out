@@ -26,14 +26,14 @@ class EquipoViewModel(
     private val repository: EquipoRepository,
     private val cargarMiembrosEquipoUseCase: CargarMiembrosEquipo,
     private val addUsuarioAlEquipoUseCase: AddUsuarioAlEquipoUseCase,
-    private val getUsuarioByIDUseCase: GetUsuarioByUsernameUseCase
+    private val getUsuarioByUsernameUseCase: GetUsuarioByUsernameUseCase
 ) : ScreenModel {
     private val _uiState = MutableStateFlow(EquipoUiState(isLoading = true))
     val uiState: StateFlow<EquipoUiState> = _uiState.asStateFlow()
 
     fun cargarEquipoPorId(idEquipo: Long) {
         screenModelScope.launch {
-            _uiState.update { it.copy(isLoading = true) }
+            _uiState.update { it.copy(isLoading = true, error = null) }
             try {
                 val equipo = repository.getEquipoById(idEquipo)
                 _uiState.update { it.copy(equipo = equipo, isLoading = false) }
@@ -55,9 +55,7 @@ class EquipoViewModel(
         screenModelScope.launch {
              _uiState.update { it.copy(isLoading = true) }
             try {
-                println("Solicitando miembros para equipo $idEquipo")
                 val miembros = cargarMiembrosEquipoUseCase.invoke(idEquipo)
-                println("Miembros cargados para equipo $idEquipo: ${miembros.size}")
                 _uiState.update { it.copy(miembros = miembros, isLoading = false) }
             } catch (e: Exception) {
                  println("Error cargando miembros: ${e.message}")
@@ -68,7 +66,7 @@ class EquipoViewModel(
 
     fun addUsuarioAlEquipo(idEquipo: Long, idUsuario: Long) {
         screenModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, userAddedSuccess = false) }
+            _uiState.update { it.copy(isLoading = true, userAddedSuccess = false, error = null) }
             try {
                 val success = addUsuarioAlEquipoUseCase(idEquipo, idUsuario)
                 if (success) {
@@ -82,14 +80,20 @@ class EquipoViewModel(
             }
         }
     }
-    
-    fun anadirUsuarioAlEquipo(idEquipo: Long, idUsuario: Long) {
+
+    fun anadirUsuarioAlEquipoPorNombre(idEquipo: Long, username: String) {
         screenModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, userAddedSuccess = false) }
+            _uiState.update { it.copy(isLoading = true, userAddedSuccess = false, error = null) }
             try {
-                val usuario = getUsuarioByIDUseCase(idUsuario)
+                val usuario = getUsuarioByUsernameUseCase(username)
                 if (usuario != null) {
-                    addUsuarioAlEquipo(idEquipo, usuario.idUsuario)
+                    val success = addUsuarioAlEquipoUseCase(idEquipo, usuario.idUsuario)
+                    if (success) {
+                        cargarMiembrosEquipo(idEquipo)
+                        _uiState.update { it.copy(userAddedSuccess = true, isLoading = false) }
+                    } else {
+                        _uiState.update { it.copy(isLoading = false, error = "Error al añadir usuario") }
+                    }
                 } else {
                     _uiState.update { it.copy(isLoading = false, error = "Usuario no encontrado") }
                 }

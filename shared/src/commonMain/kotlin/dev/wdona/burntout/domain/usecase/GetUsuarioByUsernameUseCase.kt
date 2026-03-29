@@ -4,7 +4,7 @@ import dev.wdona.burntout.domain.repository.UsuarioRepository
 import dev.wdona.burntout.shared.domain.Usuario
 
 class GetUsuarioByUsernameUseCase(private val usuarioRepository: UsuarioRepository) {
-    suspend operator fun invoke(id: Long): Usuario {
-        return usuarioRepository.getUserById(id)
+    suspend operator fun invoke(username: String): Usuario? {
+        return usuarioRepository.getUsuarioByUsername(username)
     }
 }

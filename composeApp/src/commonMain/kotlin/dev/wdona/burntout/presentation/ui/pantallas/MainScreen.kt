@@ -14,14 +14,9 @@ import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.QuestionAnswer
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.key
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.core.screen.ScreenKey
 import cafe.adriel.voyager.core.screen.uniqueScreenKey
@@ -31,7 +26,6 @@ import cafe.adriel.voyager.navigator.tab.*
 import dev.wdona.burntout.presentation.ui.pantallas.equipo.EquipoScreen
 import dev.wdona.burntout.presentation.ui.pantallas.equipo.LeaderboardScreen
 import dev.wdona.burntout.presentation.ui.pantallas.formulario.PreguntaScreen
-import dev.wdona.burntout.presentation.ui.pantallas.formulario.PreguntasInicialesScreen
 import dev.wdona.burntout.presentation.ui.pantallas.perfil.PerfilScreen
 import dev.wdona.burntout.presentation.ui.pantallas.tablero.TablerosScreen
 import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.*
@@ -39,7 +33,7 @@ import dev.wdona.burntout.shared.utils.SettingsManager
 
 class MainScreen(
     private val tareaFactory: TareasViewModelFactory,
-    private val equipoFactory: MiEquipoViewModelFactory,
+    private val equipoFactory: EquipoViewModelFactory,
     private val perfilFactory: MiPerfilViewModelFactory,
     private val tableroFactory: TablerosViewModelFactory,
     private val leaderboardFactory: LeaderboardViewModelFactory,
@@ -123,7 +117,7 @@ private class TablerosTab(
 }
 
 private class EquipoTab(
-    val factory: MiEquipoViewModelFactory,
+    val factory: EquipoViewModelFactory,
     val perfilFactory: MiPerfilViewModelFactory,
     val settingsFactory: AjustesViewModelFactory,
     val idEquipoActual: Long = SettingsManager.getIdEquipoActual()
@@ -144,7 +138,7 @@ private class EquipoTab(
 private class LeaderboardTab(
     val factory: LeaderboardViewModelFactory,
     val settingsFactory: AjustesViewModelFactory,
-    val equipoFactory: MiEquipoViewModelFactory,
+    val equipoFactory: EquipoViewModelFactory,
     val perfilFactory: MiPerfilViewModelFactory
 ) : Tab {
     override val key = "LeaderboardTab"

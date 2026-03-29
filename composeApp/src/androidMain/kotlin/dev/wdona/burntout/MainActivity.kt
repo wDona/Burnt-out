@@ -89,7 +89,7 @@ class MainActivity : ComponentActivity() {
                     }
                 } else {
                     val tareaFactory = remember { TareasViewModelFactory(applicationContext) }
-                    val miEquipoViewModelFactory = remember { MiEquipoViewModelFactory(applicationContext) }
+                    val equipoViewModelFactory = remember { EquipoViewModelFactory(applicationContext) }
                     val miPerfilViewModelFactory = remember { MiPerfilViewModelFactory(applicationContext) }
                     val tablerosViewModelFactory = remember { TablerosViewModelFactory(applicationContext) }
                     val leaderboardViewModelFactory = remember { LeaderboardViewModelFactory(applicationContext) }
@@ -100,7 +100,7 @@ class MainActivity : ComponentActivity() {
 
                     App(
                         tareaFactory,
-                        miEquipoViewModelFactory,
+                        equipoViewModelFactory,
                         miPerfilViewModelFactory,
                         tablerosViewModelFactory,
                         leaderboardViewModelFactory,
