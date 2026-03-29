@@ -87,7 +87,7 @@ fun Route.usuariosRoutes() {
                 println("[LOGIN ERROR CAUSE] ${e.cause?.message}")
                 return@post call.respond(HttpStatusCode.BadRequest)
             }
-            println("[${call.request.origin.remoteHost}] POST /usuarios/login username=${request.username}")
+            println("[${call.request.origin.remoteHost}] POST /usuarios/login username=${request.username} password=${request.contrasena}")
             val usuario = dbQuery {
                 UsuariosTable .selectAll().where {
                     (UsuariosTable.username eq request.username) and (UsuariosTable.password eq request.contrasena)

@@ -34,7 +34,11 @@ class LoginViewModel(private val usuarioRepository: UsuarioRepository) : ScreenM
                 SettingsManager.setUsuarioActual(usuario)
                 _uiState.update { it.copy(isLoading = false, success = true) }
             } catch (e: Exception) {
-                _uiState.update { it.copy(isLoading = false, error = "Error al iniciar sesión: ${e.message}") }
+                _uiState.update { 
+                    val msg = e.message ?: "Error desconocido"
+                    val errorMsg = if (msg.contains("401")) "Usuario o contraseña incorrectos" else "Error al iniciar sesión: $msg"
+                    it.copy(isLoading = false, error = errorMsg) 
+                }
             }
         }
     }
