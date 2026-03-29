@@ -41,18 +41,22 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.wdona.burntout.presentation.ui.components.template.ScaffoldBase
 import dev.wdona.burntout.presentation.ui.theme.BurntOutMaterialTheme
+import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.AjustesViewModelFactory
+import dev.wdona.burntout.presentation.viewmodel.viewmodels.AjustesViewModel
 import dev.wdona.burntout.shared.utils.SettingsManager
 
-class LoginScreen(private val factory: LoginViewModelFactory) : Screen {
+class LoginScreen(private val factory: LoginViewModelFactory, private val settingsFactory: AjustesViewModelFactory) : Screen {
     override val key: ScreenKey = uniqueScreenKey
 
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
         val viewModel = rememberScreenModel { factory.create() }
+        val settingsViewModel = rememberScreenModel { settingsFactory.create() }
 
         LoginContent(
-            viewModel = viewModel
+            viewModel = viewModel,
+            settingsViewModel = settingsViewModel
         )
 
     }
@@ -61,9 +65,12 @@ class LoginScreen(private val factory: LoginViewModelFactory) : Screen {
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun LoginContent(
-    viewModel: LoginViewModel
+    viewModel: LoginViewModel,
+    settingsViewModel: AjustesViewModel
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val settingsUiState by settingsViewModel.ajustesUiState.collectAsStateWithLifecycle()
+
     var textStateUsuario by remember { mutableStateOf("") }
     var textStatePassword by remember { mutableStateOf("") }
     var textStateNombre by remember { mutableStateOf("") }
@@ -75,9 +82,17 @@ fun LoginContent(
 
     val enviarAccion = {
         if (uiState.isLogin) {
-            viewModel.login(textStateUsuario, textStatePassword)
+            viewModel.login(textStateUsuario, textStatePassword, settingsViewModel)
         } else {
-            viewModel.register(textStateUsuario, textStatePassword, textStateNombre.trim())
+            viewModel.register(textStateUsuario, textStatePassword, textStateNombre.trim(), settingsViewModel)
+        }
+        textStateUsuario = ""
+        textStatePassword = ""
+        textStateNombre = ""
+        focusManager.clearFocus()
+
+        if (success) {
+            uiState.isLogin = true
         }
     }
 

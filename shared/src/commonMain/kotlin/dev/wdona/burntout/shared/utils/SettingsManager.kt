@@ -45,6 +45,8 @@ object SettingsManager {
         _primerCuestionarioHechoFlow.value = false
         _cuestionarioHoyHechoFlow.value = false
         _idUsuarioActualFlow.value = Long.MIN_VALUE
+        _idEquipoActualFlow.value = Long.MIN_VALUE
+        _sincronizadoEnEstaAperturaFlow.value = false
         _isAutenticadoFlow.value = false
     }
 
@@ -121,6 +123,7 @@ object SettingsManager {
 
     fun setIdEquipoActual(id: Long) {
         settings.putLong(KEY_ID_EQUIPO_ACTUAL, id)
+        _idEquipoActualFlow.value = id
     }
 
     fun setRiesgoCEUsuarioActual(riesgo: Double) {

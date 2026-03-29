@@ -86,6 +86,10 @@ class UsuarioDaoImpl(appDatabase: AppDatabase) : UsuarioDao {
         }
     }
 
+    override suspend fun vincularUsuarioEquipo(idUsuario: Long, idEquipo: Long) {
+        queries.insertUserTeam(idUsuario, idEquipo)
+    }
+
     override suspend fun updateRiesgoBurnout(idUsuario: Long, riesgo: Double): Boolean {
         return try {
             queries.updateRiesgoBurnout(riesgo, idUsuario)

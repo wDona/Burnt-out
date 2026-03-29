@@ -21,7 +21,7 @@ data class EquipoUiState(
 
 class EquipoViewModel(
     private val repository: EquipoRepository,
-    private val cargarMiembrosEquipo: CargarMiembrosEquipo
+    private val cargarMiembrosEquipoUseCase: CargarMiembrosEquipo
 ) : ScreenModel {
     private val _uiState = MutableStateFlow(EquipoUiState(isLoading = true))
     val uiState: StateFlow<EquipoUiState> = _uiState.asStateFlow()
@@ -50,9 +50,12 @@ class EquipoViewModel(
         screenModelScope.launch {
              _uiState.update { it.copy(isLoading = true) }
             try {
-                val miembros = cargarMiembrosEquipo.invoke(idEquipo)
+                println("Solicitando miembros para equipo $idEquipo")
+                val miembros = cargarMiembrosEquipoUseCase.invoke(idEquipo)
+                println("Miembros cargados para equipo $idEquipo: ${miembros.size}")
                 _uiState.update { it.copy(miembros = miembros, isLoading = false) }
             } catch (e: Exception) {
+                 println("Error cargando miembros: ${e.message}")
                  _uiState.update { it.copy(isLoading = false, error = e.message) }
             }
         }

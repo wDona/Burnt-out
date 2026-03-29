@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 data class LoginUiState(
-    val isLogin: Boolean = true,
+    var isLogin: Boolean = true,
     val isLoading: Boolean = false,
     val error: String? = null,
     val success: Boolean = false
@@ -26,12 +26,14 @@ class LoginViewModel(private val usuarioRepository: UsuarioRepository) : ScreenM
         _uiState.update { it.copy(isLogin = !it.isLogin) }
     }
 
-    fun login(username: String, contrasena: String) {
+    fun login(username: String, contrasena: String, settingsViewModel: AjustesViewModel) {
         screenModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
             try {
                 val usuario = usuarioRepository.login(username, contrasena)
                 SettingsManager.setUsuarioActual(usuario)
+                settingsViewModel.cargarUsuarioActual(usuario)
+
                 _uiState.update { it.copy(isLoading = false, success = true) }
             } catch (e: Exception) {
                 _uiState.update { 
@@ -43,7 +45,7 @@ class LoginViewModel(private val usuarioRepository: UsuarioRepository) : ScreenM
         }
     }
 
-    fun register(username: String, contrasena: String, nombre: String) {
+    fun register(username: String, contrasena: String, nombre: String, settingsViewModel: AjustesViewModel) {
         screenModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
             try {
@@ -70,6 +72,7 @@ class LoginViewModel(private val usuarioRepository: UsuarioRepository) : ScreenM
                 val usuarioLogeado = usuarioRepository.login(username, contrasena)
                 
                 SettingsManager.setUsuarioActual(usuarioLogeado)
+                settingsViewModel.cargarUsuarioActual(usuarioLogeado)
                 SettingsManager.setPrimerCuestionarioHecho(false)
 
                 _uiState.update { it.copy(isLoading = false, success = true) }

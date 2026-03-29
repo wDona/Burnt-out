@@ -37,6 +37,10 @@ class UsuarioLocalDataSourceImpl(private val usuarioDao: UsuarioDao) : UsuarioLo
         return usuarioDao.insertOrUpdateUsuario(usuario)
     }
 
+    override suspend fun vincularUsuarioEquipo(idUsuario: Long, idEquipo: Long) {
+        usuarioDao.vincularUsuarioEquipo(idUsuario, idEquipo)
+    }
+
     override suspend fun updateRiesgoBurnout(idUsuario: Long, riesgo: Double): Boolean {
         return usuarioDao.updateRiesgoBurnout(idUsuario, riesgo)
     }

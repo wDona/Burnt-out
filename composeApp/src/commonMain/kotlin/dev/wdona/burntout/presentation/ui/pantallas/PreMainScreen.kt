@@ -53,7 +53,14 @@ class PreMainScreen(
         val syncViewModel = rememberScreenModel { operacionesPendientesFactory.create() }
 
         LaunchedEffect(Unit) {
-                syncViewModel.sincronizarAlIniciar()
+            println("Sincronizando...")
+            syncViewModel.sincronizarAlIniciar()
+
+            println("uistate: $uiState")
+            println("primerCuestionarioHecho: ${uiState.primerCuestionarioHecho}")
+            println("hoyHecho: ${uiState.hoyHecho}")
+            println("idEquipo: ${uiState.idEquipo}")
+            println("token: ${uiState.token}")
         }
 
         Scaffold { paddingValues ->

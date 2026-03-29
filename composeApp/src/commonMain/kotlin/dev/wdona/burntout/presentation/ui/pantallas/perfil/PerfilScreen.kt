@@ -46,7 +46,9 @@ import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.AjustesViewM
 import dev.wdona.burntout.presentation.ui.components.common.BateriaBurnout
 import dev.wdona.burntout.presentation.ui.components.common.FilaTextoPlaceholder
 import dev.wdona.burntout.presentation.ui.theme.BurntOutMaterialTheme
+import dev.wdona.burntout.presentation.viewmodel.viewmodels.AjustesViewModel
 import dev.wdona.burntout.shared.domain.Usuario
+import androidx.compose.runtime.collectAsState
 
 class PerfilScreen(val factory: MiPerfilViewModelFactory, val ajustesFactory: AjustesViewModelFactory, val onVolver: (() -> Unit)? = null, var idUsuario: Long? = null) : Screen {
 
@@ -57,6 +59,7 @@ class PerfilScreen(val factory: MiPerfilViewModelFactory, val ajustesFactory: Aj
         val navigator = LocalNavigator.currentOrThrow
 
         val viewmodel = rememberScreenModel { factory.create() }
+        val settingsViewModel = rememberScreenModel { ajustesFactory.create() }
         if (idUsuario == null) {
             idUsuario = SettingsManager.getIdUsuarioActual()
         }
@@ -69,7 +72,8 @@ class PerfilScreen(val factory: MiPerfilViewModelFactory, val ajustesFactory: Aj
             viewmodel,
             onAjustes = { navigator.push(SettingsScreen(ajustesFactory)) },
             onVolver = onVolver,
-            onLogout = { navigator.popUntilRoot() }
+            onLogout = { navigator.popUntilRoot() },
+            settingsViewModel
         )
     }
 
@@ -77,18 +81,17 @@ class PerfilScreen(val factory: MiPerfilViewModelFactory, val ajustesFactory: Aj
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
-fun PerfilContent(viewModel: PerfilViewModel, onAjustes: () -> Unit, onVolver: (() -> Unit)? = null, onLogout: () -> Unit) {
+fun PerfilContent(viewModel: PerfilViewModel, onAjustes: () -> Unit, onVolver: (() -> Unit)? = null, onLogout: () -> Unit, settingsViewModel: AjustesViewModel) {
     // Hacer que uiState sea un objeto para refrescar todos los elementos a la vez
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val usuario = uiState.usuario
-    val isLoading = uiState.isLoading
+    val ajustesState by settingsViewModel.ajustesUiState.collectAsStateWithLifecycle()
 
-    val titulo = if (isLoading) "" else (usuario?.nombre ?: "No se ha cargado el usuario")
+    val titulo = if (uiState.isLoading) "" else (uiState.usuario?.nombre ?: "No se ha cargado el usuario")
 
     val titleIcon = @Composable {
-        if (isLoading) {
+        if (uiState.isLoading) {
              // TODO: placeholders como en youtube
-        } else if (usuario != null) {
+        } else if (uiState.usuario != null) {
             Icon(
                 imageVector = Icons.Default.Person4,
                 contentDescription = "Icono de usuario",
@@ -119,7 +122,7 @@ fun PerfilContent(viewModel: PerfilViewModel, onAjustes: () -> Unit, onVolver: (
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
 
-                if (isLoading) {
+                if (uiState.isLoading) {
                     FilaTextoPlaceholder(
                         modifier = Modifier
                             .padding(horizontal = 32.dp)
@@ -143,7 +146,7 @@ fun PerfilContent(viewModel: PerfilViewModel, onAjustes: () -> Unit, onVolver: (
                         paddingTop = 8
 
                     )
-                } else if (usuario == null) {
+                } else if (uiState.usuario == null) {
                     Text(
                         text = "No se ha podido cargar el usuario",
                         style = MaterialTheme.typography.titleLarge,
@@ -161,15 +164,16 @@ fun PerfilContent(viewModel: PerfilViewModel, onAjustes: () -> Unit, onVolver: (
                     }
                 }
                 else {
-                    val riesgo = usuario.riesgoBurnout ?: -1.0
+                    val riesgo = uiState.usuario?.riesgoBurnout ?: -1.0
 
                     BateriaBurnout(riesgo = riesgo)
 
 //                    Text("ID: ${usuario!!.idUsuario}", style = MaterialTheme.typography.titleMedium)
-                    Text(usuario.username, style = MaterialTheme.typography.titleMedium)
-                    Text(usuario.descripcion ?: "-", style = MaterialTheme.typography.titleMedium)
+                    uiState.usuario?.username?.let { text -> Text(text, style = MaterialTheme.typography.titleMedium) }
+                    Text(uiState.usuario?.descripcion ?: "-", style = MaterialTheme.typography.titleMedium)
 
-                    if (usuario.idUsuario == SettingsManager.getIdUsuarioActual()) { // FIXME??
+                    if (uiState.usuario!!.idUsuario == ajustesState.idUsuario) {
+                        print("Perfil usuario actual")
                         OutlinedButton(
                             onClick = {
                                 SettingsManager.clearAll()
@@ -192,6 +196,10 @@ fun PerfilContent(viewModel: PerfilViewModel, onAjustes: () -> Unit, onVolver: (
                             )
                             Text("Cerrar sesion")
                         }
+                    } else {
+                        println("Perfil usuario no actual")
+                        println("uistate: ${uiState.usuario!!.idUsuario}")
+                        println("settingsviewmodel usuario ${ajustesState.idUsuario}")
                     }
                 }
             }

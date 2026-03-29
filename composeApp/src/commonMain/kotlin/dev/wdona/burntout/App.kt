@@ -43,7 +43,8 @@ fun App(
             if (!isAutenticado) {
                 Navigator(
                     LoginScreen(
-                        factory = loginViewModelFactory
+                        factory = loginViewModelFactory,
+                        settingsFactory = ajustesViewModelFactory,
                     )
                 ) { navigator ->
                     CrossfadeTransition(navigator)

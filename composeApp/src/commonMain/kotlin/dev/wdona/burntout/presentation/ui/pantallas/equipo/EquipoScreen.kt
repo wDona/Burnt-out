@@ -63,7 +63,6 @@ class EquipoScreen(val factory: MiEquipoViewModelFactory, val perfilFactory: MiP
 @Composable
 fun EquipoContent(viewModel: EquipoViewModel, onVolver: (() -> Unit)? = null, onClickUsuario: (Long) -> Unit, perfilViewModel: PerfilViewModel) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    // TODO COGER MIEMBROS
 
     val titulo = if (uiState.isLoading) "" else (uiState.equipo?.titulo ?: "Mi equipo (off)")
     val subtitulo = "" + (uiState.equipo?.puntuacion ?: "0") + "pts"
@@ -91,7 +90,7 @@ fun EquipoContent(viewModel: EquipoViewModel, onVolver: (() -> Unit)? = null, on
                     modifier = Modifier
                         .fillMaxWidth()
                 ) {
-                    items(miembros) { miembro ->
+                    items(uiState.miembros) { miembro ->
                         MiembroCard(miembro, onClick = {
                             perfilViewModel.cargarUsuario(miembro.idUsuario)
                             onClickUsuario(miembro.idUsuario)

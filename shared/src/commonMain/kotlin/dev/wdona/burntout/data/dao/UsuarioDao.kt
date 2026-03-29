@@ -11,5 +11,6 @@ interface UsuarioDao {
     suspend fun actualizarUsuario(usuario: Usuario): Boolean
     suspend fun eliminarUsuario(idUsuario: Long): Boolean
     suspend fun insertOrUpdateUsuario(usuario: Usuario): Boolean
+    suspend fun vincularUsuarioEquipo(idUsuario: Long, idEquipo: Long)
     suspend fun updateRiesgoBurnout(idUsuario: Long, riesgo: Double): Boolean
 }
