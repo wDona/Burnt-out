@@ -11,7 +11,7 @@ import kotlinx.serialization.Serializable
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 @Serializable
-private data class CompletadoRequest(val completado: Boolean)
+internal data class CompletadoRequest(val completado: Boolean)
 fun Route.subtareasRoutes() {
     route("/subtareas") {
         get {

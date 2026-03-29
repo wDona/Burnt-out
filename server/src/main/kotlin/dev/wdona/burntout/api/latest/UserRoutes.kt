@@ -14,7 +14,7 @@ import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.and
 @Serializable
-private data class LoginRequest(val username: String, val contrasena: String)
+internal data class LoginRequest(val username: String, val contrasena: String)
 fun Route.usuariosRoutes() {
     route("/usuarios") {
         get {

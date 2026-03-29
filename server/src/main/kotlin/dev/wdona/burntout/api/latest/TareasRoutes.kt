@@ -12,7 +12,7 @@ import kotlinx.serialization.Serializable
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 @Serializable
-private data class EstadoRequest(val estado: String)
+internal data class EstadoRequest(val estado: String)
 fun Route.tareasRoutes() {
     route("/tareas") {
         get {
