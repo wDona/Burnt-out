@@ -3,6 +3,7 @@ import dev.wdona.burntout.db.DatabaseFactory.dbQuery
 import dev.wdona.burntout.db.tables.AjustesTable
 import dev.wdona.burntout.domain.model.Ajuste
 import io.ktor.http.HttpStatusCode
+import io.ktor.server.plugins.origin
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.*
@@ -14,6 +15,7 @@ fun Route.ajustesRoutes() {
         get {
             val idUsuario = call.parameters["idUsuario"]?.toLongOrNull()
                 ?: return@get call.respond(HttpStatusCode.BadRequest)
+            println("[${call.request.origin.remoteHost}] GET /ajustes/$idUsuario")
             val ajustes = dbQuery {
                 AjustesTable .selectAll().where { AjustesTable.idUsuario eq idUsuario }.map {
                     Ajuste(
@@ -29,6 +31,7 @@ fun Route.ajustesRoutes() {
             val idUsuario = call.parameters["idUsuario"]?.toLongOrNull()
                 ?: return@post call.respond(HttpStatusCode.BadRequest)
             val ajuste = call.receive<Ajuste>()
+            println("[${call.request.origin.remoteHost}] POST /ajustes/$idUsuario nombre=${ajuste.nombre}")
             val nuevoId = dbQuery {
                 AjustesTable.insert {
                     it[AjustesTable.idUsuario] = idUsuario
@@ -45,6 +48,7 @@ fun Route.ajustesRoutes() {
                 val id = call.parameters["id"]?.toLongOrNull()
                     ?: return@put call.respond(HttpStatusCode.BadRequest)
                 val ajuste = call.receive<Ajuste>()
+                println("[${call.request.origin.remoteHost}] PUT /ajustes/$idUsuario/$id nombre=${ajuste.nombre}")
                 val updatedCount = dbQuery {
                     AjustesTable.update({ (AjustesTable.id eq id) and (AjustesTable.idUsuario eq idUsuario) }) {
                         it[nombre] = ajuste.nombre
@@ -59,6 +63,7 @@ fun Route.ajustesRoutes() {
                     ?: return@delete call.respond(HttpStatusCode.BadRequest)
                 val id = call.parameters["id"]?.toLongOrNull()
                     ?: return@delete call.respond(HttpStatusCode.BadRequest)
+                println("[${call.request.origin.remoteHost}] DELETE /ajustes/$idUsuario/$id")
                 val deletedCount = dbQuery {
                     AjustesTable.deleteWhere { (AjustesTable.id eq id) and (AjustesTable.idUsuario eq idUsuario) }
                 }

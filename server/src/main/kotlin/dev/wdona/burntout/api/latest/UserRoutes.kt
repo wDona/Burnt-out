@@ -5,6 +5,7 @@ import dev.wdona.burntout.db.tables.EquiposTable
 import dev.wdona.burntout.db.tables.EquipoMiembrosTable
 import dev.wdona.burntout.shared.domain.Usuario
 import io.ktor.http.HttpStatusCode
+import io.ktor.server.plugins.origin
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.*
@@ -19,6 +20,7 @@ fun Route.usuariosRoutes() {
         get {
             val idOrg = call.request.queryParameters["idOrg"]?.toLongOrNull()
             val idEquipo = call.request.queryParameters["idEquipo"]?.toLongOrNull()
+            println("[${call.request.origin.remoteHost}] GET /usuarios idOrg=$idOrg idEquipo=$idEquipo")
             val resultado = dbQuery {
                 val query = UsuariosTable.selectAll()
                 if (idOrg != null) {
@@ -44,6 +46,7 @@ fun Route.usuariosRoutes() {
         }
         post {
             val usuario = call.receive<Usuario>()
+            println("[${call.request.origin.remoteHost}] POST /usuarios username=${usuario.username}")
             var createdEquipoId = usuario.idEquipo
             val nuevoId = dbQuery {
                 var equipoId = usuario.idEquipo
@@ -77,6 +80,7 @@ fun Route.usuariosRoutes() {
         }
         post("/login") {
             val request = call.receive<LoginRequest>()
+            println("[${call.request.origin.remoteHost}] POST /usuarios/login username=${request.username}")
             val usuario = dbQuery {
                 UsuariosTable .selectAll().where {
                     (UsuariosTable.username eq request.username) and (UsuariosTable.password eq request.contrasena)
@@ -97,6 +101,7 @@ fun Route.usuariosRoutes() {
         }
         get("/existe/{username}") {
             val username = call.parameters["username"] ?: return@get call.respond(HttpStatusCode.BadRequest)
+            println("[${call.request.origin.remoteHost}] GET /usuarios/existe/$username")
             val existe = dbQuery {
                 UsuariosTable.selectAll().where { UsuariosTable.username eq username }.count() > 0
             }
@@ -106,6 +111,7 @@ fun Route.usuariosRoutes() {
             get {
                 val id = call.parameters["id"]?.toLongOrNull()
                     ?: return@get call.respond(HttpStatusCode.BadRequest)
+                println("[${call.request.origin.remoteHost}] GET /usuarios/$id")
                 val usuario = dbQuery {
                     UsuariosTable .selectAll().where { UsuariosTable.id eq id }.map {
                         Usuario(
@@ -126,6 +132,7 @@ fun Route.usuariosRoutes() {
                 val id = call.parameters["id"]?.toLongOrNull()
                     ?: return@put call.respond(HttpStatusCode.BadRequest)
                 val usuario = call.receive<Usuario>()
+                println("[${call.request.origin.remoteHost}] PUT /usuarios/$id username=${usuario.username}")
                 val updatedCount = dbQuery {
                     UsuariosTable.update({ UsuariosTable.id eq id }) {
                         it[username] = usuario.username
@@ -143,6 +150,7 @@ fun Route.usuariosRoutes() {
             delete {
                 val id = call.parameters["id"]?.toLongOrNull()
                     ?: return@delete call.respond(HttpStatusCode.BadRequest)
+                println("[${call.request.origin.remoteHost}] DELETE /usuarios/$id")
                 val deletedCount = dbQuery {
                     UsuariosTable.deleteWhere { UsuariosTable.id eq id }
                 }

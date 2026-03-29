@@ -4,6 +4,7 @@ import dev.wdona.burntout.db.tables.SubtareasTable
 import dev.wdona.burntout.db.tables.TareasTable
 import dev.wdona.burntout.shared.domain.Tarea
 import io.ktor.http.HttpStatusCode
+import io.ktor.server.plugins.origin
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.*
@@ -16,6 +17,7 @@ fun Route.tareasRoutes() {
     route("/tareas") {
         get {
             val idTablero = call.request.queryParameters["idTablero"]?.toLongOrNull()
+            println("[${call.request.origin.remoteHost}] GET /tareas idTablero=$idTablero")
             val resultado = dbQuery {
                 val query = if (idTablero != null) {
                     TareasTable .selectAll().where { TareasTable.idTablero eq idTablero }
@@ -40,6 +42,7 @@ fun Route.tareasRoutes() {
         }
         post {
             val tarea = call.receive<Tarea>()
+            println("[${call.request.origin.remoteHost}] POST /tareas titulo=${tarea.titulo}")
             val nuevoId = dbQuery {
                 TareasTable.insert {
                     it[titulo] = tarea.titulo
@@ -55,6 +58,7 @@ fun Route.tareasRoutes() {
             get {
                 val id = call.parameters["id"]?.toLongOrNull()
                     ?: return@get call.respond(HttpStatusCode.BadRequest)
+                println("[${call.request.origin.remoteHost}] GET /tareas/$id")
                 val tarea = dbQuery {
                     val row = TareasTable .selectAll().where { TareasTable.id eq id }.singleOrNull()
                     if (row != null) {
@@ -76,6 +80,7 @@ fun Route.tareasRoutes() {
                 val id = call.parameters["id"]?.toLongOrNull()
                     ?: return@put call.respond(HttpStatusCode.BadRequest)
                 val tarea = call.receive<Tarea>()
+                println("[${call.request.origin.remoteHost}] PUT /tareas/$id titulo=${tarea.titulo}")
                 val updatedCount = dbQuery {
                     TareasTable.update({ TareasTable.id eq id }) {
                         it[titulo] = tarea.titulo
@@ -91,6 +96,7 @@ fun Route.tareasRoutes() {
             delete {
                 val id = call.parameters["id"]?.toLongOrNull()
                     ?: return@delete call.respond(HttpStatusCode.BadRequest)
+                println("[${call.request.origin.remoteHost}] DELETE /tareas/$id")
                 val deletedCount = dbQuery {
                     TareasTable.deleteWhere { TareasTable.id eq id }
                 }
@@ -101,6 +107,7 @@ fun Route.tareasRoutes() {
                 val id = call.parameters["id"]?.toLongOrNull()
                     ?: return@patch call.respond(HttpStatusCode.BadRequest)
                 val request = call.receive<EstadoRequest>()
+                println("[${call.request.origin.remoteHost}] PATCH /tareas/$id/estado estado=${request.estado}")
                 val updatedTarea = dbQuery {
                     val count = TareasTable.update({ TareasTable.id eq id }) {
                         it[estado] = request.estado

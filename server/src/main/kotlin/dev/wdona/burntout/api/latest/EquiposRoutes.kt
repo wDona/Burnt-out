@@ -6,6 +6,7 @@ import dev.wdona.burntout.db.tables.UsuariosTable
 import dev.wdona.burntout.shared.domain.Equipo
 import dev.wdona.burntout.shared.domain.Usuario
 import io.ktor.http.HttpStatusCode
+import io.ktor.server.plugins.origin
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.*
@@ -15,6 +16,7 @@ fun Route.equiposRoutes() {
     route("/equipos") {
         get {
             val idOrg = call.request.queryParameters["idOrg"]?.toLongOrNull()
+            println("[${call.request.origin.remoteHost}] GET /equipos idOrg=$idOrg")
             val resultado = dbQuery {
                 val query = if (idOrg != null) {
                     EquiposTable .selectAll().where { EquiposTable.idOrganizacion eq idOrg }
@@ -39,6 +41,7 @@ fun Route.equiposRoutes() {
         }
         post {
             val equipo = call.receive<Equipo>()
+            println("[${call.request.origin.remoteHost}] POST /equipos titulo=${equipo.titulo}")
             val nuevoId = dbQuery {
                 val id = EquiposTable.insert {
                     it[titulo] = equipo.titulo
@@ -59,6 +62,7 @@ fun Route.equiposRoutes() {
             get {
                 val id = call.parameters["id"]?.toLongOrNull()
                     ?: return@get call.respond(HttpStatusCode.BadRequest)
+                println("[${call.request.origin.remoteHost}] GET /equipos/$id")
                 val equipo = dbQuery {
                     val row = EquiposTable .selectAll().where { EquiposTable.id eq id }.singleOrNull()
                     if (row != null) {
@@ -80,6 +84,7 @@ fun Route.equiposRoutes() {
                 val id = call.parameters["id"]?.toLongOrNull()
                     ?: return@put call.respond(HttpStatusCode.BadRequest)
                 val equipo = call.receive<Equipo>()
+                println("[${call.request.origin.remoteHost}] PUT /equipos/$id titulo=${equipo.titulo}")
                 val isSuccess = dbQuery {
                     val updatedCount = EquiposTable.update({ EquiposTable.id eq id }) {
                         it[titulo] = equipo.titulo
@@ -105,6 +110,7 @@ fun Route.equiposRoutes() {
             delete {
                 val id = call.parameters["id"]?.toLongOrNull()
                     ?: return@delete call.respond(HttpStatusCode.BadRequest)
+                println("[${call.request.origin.remoteHost}] DELETE /equipos/$id")
                 val deletedCount = dbQuery {
                     EquipoMiembrosTable.deleteWhere { EquipoMiembrosTable.idEquipo eq id }
                     EquiposTable.deleteWhere { EquiposTable.id eq id }
@@ -115,6 +121,7 @@ fun Route.equiposRoutes() {
             get("/miembros") {
                 val id = call.parameters["id"]?.toLongOrNull()
                     ?: return@get call.respond(HttpStatusCode.BadRequest)
+                println("[${call.request.origin.remoteHost}] GET /equipos/$id/miembros")
                 val miembros = dbQuery {
                     val ids = EquipoMiembrosTable
                          .selectAll().where { EquipoMiembrosTable.idEquipo eq id }
@@ -133,8 +140,6 @@ fun Route.equiposRoutes() {
                         )
                     }
                 }
-                // If the team doesn't exist, we should theoretically return 404, but to keep it simple:
-                // Actually let's check if the team exists
                 val teamExists = dbQuery {
                     EquiposTable .selectAll().where { EquiposTable.id eq id }.count() > 0
                 }

@@ -5,6 +5,7 @@ import dev.wdona.burntout.db.tables.RespuestasTable
 import dev.wdona.burntout.domain.model.Respuesta
 import dev.wdona.burntout.shared.domain.Pregunta
 import io.ktor.http.HttpStatusCode
+import io.ktor.server.plugins.origin
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.*
@@ -14,6 +15,7 @@ fun Route.preguntasRespuestasRoutes() {
     route("/preguntas") {
         get {
             val idOrg = call.request.queryParameters["idOrg"]?.toLongOrNull()
+            println("[${call.request.origin.remoteHost}] GET /preguntas idOrg=$idOrg")
             val resultado = dbQuery {
                 val query = if (idOrg != null) {
                     PreguntasTable .selectAll().where { PreguntasTable.idOrganizacion eq idOrg }
@@ -33,6 +35,7 @@ fun Route.preguntasRespuestasRoutes() {
         }
         post {
             val pregunta = call.receive<Pregunta>()
+            println("[${call.request.origin.remoteHost}] POST /preguntas pregunta=${pregunta.pregunta}")
             val nuevaId = dbQuery {
                 PreguntasTable.insert {
                     it[PreguntasTable.pregunta] = pregunta.pregunta
@@ -46,6 +49,7 @@ fun Route.preguntasRespuestasRoutes() {
             get {
                 val id = call.parameters["id"]?.toLongOrNull()
                     ?: return@get call.respond(HttpStatusCode.BadRequest)
+                println("[${call.request.origin.remoteHost}] GET /preguntas/$id")
                 val pregunta = dbQuery {
                     PreguntasTable .selectAll().where { PreguntasTable.id eq id }.map {
                         Pregunta(
@@ -62,6 +66,7 @@ fun Route.preguntasRespuestasRoutes() {
                 val id = call.parameters["id"]?.toLongOrNull()
                     ?: return@put call.respond(HttpStatusCode.BadRequest)
                 val pregunta = call.receive<Pregunta>()
+                println("[${call.request.origin.remoteHost}] PUT /preguntas/$id pregunta=${pregunta.pregunta}")
                 val updatedCount = dbQuery {
                     PreguntasTable.update({ PreguntasTable.id eq id }) {
                         it[PreguntasTable.pregunta] = pregunta.pregunta
@@ -75,6 +80,7 @@ fun Route.preguntasRespuestasRoutes() {
             delete {
                 val id = call.parameters["id"]?.toLongOrNull()
                     ?: return@delete call.respond(HttpStatusCode.BadRequest)
+                println("[${call.request.origin.remoteHost}] DELETE /preguntas/$id")
                 val deletedCount = dbQuery {
                     PreguntasTable.deleteWhere { PreguntasTable.id eq id }
                 }
@@ -89,6 +95,7 @@ fun Route.preguntasRespuestasRoutes() {
             val idUsuario = call.request.queryParameters["idUsuario"]?.toLongOrNull()
             val last = call.request.queryParameters["last"]?.toBoolean() ?: false
             val fecha = call.request.queryParameters["fecha"]?.toLongOrNull()
+            println("[${call.request.origin.remoteHost}] GET /respuestas idPregunta=$idPregunta idUsuario=$idUsuario last=$last")
             val resultado = dbQuery {
                 val query = RespuestasTable.selectAll()
                 if (idPregunta != null) {
@@ -122,6 +129,7 @@ fun Route.preguntasRespuestasRoutes() {
         }
         post {
             val respuesta = call.receive<Respuesta>()
+            println("[${call.request.origin.remoteHost}] POST /respuestas idUsuario=${respuesta.idUsuario} idPregunta=${respuesta.idPregunta}")
             dbQuery {
                 // Delete if exists to act as insert/replace on PK or just use update if not using a specific UPSERT
                 val existing = RespuestasTable .selectAll().where {
