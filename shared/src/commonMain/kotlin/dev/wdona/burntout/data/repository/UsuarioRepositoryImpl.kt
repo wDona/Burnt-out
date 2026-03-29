@@ -24,7 +24,7 @@ class UsuarioRepositoryImpl(
 
     private val repositoryScope = CoroutineScope(Dispatchers.Default)
 
-    override suspend fun getUserById(idUsuario: Long): Usuario = withContext(Dispatchers.IO) {
+    override suspend fun getUserById(idUsuario: Long): Usuario = withContext(NonCancellable + Dispatchers.IO) {
         if (idUsuario == Long.MIN_VALUE) {
             return@withContext local.getUserById(idUsuario)
         }
@@ -42,7 +42,7 @@ class UsuarioRepositoryImpl(
 
     }
 
-    override suspend fun getUsuariosByOrg(idOrg: Long): List<Usuario> = withContext(Dispatchers.IO) {
+    override suspend fun getUsuariosByOrg(idOrg: Long): List<Usuario> = withContext(NonCancellable + Dispatchers.IO) {
         if (!SettingsManager.isUsuarioInvitado()) {
             repositoryScope.launch {
                 try {
@@ -57,7 +57,7 @@ class UsuarioRepositoryImpl(
         local.getUsuariosByOrg(idOrg)
     }
 
-    override suspend fun getUsuariosByEquipo(idEquipo: Long): List<Usuario> = withContext(Dispatchers.IO) {
+    override suspend fun getUsuariosByEquipo(idEquipo: Long): List<Usuario> = withContext(NonCancellable + Dispatchers.IO) {
         // FIXME: Sincronizar remote si existe endpoint
         if (!SettingsManager.isUsuarioInvitado()) {
             // TODO
@@ -66,7 +66,7 @@ class UsuarioRepositoryImpl(
     }
 
     override suspend fun crearUsuario(usuario: Usuario) {
-        withContext(Dispatchers.IO) {
+        withContext(NonCancellable + Dispatchers.IO) {
             try {
                 local.crearUsuario(usuario)
             } catch (e: Exception) {
@@ -98,7 +98,7 @@ class UsuarioRepositoryImpl(
     }
 
     override suspend fun actualizarUsuario(usuario: Usuario) {
-        withContext(Dispatchers.IO) {
+        withContext(NonCancellable + Dispatchers.IO) {
             try {
                 local.actualizarUsuario(usuario)
             } catch (e: Exception) {
@@ -130,7 +130,7 @@ class UsuarioRepositoryImpl(
     }
 
     override suspend fun eliminarUsuario(idUsuario: Long) {
-        withContext(Dispatchers.IO) {
+        withContext(NonCancellable + Dispatchers.IO) {
             try {
                 local.eliminarUsuario(idUsuario)
             } catch (e: Exception) {
@@ -162,14 +162,14 @@ class UsuarioRepositoryImpl(
     }
 
     override suspend fun updateRiesgoBurnout(idUsuario: Long, riesgo: Double) {
-        withContext(Dispatchers.IO) {
+        withContext(NonCancellable + Dispatchers.IO) {
             val usuario = getUserById(idUsuario)
             actualizarUsuario(usuario.copy(riesgoBurnout = riesgo))
             local.updateRiesgoBurnout(idUsuario, riesgo)
         }
     }
 
-    override suspend fun existeUsuario(username: String): Boolean = withContext(Dispatchers.IO) {
+    override suspend fun existeUsuario(username: String): Boolean = withContext(NonCancellable + Dispatchers.IO) {
         try {
             remote.existeUsuario(username)
         } catch (e: Exception) {
@@ -183,7 +183,7 @@ class UsuarioRepositoryImpl(
         }
     }
 
-    override suspend fun login(username: String, contrasena: String): Usuario = withContext(Dispatchers.IO) {
+    override suspend fun login(username: String, contrasena: String): Usuario = withContext(NonCancellable + Dispatchers.IO) {
         try {
             val usuario = remote.login(username, contrasena)
             local.eliminarUsuario(usuario.idUsuario)

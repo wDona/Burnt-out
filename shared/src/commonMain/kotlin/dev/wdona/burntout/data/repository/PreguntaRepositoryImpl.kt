@@ -25,7 +25,7 @@ class PreguntaRespuestaRepositoryImpl(
 
     private val repositoryScope = CoroutineScope(Dispatchers.Default)
 
-    override suspend fun getPreguntasByOrg(idOrg: Long): List<Pregunta> = withContext(Dispatchers.IO) {
+    override suspend fun getPreguntasByOrg(idOrg: Long): List<Pregunta> = withContext(NonCancellable + Dispatchers.IO) {
         if (!SettingsManager.isUsuarioInvitado()) {
             repositoryScope.launch {
                 try {
@@ -41,7 +41,7 @@ class PreguntaRespuestaRepositoryImpl(
         local.getPreguntasByOrg(idOrg)
     }
 
-    override suspend fun getRespuestasByPregunta(idPregunta: Long): List<Respuesta> = withContext(Dispatchers.IO) {
+    override suspend fun getRespuestasByPregunta(idPregunta: Long): List<Respuesta> = withContext(NonCancellable + Dispatchers.IO) {
         if (!SettingsManager.isUsuarioInvitado()) {
             repositoryScope.launch {
                 try {
@@ -57,7 +57,7 @@ class PreguntaRespuestaRepositoryImpl(
         local.getRespuestasByPregunta(idPregunta)
     }
 
-    override suspend fun getRespuestasByIdUsuario(idUser: Long): List<Respuesta> = withContext(Dispatchers.IO) {
+    override suspend fun getRespuestasByIdUsuario(idUser: Long): List<Respuesta> = withContext(NonCancellable + Dispatchers.IO) {
         if (!SettingsManager.isUsuarioInvitado()) {
             repositoryScope.launch {
                 try {
@@ -73,14 +73,14 @@ class PreguntaRespuestaRepositoryImpl(
         local.getRespuestasByIdUsuario(idUser)
     }
 
-    override suspend fun getLastRespuestasByIdUsuario(idUser: Long): List<Respuesta> = withContext(Dispatchers.IO) {
+    override suspend fun getLastRespuestasByIdUsuario(idUser: Long): List<Respuesta> = withContext(NonCancellable + Dispatchers.IO) {
         // En este caso priorizamos la base de datos local que ya tiene el histórico,
         // opcionalmente podríamos pedir al server las "últimas" si el endpoint existiera.
         // Dado que syncronizamos en otros puntos, confiamos en lo local.
         local.getLastRespuestasByIdUsuario(idUser)
     }
 
-    override suspend fun getRespuestasByIdUsuarioAndDate(idUser: Long, date: Long): List<Respuesta> = withContext(Dispatchers.IO) {
+    override suspend fun getRespuestasByIdUsuarioAndDate(idUser: Long, date: Long): List<Respuesta> = withContext(NonCancellable + Dispatchers.IO) {
         if (!SettingsManager.isUsuarioInvitado()) {
             repositoryScope.launch {
                 try {
@@ -97,7 +97,7 @@ class PreguntaRespuestaRepositoryImpl(
     }
 
     override suspend fun crearPregunta(pregunta: Pregunta) {
-        withContext(Dispatchers.IO) {
+        withContext(NonCancellable + Dispatchers.IO) {
             try {
                 local.crearPregunta(pregunta)
             } catch (e: Exception) {
@@ -125,7 +125,7 @@ class PreguntaRespuestaRepositoryImpl(
     }
 
     override suspend fun actualizarPregunta(pregunta: Pregunta) {
-        withContext(Dispatchers.IO) {
+        withContext(NonCancellable + Dispatchers.IO) {
             try {
                 local.actualizarPregunta(pregunta)
             } catch (e: Exception) {
@@ -151,7 +151,7 @@ class PreguntaRespuestaRepositoryImpl(
     }
 
     override suspend fun eliminarPregunta(idPregunta: Long) {
-        withContext(Dispatchers.IO) {
+        withContext(NonCancellable + Dispatchers.IO) {
             try {
                 local.eliminarPregunta(idPregunta)
             } catch (e: Exception) {
@@ -177,7 +177,7 @@ class PreguntaRespuestaRepositoryImpl(
     }
 
     override suspend fun responderPregunta(respuesta: Respuesta) {
-        withContext(Dispatchers.IO) {
+        withContext(NonCancellable + Dispatchers.IO) {
             try {
                 local.responderPregunta(respuesta)
             } catch (e: Exception) {
@@ -204,7 +204,7 @@ class PreguntaRespuestaRepositoryImpl(
     }
 
     private suspend fun savePendingOp(tipo: TipoAccion, entity: Entity, id: Long, json: String, success: Boolean) {
-        withContext(Dispatchers.IO) {
+        withContext(NonCancellable + Dispatchers.IO) {
              pendiente.insertOperacionPendiente(
                  tipo.getNombreAccion(),
                  entity.getNombreEntity(),

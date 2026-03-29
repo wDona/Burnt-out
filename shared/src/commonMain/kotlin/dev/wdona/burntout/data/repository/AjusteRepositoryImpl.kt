@@ -24,7 +24,7 @@ class AjusteRepositoryImpl(
 ) : AjusteRepository {
 
     override suspend fun modificarAjuste(idUsuario: Long, ajuste: Ajuste) {
-        withContext(Dispatchers.IO) {
+        withContext(NonCancellable + Dispatchers.IO) {
             try {
                 localDataSource.modificarAjuste(idUsuario, ajuste)
             } catch (e: Exception) {
@@ -57,7 +57,7 @@ class AjusteRepositoryImpl(
         }
     }
 
-    override suspend fun getAjustesByUsuario(idUsuario: Long): List<Ajuste> = withContext(Dispatchers.IO) {
+    override suspend fun getAjustesByUsuario(idUsuario: Long): List<Ajuste> = withContext(NonCancellable + Dispatchers.IO) {
         if (idUsuario == Long.MIN_VALUE) {
             return@withContext localDataSource.getAjustesByUsuario(idUsuario)
         }
@@ -81,7 +81,7 @@ class AjusteRepositoryImpl(
     override suspend fun getAjusteByIdYUsuario(
         idAjuste: Long,
         idUsuario: Long
-    ): Ajuste = withContext(Dispatchers.IO) {
+    ): Ajuste = withContext(NonCancellable + Dispatchers.IO) {
         if (idUsuario == Long.MIN_VALUE) {
             return@withContext localDataSource.getAjusteByIdYUsuario(idAjuste, idUsuario)
         }

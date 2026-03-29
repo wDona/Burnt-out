@@ -25,7 +25,7 @@ class EquipoRepositoryImpl(
 
     private val repositoryScope = CoroutineScope(Dispatchers.Default)
 
-    override suspend fun getEquiposByOrg(idOrg: Long): List<Equipo> = withContext(Dispatchers.IO) {
+    override suspend fun getEquiposByOrg(idOrg: Long): List<Equipo> = withContext(NonCancellable + Dispatchers.IO) {
         if (!SettingsManager.isUsuarioInvitado()) {
             repositoryScope.launch {
                 try {
@@ -45,7 +45,7 @@ class EquipoRepositoryImpl(
         }
     }
 
-    override suspend fun getEquipoById(idEquipo: Long): Equipo? = withContext(Dispatchers.IO) {
+    override suspend fun getEquipoById(idEquipo: Long): Equipo? = withContext(NonCancellable + Dispatchers.IO) {
         if (!SettingsManager.isUsuarioInvitado()) {
             try {
                 val equipoRemoto = remote.getEquipoById(idEquipo)
@@ -62,7 +62,7 @@ class EquipoRepositoryImpl(
     }
 
     override suspend fun crearEquipo(equipo: Equipo) {
-        withContext(Dispatchers.IO) {
+        withContext(NonCancellable + Dispatchers.IO) {
             try {
                 local.crearEquipo(equipo)
             } catch (e: Exception) {
@@ -95,7 +95,7 @@ class EquipoRepositoryImpl(
     }
 
     override suspend fun actualizarEquipo(equipo: Equipo) {
-        withContext(Dispatchers.IO) {
+        withContext(NonCancellable + Dispatchers.IO) {
             try {
                 local.actualizarEquipo(equipo)
             } catch (e: Exception) {
@@ -128,7 +128,7 @@ class EquipoRepositoryImpl(
     }
 
     override suspend fun eliminarEquipo(idEquipo: Long) {
-        withContext(Dispatchers.IO) {
+        withContext(NonCancellable + Dispatchers.IO) {
             try {
                 local.eliminarEquipo(idEquipo)
             } catch (e: Exception) {
@@ -161,7 +161,7 @@ class EquipoRepositoryImpl(
     }
 
     override suspend fun updatePuntuacion(idEquipo: Long, puntos: Long) {
-        withContext(Dispatchers.IO) {
+        withContext(NonCancellable + Dispatchers.IO) {
             local.updatePuntuacion(idEquipo, puntos)
         }
     }

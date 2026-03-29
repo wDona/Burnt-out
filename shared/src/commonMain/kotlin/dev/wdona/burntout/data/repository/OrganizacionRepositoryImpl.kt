@@ -23,7 +23,7 @@ class OrganizacionRepositoryImpl(
 
     private val repositoryScope = CoroutineScope(Dispatchers.Default)
 
-    override suspend fun getOrganizacionById(idOrg: Long): Organizacion? = withContext(Dispatchers.IO) {
+    override suspend fun getOrganizacionById(idOrg: Long): Organizacion? = withContext(NonCancellable + Dispatchers.IO) {
         if (!SettingsManager.isUsuarioInvitado()) {
             repositoryScope.launch {
                 try {
@@ -41,7 +41,7 @@ class OrganizacionRepositoryImpl(
         }
     }
 
-    override suspend fun getAllOrganizaciones(): List<Organizacion> = withContext(Dispatchers.IO) {
+    override suspend fun getAllOrganizaciones(): List<Organizacion> = withContext(NonCancellable + Dispatchers.IO) {
         if (!SettingsManager.isUsuarioInvitado()) {
             repositoryScope.launch {
                 try {
@@ -60,7 +60,7 @@ class OrganizacionRepositoryImpl(
     }
 
     override suspend fun crearOrganizacion(organizacion: Organizacion) {
-        withContext(Dispatchers.IO) {
+        withContext(NonCancellable + Dispatchers.IO) {
             try {
                 local.crearOrganizacion(organizacion)
             } catch (e: Exception) {
@@ -93,7 +93,7 @@ class OrganizacionRepositoryImpl(
     }
 
     override suspend fun actualizarOrganizacion(organizacion: Organizacion) {
-        withContext(Dispatchers.IO) {
+        withContext(NonCancellable + Dispatchers.IO) {
             try {
                 local.actualizarOrganizacion(organizacion)
             } catch (e: Exception) {
@@ -124,7 +124,7 @@ class OrganizacionRepositoryImpl(
     }
 
     override suspend fun eliminarOrganizacion(idOrg: Long) {
-        withContext(Dispatchers.IO) {
+        withContext(NonCancellable + Dispatchers.IO) {
             try {
                 local.eliminarOrganizacion(idOrg)
             } catch (e: Exception) {

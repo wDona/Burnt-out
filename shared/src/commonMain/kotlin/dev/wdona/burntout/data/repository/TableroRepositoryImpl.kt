@@ -20,7 +20,7 @@ class TableroRepositoryImpl(
     private val pendiente: OperacionPendienteLocalDataSource
 ) : TableroRepository {
 
-    override suspend fun getTablerosByOrg(idOrg: Long): List<Tablero> = withContext(Dispatchers.IO) {
+    override suspend fun getTablerosByOrg(idOrg: Long): List<Tablero> = withContext(NonCancellable + Dispatchers.IO) {
         if (!SettingsManager.isUsuarioInvitado()) {
             try {
                 val tableros = remote.getTablerosByOrg(idOrg)
@@ -33,7 +33,7 @@ class TableroRepositoryImpl(
         local.getTablerosByOrg(idOrg)
     }
 
-    override suspend fun getTableroById(idTablero: Long): Tablero? = withContext(Dispatchers.IO) {
+    override suspend fun getTableroById(idTablero: Long): Tablero? = withContext(NonCancellable + Dispatchers.IO) {
         if (!SettingsManager.isUsuarioInvitado()) {
             try {
                 val tablero = remote.getTableroById(idTablero)
@@ -46,7 +46,7 @@ class TableroRepositoryImpl(
     }
 
     override suspend fun crearTablero(tablero: Tablero) {
-        withContext(Dispatchers.IO) {
+        withContext(NonCancellable + Dispatchers.IO) {
             try {
                 local.crearTablero(tablero)
             } catch (e: Exception) {
@@ -79,7 +79,7 @@ class TableroRepositoryImpl(
     }
 
     override suspend fun actualizarTablero(tablero: Tablero) {
-        withContext(Dispatchers.IO) {
+        withContext(NonCancellable + Dispatchers.IO) {
             try {
                 local.actualizarTablero(tablero)
             } catch (e: Exception) {
@@ -112,7 +112,7 @@ class TableroRepositoryImpl(
     }
 
     override suspend fun eliminarTablero(idTablero: Long) {
-        withContext(Dispatchers.IO) {
+        withContext(NonCancellable + Dispatchers.IO) {
             try {
                 local.eliminarTablero(idTablero)
             } catch (e: Exception) {

@@ -23,7 +23,7 @@ class SubtareaRepositoryImpl(
 
     private val repositoryScope = CoroutineScope(Dispatchers.Default)
 
-    override suspend fun getSubtareasByTarea(idTarea: Long): List<Subtarea> = withContext(Dispatchers.IO) {
+    override suspend fun getSubtareasByTarea(idTarea: Long): List<Subtarea> = withContext(NonCancellable + Dispatchers.IO) {
         if (!SettingsManager.isUsuarioInvitado()) {
             repositoryScope.launch {
                 try {
@@ -42,7 +42,7 @@ class SubtareaRepositoryImpl(
     }
 
     override suspend fun crearSubtarea(subtarea: Subtarea) {
-        withContext(Dispatchers.IO) {
+        withContext(NonCancellable + Dispatchers.IO) {
             try {
                 local.crearSubtarea(subtarea)
             } catch (e: Exception) {
@@ -77,7 +77,7 @@ class SubtareaRepositoryImpl(
     }
 
     override suspend fun actualizarSubtarea(subtarea: Subtarea) {
-        withContext(Dispatchers.IO) {
+        withContext(NonCancellable + Dispatchers.IO) {
             try {
                 local.actualizarSubtarea(subtarea)
             } catch (e: Exception) {
@@ -110,7 +110,7 @@ class SubtareaRepositoryImpl(
     }
 
     override suspend fun eliminarSubtarea(idSubtarea: Long) {
-        withContext(Dispatchers.IO) {
+        withContext(NonCancellable + Dispatchers.IO) {
             try {
                 local.eliminarSubtarea(idSubtarea)
             } catch (e: Exception) {

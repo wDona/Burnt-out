@@ -23,7 +23,7 @@ class TareaRepositoryImpl(
 
     private val repositoryScope = CoroutineScope(Dispatchers.Default)
 
-    override suspend fun getTareasByTableroId(tableroId: Long): List<Tarea> = withContext(Dispatchers.IO) {
+    override suspend fun getTareasByTableroId(tableroId: Long): List<Tarea> = withContext(NonCancellable + Dispatchers.IO) {
         if (!SettingsManager.isUsuarioInvitado()) {
             repositoryScope.launch {
                 try {
@@ -38,7 +38,7 @@ class TareaRepositoryImpl(
         local.getTareasByTablero(tableroId)
     }
 
-    override suspend fun getTareaById(idTarea: Long, idTablero: Long): Tarea? = withContext(Dispatchers.IO) {
+    override suspend fun getTareaById(idTarea: Long, idTablero: Long): Tarea? = withContext(NonCancellable + Dispatchers.IO) {
         if (!SettingsManager.isUsuarioInvitado()) {
             repositoryScope.launch {
                 try {
@@ -54,7 +54,7 @@ class TareaRepositoryImpl(
     }
 
     override suspend fun crearTarea(tarea: Tarea) {
-        withContext(Dispatchers.IO) {
+        withContext(NonCancellable + Dispatchers.IO) {
             try {
                 local.crearTarea(tarea)
             } catch (e: Exception) {
@@ -89,7 +89,7 @@ class TareaRepositoryImpl(
     }
 
     override suspend fun actualizarTarea(tarea: Tarea) {
-        withContext(Dispatchers.IO) {
+        withContext(NonCancellable + Dispatchers.IO) {
             try {
                 local.actualizarTarea(tarea)
             } catch (e: Exception) {
@@ -122,7 +122,7 @@ class TareaRepositoryImpl(
     }
 
     override suspend fun eliminarTarea(idTarea: Long) {
-        withContext(Dispatchers.IO) {
+        withContext(NonCancellable + Dispatchers.IO) {
             try {
                 local.eliminarTarea(idTarea)
             } catch (e: Exception) {
