@@ -39,4 +39,7 @@ class EquipoApiImpl(private val client: HttpClient = ApiClient.client) : EquipoA
 
     override suspend fun getMiembrosEquipo(idEquipo: Long): List<Usuario> =
         client.get("equipos/$idEquipo/miembros").body()
+
+    override suspend fun addUsuarioAlEquipo(idEquipo: Long, idUsuario: Long): Boolean =
+        client.post("equipos/$idEquipo/miembros/$idUsuario").status.isSuccess()
 }

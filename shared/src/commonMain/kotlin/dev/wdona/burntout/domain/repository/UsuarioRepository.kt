@@ -11,5 +11,6 @@ interface UsuarioRepository {
     suspend fun eliminarUsuario(idUsuario: Long)
     suspend fun updateRiesgoBurnout(idUsuario: Long, riesgo: Double)
     suspend fun existeUsuario(username: String): Boolean
+    suspend fun getUsuarioByUsername(username: String): Usuario?
     suspend fun login(username: String, contrasena: String): Usuario
 }

@@ -11,7 +11,6 @@ import dev.wdona.burntout.shared.domain.Usuario
 import dev.wdona.burntout.shared.utils.SettingsManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -30,10 +29,8 @@ class UsuarioRepositoryImpl(
         }
         try {
             val usuario = remote.getUserById(idUsuario)
-            if (usuario != null) {
-                local.eliminarUsuario(usuario.idUsuario)
-                local.insertOrUpdateUsuario(usuario)
-            }
+            local.eliminarUsuario(usuario.idUsuario)
+            local.insertOrUpdateUsuario(usuario)
             usuario
         } catch (e: Exception) {
             println("Servidor offline (getUserById): ${e.message}")
@@ -88,7 +85,8 @@ class UsuarioRepositoryImpl(
         withContext(NonCancellable + Dispatchers.IO) {
             var exito = false
             try {
-                exito = remote.crearUsuario(usuario)
+                remote.crearUsuario(usuario)
+                exito = true
             } catch (e: Exception) {
                 println("Servidor offline al crear usuario: ${e.message}")
             }
@@ -180,17 +178,18 @@ class UsuarioRepositoryImpl(
     }
 
     override suspend fun existeUsuario(username: String): Boolean = withContext(NonCancellable + Dispatchers.IO) {
-        try {
-            remote.existeUsuario(username)
-        } catch (e: Exception) {
-            println("Servidor offline (existeUsuario): ${e.message}")
-            try {
-                local.getUsuarioByUsername(username)
-                true
-            } catch (localE: Exception) {
-                false
-            }
+        if (!SettingsManager.isUsuarioInvitado()) {
+            return@withContext remote.existeUsuario(username)
         }
+        false 
+    }
+
+    override suspend fun getUsuarioByUsername(username: String): Usuario? = withContext(NonCancellable + Dispatchers.IO) {
+        if (!SettingsManager.isUsuarioInvitado()) {
+            return@withContext remote.getUsuarioByUsername(username)
+        }
+        // local.getUsuarioByUsername(username) // fallback si se requiriera online-offline completo para busqueda 
+        null
     }
 
     override suspend fun login(username: String, contrasena: String): Usuario = withContext(NonCancellable + Dispatchers.IO) {

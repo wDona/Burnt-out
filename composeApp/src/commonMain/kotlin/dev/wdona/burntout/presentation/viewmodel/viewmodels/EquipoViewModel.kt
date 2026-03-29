@@ -3,7 +3,9 @@ package dev.wdona.burntout.presentation.viewmodel.viewmodels
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
 import dev.wdona.burntout.domain.repository.EquipoRepository
+import dev.wdona.burntout.domain.usecase.AddUsuarioAlEquipoUseCase
 import dev.wdona.burntout.domain.usecase.CargarMiembrosEquipo
+import dev.wdona.burntout.domain.usecase.GetUsuarioByUsernameUseCase
 import dev.wdona.burntout.shared.domain.Equipo
 import dev.wdona.burntout.shared.domain.Usuario
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,12 +18,15 @@ data class EquipoUiState(
     val equipo: Equipo? = null,
     val miembros: List<Usuario> = emptyList(),
     val isLoading: Boolean = false,
-    val error: String? = null
+    val error: String? = null,
+    val userAddedSuccess: Boolean = false
 )
 
 class EquipoViewModel(
     private val repository: EquipoRepository,
-    private val cargarMiembrosEquipoUseCase: CargarMiembrosEquipo
+    private val cargarMiembrosEquipoUseCase: CargarMiembrosEquipo,
+    private val addUsuarioAlEquipoUseCase: AddUsuarioAlEquipoUseCase,
+    private val getUsuarioByIDUseCase: GetUsuarioByUsernameUseCase
 ) : ScreenModel {
     private val _uiState = MutableStateFlow(EquipoUiState(isLoading = true))
     val uiState: StateFlow<EquipoUiState> = _uiState.asStateFlow()
@@ -59,5 +64,42 @@ class EquipoViewModel(
                  _uiState.update { it.copy(isLoading = false, error = e.message) }
             }
         }
+    }
+
+    fun addUsuarioAlEquipo(idEquipo: Long, idUsuario: Long) {
+        screenModelScope.launch {
+            _uiState.update { it.copy(isLoading = true, userAddedSuccess = false) }
+            try {
+                val success = addUsuarioAlEquipoUseCase(idEquipo, idUsuario)
+                if (success) {
+                    cargarMiembrosEquipo(idEquipo)
+                    _uiState.update { it.copy(userAddedSuccess = true, isLoading = false) }
+                } else {
+                    _uiState.update { it.copy(isLoading = false, error = "Error al añadir usuario") }
+                }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(isLoading = false, error = e.message) }
+            }
+        }
+    }
+    
+    fun anadirUsuarioAlEquipo(idEquipo: Long, idUsuario: Long) {
+        screenModelScope.launch {
+            _uiState.update { it.copy(isLoading = true, userAddedSuccess = false) }
+            try {
+                val usuario = getUsuarioByIDUseCase(idUsuario)
+                if (usuario != null) {
+                    addUsuarioAlEquipo(idEquipo, usuario.idUsuario)
+                } else {
+                    _uiState.update { it.copy(isLoading = false, error = "Usuario no encontrado") }
+                }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(isLoading = false, error = e.message) }
+            }
+        }
+    }
+
+    fun resetUserAddedSuccess() {
+        _uiState.update { it.copy(userAddedSuccess = false) }
     }
 }

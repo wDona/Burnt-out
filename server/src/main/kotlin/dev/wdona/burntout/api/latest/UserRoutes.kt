@@ -178,5 +178,24 @@ fun Route.usuariosRoutes() {
                 call.respond(HttpStatusCode.NoContent)
             }
         }
+        get("/username/{username}") {
+            val username = call.parameters["username"] ?: return@get call.respond(HttpStatusCode.BadRequest)
+            println("[${call.request.origin.remoteHost}] GET /usuarios/username/$username")
+            val usuario = dbQuery {
+                UsuariosTable.selectAll().where { UsuariosTable.username eq username }.map {
+                    Usuario(
+                        idUsuario = it[UsuariosTable.id],
+                        username = it[UsuariosTable.username],
+                        password = it[UsuariosTable.password],
+                        nombre = it[UsuariosTable.nombre],
+                        riesgoBurnout = it[UsuariosTable.riesgoBurnout],
+                        descripcion = it[UsuariosTable.descripcion],
+                        idOrganizacion = it[UsuariosTable.idOrganizacion],
+                        idEquipo = it[UsuariosTable.idEquipo]
+                    )
+                }.singleOrNull()
+            } ?: return@get call.respond(HttpStatusCode.NotFound)
+            call.respond(usuario)
+        }
     }
 }

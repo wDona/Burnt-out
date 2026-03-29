@@ -11,4 +11,5 @@ interface EquipoLocalDataSource {
     suspend fun insertOrUpdateEquipo(equipo: Equipo): Boolean
     suspend fun updatePuntuacion(idEquipo: Long, puntos: Long): Boolean
     suspend fun eliminarEquiposPorOrg(idOrg: Long)
+    suspend fun addUsuarioAlEquipo(idEquipo: Long, idUsuario: Long): Boolean
 }

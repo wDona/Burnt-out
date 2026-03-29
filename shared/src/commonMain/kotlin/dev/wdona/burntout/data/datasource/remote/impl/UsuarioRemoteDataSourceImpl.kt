@@ -13,7 +13,7 @@ class UsuarioRemoteDataSourceImpl(private val usuarioApi: UsuarioApi) : UsuarioR
         return usuarioApi.getUsuariosByOrg(idOrg)
     }
 
-    override suspend fun crearUsuario(usuario: Usuario): Boolean {
+    override suspend fun crearUsuario(usuario: Usuario): Long {
         return usuarioApi.crearUsuario(usuario)
     }
 
@@ -35,5 +35,9 @@ class UsuarioRemoteDataSourceImpl(private val usuarioApi: UsuarioApi) : UsuarioR
 
     override suspend fun getMiembrosEquipo(idEquipo: Long): List<Usuario> {
         return usuarioApi.getMiembrosEquipo(idEquipo)
+    }
+
+    override suspend fun getUsuarioByUsername(username: String): Usuario? {
+        return usuarioApi.getUsuarioByUsername(username)
     }
 }

@@ -132,7 +132,7 @@ class SincronizarPendientesUseCase(
         return when (op.tipoAccion) {
             TipoAccion.CREACION.getNombreAccion() -> {
                 val usuario = json.decodeFromString<Usuario>(op.datosJson)
-                usuarioRemote.crearUsuario(usuario)
+                usuarioRemote.crearUsuario(usuario) != -1L
             }
             TipoAccion.ACTUALIZACION.getNombreAccion() -> {
                 val usuario = json.decodeFromString<Usuario>(op.datosJson)

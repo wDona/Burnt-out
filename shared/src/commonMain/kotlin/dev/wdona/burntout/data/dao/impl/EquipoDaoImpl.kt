@@ -70,4 +70,17 @@ class EquipoDaoImpl(appDatabase: AppDatabase) : EquipoDao {
             false
         }
     }
+
+    override suspend fun addUsuarioAlEquipo(idEquipo: Long, idUsuario: Long): Boolean {
+        return try {
+            queries.transaction {
+                queries.deleteUserFromAllTeams(idUsuario)
+                queries.insertUserTeam(idUsuario, idEquipo)
+                queries.deleteEmptyTeams()
+            }
+            true
+        } catch (e: Exception) {
+            false
+        }
+    }
 }

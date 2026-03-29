@@ -13,6 +13,7 @@ import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
+import io.ktor.http.HttpStatusCode
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -25,11 +26,13 @@ class UsuarioApiImpl(private val client: HttpClient = ApiClient.client) : Usuari
     override suspend fun getUsuariosByOrg(idOrg: Long): List<Usuario> =
         client.get("usuarios?idOrg=$idOrg").body()
 
-    override suspend fun crearUsuario(usuario: Usuario): Boolean =
-        client.post("usuarios") {
+    override suspend fun crearUsuario(usuario: Usuario): Long {
+        val response = client.post("usuarios") {
             contentType(ContentType.Application.Json)
             setBody(usuario)
-        }.status.isSuccess()
+        }
+        return response.body<Usuario>().idUsuario
+    }
 
     override suspend fun actualizarUsuario(usuario: Usuario): Boolean =
         client.put("usuarios/${usuario.idUsuario}") {
@@ -40,8 +43,20 @@ class UsuarioApiImpl(private val client: HttpClient = ApiClient.client) : Usuari
     override suspend fun eliminarUsuario(idUsuario: Long): Boolean =
         client.delete("usuarios/$idUsuario").status.isSuccess()
 
-    override suspend fun existeUsuario(username: String): Boolean =
-        client.get("usuarios/existe/$username").body()
+    override suspend fun existeUsuario(username: String): Boolean {
+        val response = client.get("usuarios/existe/$username") {
+            contentType(ContentType.Application.Json)
+        }
+        return response.body()
+    }
+
+    override suspend fun getUsuarioByUsername(username: String): Usuario? {
+        val response = client.get("usuarios/username/$username") {
+            contentType(ContentType.Application.Json)
+        }
+        if (response.status == HttpStatusCode.NotFound) return null
+        return response.body()
+    }
 
     override suspend fun login(username: String, contrasena: String): Usuario =
         client.post("usuarios/login") {

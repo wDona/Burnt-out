@@ -15,12 +15,15 @@ import dev.wdona.burntout.data.repository.EquipoRepositoryImpl
 import dev.wdona.burntout.data.repository.UsuarioRepositoryImpl
 import dev.wdona.burntout.domain.repository.EquipoRepository
 import dev.wdona.burntout.domain.repository.UsuarioRepository
+import dev.wdona.burntout.domain.usecase.AddUsuarioAlEquipoUseCase
 import dev.wdona.burntout.domain.usecase.CargarMiembrosEquipo
+import dev.wdona.burntout.domain.usecase.GetUsuarioByUsernameUseCase
 import dev.wdona.burntout.shared.db.DatabaseDriverFactory
 import dev.wdona.burntout.presentation.viewmodel.viewmodels.EquipoViewModel
 import dev.wdona.burntout.shared.db.AppDatabase
 import java.io.Serializable
 import kotlin.jvm.Transient
+
 actual class MiEquipoViewModelFactory(@Transient private val context: Context) : Serializable {
     actual fun create(): EquipoViewModel {
         val driverFactory = DatabaseDriverFactory(context)
@@ -46,8 +49,6 @@ actual class MiEquipoViewModelFactory(@Transient private val context: Context) :
                 usuarioRemoteDataSource,
                 pendienteDataSource)
 
-
-
         return getInstance(repository, usuarioRepository)
     }
 
@@ -56,7 +57,12 @@ actual class MiEquipoViewModelFactory(@Transient private val context: Context) :
 
         fun getInstance(repository: EquipoRepository, usuarioRepository: UsuarioRepository): EquipoViewModel {
             if (instance == null) {
-                instance = EquipoViewModel(repository, CargarMiembrosEquipo(usuarioRepository))
+                instance = EquipoViewModel(
+                    repository,
+                    CargarMiembrosEquipo(usuarioRepository),
+                    AddUsuarioAlEquipoUseCase(repository),
+                    GetUsuarioByUsernameUseCase(usuarioRepository)
+                )
             }
             return instance!!
         }

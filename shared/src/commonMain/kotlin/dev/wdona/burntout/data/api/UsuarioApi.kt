@@ -5,10 +5,11 @@ import dev.wdona.burntout.shared.domain.Usuario
 interface UsuarioApi {
     suspend fun getUserById(idUsuario: Long): Usuario
     suspend fun getUsuariosByOrg(idOrg: Long): List<Usuario>
-    suspend fun crearUsuario(usuario: Usuario): Boolean
+    suspend fun crearUsuario(usuario: Usuario): Long
     suspend fun actualizarUsuario(usuario: Usuario): Boolean
     suspend fun eliminarUsuario(idUsuario: Long): Boolean
     suspend fun existeUsuario(username: String): Boolean
+    suspend fun getUsuarioByUsername(username: String): Usuario?
     suspend fun login(username: String, contrasena: String): Usuario
     suspend fun getMiembrosEquipo(idEquipo: Long): List<Usuario>
 }

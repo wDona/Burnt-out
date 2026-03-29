@@ -29,4 +29,8 @@ class EquipoRemoteDataSourceImpl(private val equipoApi: EquipoApi) : EquipoRemot
     override suspend fun getMiembrosEquipo(idEquipo: Long): List<Usuario> {
         return equipoApi.getMiembrosEquipo(idEquipo)
     }
+
+    override suspend fun addUsuarioAlEquipo(idEquipo: Long, idUsuario: Long): Boolean {
+        return equipoApi.addUsuarioAlEquipo(idEquipo, idUsuario)
+    }
 }

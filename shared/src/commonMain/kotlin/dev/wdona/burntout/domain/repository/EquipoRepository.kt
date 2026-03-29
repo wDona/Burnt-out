@@ -10,4 +10,5 @@ interface EquipoRepository {
     suspend fun actualizarEquipo(equipo: Equipo)
     suspend fun eliminarEquipo(idEquipo: Long)
     suspend fun updatePuntuacion(idEquipo: Long, puntos: Long)
+    suspend fun addUsuarioAlEquipo(idEquipo: Long, idUsuario: Long): Boolean
 }

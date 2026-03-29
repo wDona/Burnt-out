@@ -380,6 +380,12 @@ INSERT OR IGNORE INTO User_TeamEntity(ID_Usuario, ID_Equipo) VALUES(?, ?);
 deleteUserTeam:
 DELETE FROM User_TeamEntity WHERE ID_Usuario = ? AND ID_Equipo = ?;
 
+deleteUserFromAllTeams:
+DELETE FROM User_TeamEntity WHERE ID_Usuario = ?;
+
+deleteEmptyTeams:
+DELETE FROM EquipoEntity WHERE ID_Equipo NOT IN (SELECT DISTINCT ID_Equipo FROM User_TeamEntity);
+
 -- ====== ORGANIZACIONES ======
 getAllOrganizaciones:
 SELECT * FROM OrganizacionEntity;

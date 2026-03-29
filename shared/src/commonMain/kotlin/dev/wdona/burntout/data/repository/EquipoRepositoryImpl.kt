@@ -165,4 +165,39 @@ class EquipoRepositoryImpl(
             local.updatePuntuacion(idEquipo, puntos)
         }
     }
+
+    override suspend fun addUsuarioAlEquipo(idEquipo: Long, idUsuario: Long): Boolean = withContext(NonCancellable + Dispatchers.IO) {
+        val localSuccess = try {
+            local.addUsuarioAlEquipo(idEquipo, idUsuario)
+        } catch (e: Exception) {
+            println("Error local al añadir usuario al equipo: ${e.message}")
+            false
+        }
+
+        if (SettingsManager.isUsuarioInvitado()) return@withContext localSuccess
+
+        var remoteSuccess = false
+        try {
+            remoteSuccess = remote.addUsuarioAlEquipo(idEquipo, idUsuario)
+        } catch (e: Exception) {
+            println("Error remoto al añadir usuario al equipo: ${e.message}")
+        }
+
+        if (!remoteSuccess) {
+            try {
+                pendiente.insertOperacionPendiente(
+                    TipoAccion.ACTUALIZACION.getNombreAccion(),
+                    Entity.EQUIPO.getNombreEntity(),
+                    idEquipo,
+                    "{\"idUsuario\":$idUsuario}",
+                    System.currentTimeMillis(),
+                    0L
+                )
+            } catch (e: Exception) {
+                println("Error al registrar operación pendiente: ${e.message}")
+            }
+        }
+
+        remoteSuccess || localSuccess
+    }
 }

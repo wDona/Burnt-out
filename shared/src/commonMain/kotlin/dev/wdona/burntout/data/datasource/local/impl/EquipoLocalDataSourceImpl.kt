@@ -37,4 +37,8 @@ class EquipoLocalDataSourceImpl(private val equipoDao: EquipoDao) : EquipoLocalD
         val equipos = equipoDao.getEquiposByOrg(idOrg)
         equipos.forEach { equipoDao.eliminarEquipo(it.idEquipo) }
     }
+
+    override suspend fun addUsuarioAlEquipo(idEquipo: Long, idUsuario: Long): Boolean {
+        return equipoDao.addUsuarioAlEquipo(idEquipo, idUsuario)
+    }
 }
