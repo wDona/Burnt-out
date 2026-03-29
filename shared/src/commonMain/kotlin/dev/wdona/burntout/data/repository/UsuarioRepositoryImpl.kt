@@ -32,7 +32,7 @@ class UsuarioRepositoryImpl(
             val usuario = remote.getUserById(idUsuario)
             if (usuario != null) {
                 local.eliminarUsuario(usuario.idUsuario)
-                local.crearUsuario(usuario)
+                local.insertOrUpdateUsuario(usuario)
             }
             usuario
         } catch (e: Exception) {
@@ -48,7 +48,7 @@ class UsuarioRepositoryImpl(
                 try {
                     val usuarios = remote.getUsuariosByOrg(idOrg)
                     local.eliminarUsuariosPorOrg(idOrg)
-                    usuarios.forEach { local.crearUsuario(it) }
+                    usuarios.forEach { local.insertOrUpdateUsuario(it) }
                 } catch (e: Exception) {
                     println("Servidor offline (getUsuariosByOrg): ${e.message}")
                 }
@@ -74,7 +74,7 @@ class UsuarioRepositoryImpl(
             }
         }
 
-        if (SettingsManager.isUsuarioInvitado()) return
+        if (usuario.idUsuario == Long.MIN_VALUE) return
         withContext(NonCancellable + Dispatchers.IO) {
             var exito = false
             try {
@@ -106,7 +106,7 @@ class UsuarioRepositoryImpl(
             }
         }
 
-        if (SettingsManager.isUsuarioInvitado()) return
+        if (usuario.idUsuario == Long.MIN_VALUE) return
         withContext(NonCancellable + Dispatchers.IO) {
             var exito = false
             try {
@@ -138,7 +138,7 @@ class UsuarioRepositoryImpl(
             }
         }
 
-        if (SettingsManager.isUsuarioInvitado()) return
+        if (idUsuario == Long.MIN_VALUE) return
         withContext(NonCancellable + Dispatchers.IO) {
             var exito = false
             try {
@@ -186,11 +186,20 @@ class UsuarioRepositoryImpl(
     override suspend fun login(username: String, contrasena: String): Usuario = withContext(NonCancellable + Dispatchers.IO) {
         try {
             val usuario = remote.login(username, contrasena)
-            local.eliminarUsuario(usuario.idUsuario)
-            local.crearUsuario(usuario)
+
+            try {
+                val usuarioLocal = local.getUsuarioByUsername(username)
+                local.eliminarUsuario(usuarioLocal.idUsuario)
+            } catch (ignore: Exception) {
+            }
+
+            // TODO: si existia ya y tenia un id offline, habria que actualizar
+            //      las tablas relacionadas que apuntaban a ese ID offline (tareas, respuestas, etc.)
+            //      al nuevo id de servidor?
+            local.insertOrUpdateUsuario(usuario)
             usuario
         } catch (e: Exception) {
-            println("Servidor offline (login): ${e.message}")
+            println("Error al iniciar sesión (login): ${e.message}")
             try {
                 val usuarioLocal = local.getUsuarioByUsername(username)
                 if (usuarioLocal.password == contrasena) {
