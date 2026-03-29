@@ -79,7 +79,13 @@ fun Route.usuariosRoutes() {
             call.respond(HttpStatusCode.Created, usuario.copy(idUsuario = nuevoId, idEquipo = createdEquipoId))
         }
         post("/login") {
-            val request = call.receive<LoginRequest>()
+            println("[${call.request.origin.remoteHost}] POST /usuarios/login - ContentType: ${call.request.contentType()}")
+            val request = try {
+                call.receive<LoginRequest>()
+            } catch (e: Exception) {
+                println("[LOGIN ERROR] ${e::class.simpleName}: ${e.message}")
+                return@post call.respond(HttpStatusCode.BadRequest)
+            }
             println("[${call.request.origin.remoteHost}] POST /usuarios/login username=${request.username}")
             val usuario = dbQuery {
                 UsuariosTable .selectAll().where {
