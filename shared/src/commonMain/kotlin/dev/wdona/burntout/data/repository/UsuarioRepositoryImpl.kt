@@ -178,18 +178,30 @@ class UsuarioRepositoryImpl(
     }
 
     override suspend fun existeUsuario(username: String): Boolean = withContext(NonCancellable + Dispatchers.IO) {
-        if (!SettingsManager.isUsuarioInvitado()) {
-            return@withContext remote.existeUsuario(username)
+        val existsRemote = try {
+            remote.existeUsuario(username)
+        } catch (e: Exception) {
+            println("Error al comprobar existencia de usuario remota: ${e.message}")
+            false
         }
-        false 
+        val existsLocal = try {
+            local.getUsuarioByUsername(username) != null
+        } catch (e: Exception) {
+            false
+        }
+        existsRemote || existsLocal
     }
 
     override suspend fun getUsuarioByUsername(username: String): Usuario? = withContext(NonCancellable + Dispatchers.IO) {
-        if (!SettingsManager.isUsuarioInvitado()) {
-            return@withContext remote.getUsuarioByUsername(username)
+        try {
+            remote.getUsuarioByUsername(username)
+        } catch (e: Exception) {
+            try {
+                local.getUsuarioByUsername(username)
+            } catch (localE: Exception) {
+                null
+            }
         }
-        // local.getUsuarioByUsername(username) // fallback si se requiriera online-offline completo para busqueda 
-        null
     }
 
     override suspend fun login(username: String, contrasena: String): Usuario = withContext(NonCancellable + Dispatchers.IO) {

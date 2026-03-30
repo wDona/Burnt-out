@@ -96,7 +96,6 @@ class PreguntasInicialesScreen(
                     leaderboardFactory = leaderboardFactory,
                     ajustesFactory = ajustesFactory,
                     formularioFactory = viewModelFactory,
-                    idEquipo = idEquipo
                 )
             )
         }

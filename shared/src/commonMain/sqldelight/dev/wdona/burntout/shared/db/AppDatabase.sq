@@ -11,6 +11,7 @@ CREATE TABLE UsuarioEntity (
     Riesgo_Burnout REAL,
     Descripcion TEXT,
     FK_ID_Organizacion INTEGER NOT NULL,
+    FK_ID_Equipo INTEGER NOT NULL DEFAULT 0,
     FOREIGN KEY(FK_ID_Organizacion) REFERENCES OrganizacionEntity(ID_Org)
 );
 
@@ -120,7 +121,7 @@ insertEquipoBase:
 INSERT OR IGNORE INTO EquipoEntity(ID_Equipo, Titulo, FK_ID_Org) VALUES(-9223372036854775808, 'Equipo predeterminado', -9223372036854775808);
 
 insertUsuarioBase:
-INSERT OR IGNORE INTO UsuarioEntity(ID_Usuario, Username, Contrasena, Nombre, FK_ID_Organizacion) VALUES(-9223372036854775808, 'Invitado', '********', 'Usuario invitado', -9223372036854775808);
+INSERT OR IGNORE INTO UsuarioEntity(ID_Usuario, Username, Contrasena, Nombre, FK_ID_Organizacion, FK_ID_Equipo) VALUES(-9223372036854775808, 'Invitado', '********', 'Usuario invitado', -9223372036854775808, -9223372036854775808);
 INSERT OR IGNORE INTO User_TeamEntity(ID_Usuario, ID_Equipo) VALUES(-9223372036854775808, -9223372036854775808);
 
 -- BASADAS EN EL MBI (Maslach Burnout Inventory)
@@ -253,12 +254,12 @@ SELECT * FROM EquipoEntity ORDER BY Puntuacion DESC;
 
 -- ==== Usuarios ====
 insertUsuario:
-INSERT INTO UsuarioEntity(Username, Contrasena, Nombre, Riesgo_Burnout, Descripcion, FK_ID_Organizacion)
-VALUES(?, ?, ?, ?, ?, ?);
+INSERT INTO UsuarioEntity(Username, Contrasena, Nombre, Riesgo_Burnout, Descripcion, FK_ID_Organizacion, FK_ID_Equipo)
+VALUES(?, ?, ?, ?, ?, ?, ?);
 
 upsertUsuario:
-INSERT OR REPLACE INTO UsuarioEntity(ID_Usuario, Username, Contrasena, Nombre, Riesgo_Burnout, Descripcion, FK_ID_Organizacion)
-VALUES(?, ?, ?, ?, ?, ?, ?);
+INSERT OR REPLACE INTO UsuarioEntity(ID_Usuario, Username, Contrasena, Nombre, Riesgo_Burnout, Descripcion, FK_ID_Organizacion, FK_ID_Equipo)
+VALUES(?, ?, ?, ?, ?, ?, ?, ?);
 
 getUserById:
 SELECT * FROM UsuarioEntity WHERE ID_Usuario = ?;
@@ -275,7 +276,10 @@ FROM UsuarioEntity u JOIN User_TeamEntity ut ON u.ID_Usuario = ut.ID_Usuario
 WHERE ut.ID_Equipo = ?;
 
 updateUsuario:
-UPDATE UsuarioEntity SET Username = ?, Contrasena = ?, Nombre = ?, Riesgo_Burnout = ?, Descripcion = ? WHERE ID_Usuario = ?;
+UPDATE UsuarioEntity SET Username = ?, Contrasena = ?, Nombre = ?, Riesgo_Burnout = ?, Descripcion = ?, FK_ID_Equipo = ? WHERE ID_Usuario = ?;
+
+updateUsuarioTeamId:
+UPDATE UsuarioEntity SET FK_ID_Equipo = ? WHERE ID_Usuario = ?;
 
 deleteUsuario:
 DELETE FROM UsuarioEntity WHERE ID_Usuario = ?;

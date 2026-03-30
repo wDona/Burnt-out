@@ -50,6 +50,14 @@ fun Route.usuariosRoutes() {
         post {
             val usuario = call.receive<Usuario>()
             println("[${call.request.origin.remoteHost}] POST /usuarios username=${usuario.username}")
+            
+            val existe = dbQuery {
+                UsuariosTable.selectAll().where { UsuariosTable.username eq usuario.username }.count() > 0
+            }
+            if (existe) {
+                return@post call.respond(HttpStatusCode.Conflict, "El nombre de usuario ya existe")
+            }
+
             var createdEquipoId = usuario.idEquipo
             val nuevoId = dbQuery {
                 var equipoId = usuario.idEquipo
@@ -92,7 +100,7 @@ fun Route.usuariosRoutes() {
             call.respond(HttpStatusCode.Created, usuario.copy(idUsuario = nuevoId, idEquipo = createdEquipoId))
         }
         post("/login") {
-            println("[${call.request.origin.remoteHost}] POST /usuarios/login - ContentType: ${call.request.headers["Content-Type"]}")
+            println("[${call.request.origin.remoteHost}] POST /usuarios/login")
             val request = try {
                 call.receive<LoginRequest>()
             } catch (e: Exception) {

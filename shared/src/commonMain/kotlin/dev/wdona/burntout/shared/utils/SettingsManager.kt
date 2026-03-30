@@ -54,21 +54,17 @@ object SettingsManager {
         _isAutenticadoFlow.value = false
     }
 
-    fun setIdUsuarioActual(id: Long?) {
+    private fun setIdUsuarioActualInternal(id: Long?) {
         val safeId = id ?: Long.MIN_VALUE
         settings.putLong(KEY_ID_USUARIO_ACTUAL, safeId)
         
-        // Actualizar flujos para el nuevo usuario ANTES de que se lance isAutenticado=true
         _primerCuestionarioHechoFlow.value = getPrimerCuestionarioHecho()
         _cuestionarioHoyHechoFlow.value = esCuestionarioHoyHecho()
-
         _idUsuarioActualFlow.value = safeId
-        _isAutenticadoFlow.value = true
     }
 
     fun getIdUsuarioActual(): Long {
-        val id = settings.getLong(KEY_ID_USUARIO_ACTUAL, Long.MIN_VALUE)
-        return id
+        return settings.getLong(KEY_ID_USUARIO_ACTUAL, Long.MIN_VALUE)
     }
 
     fun setTokenUsuario(token: String?) {
@@ -76,8 +72,7 @@ object SettingsManager {
     }
 
     fun getTokenUsuario(): String {
-        val token = settings.getString(KEY_TOKEN_USUARIO, "")
-        return token
+        return settings.getString(KEY_TOKEN_USUARIO, "")
     }
 
     fun setPrimerCuestionarioHecho(primerCuestionario: Boolean) {
@@ -94,26 +89,22 @@ object SettingsManager {
     }
 
     fun getIdEquipoActual(): Long {
-        val id = settings.getLong(KEY_ID_EQUIPO_ACTUAL, Long.MIN_VALUE)
-        return id
+        return settings.getLong(KEY_ID_EQUIPO_ACTUAL, Long.MIN_VALUE)
     }
 
     fun getRolActual(): Long {
-        val id = settings.getLong(KEY_ROL_ACTUAL, Long.MIN_VALUE)
-        return id
+        return settings.getLong(KEY_ROL_ACTUAL, Long.MIN_VALUE)
     }
 
     fun getIdOrganizacionActual(): Long {
-        val id = settings.getLong(KEY_ID_ORGANIZACION_ACTUAL, Long.MIN_VALUE)
-        return id
+        return settings.getLong(KEY_ID_ORGANIZACION_ACTUAL, Long.MIN_VALUE)
     }
 
     fun getNombreUsuario(): String {
-        val nombre = settings.getString(KEY_NOMBRE_USUARIO, "")
-        return nombre
+        return settings.getString(KEY_NOMBRE_USUARIO, "")
     }
 
-    fun setNombreUsuario(nombre: String) {
+    private fun setNombreUsuarioInternal(nombre: String) {
         settings.putString(KEY_NOMBRE_USUARIO, nombre)
         _nombreUsuarioFlow.value = nombre
     }
@@ -181,11 +172,25 @@ object SettingsManager {
     }
 
     fun setUsuarioActual(usuario: Usuario) {
-        setIdUsuarioActual(usuario.idUsuario)
-        setNombreUsuario(usuario.username)
+        // Establecer todo ANTES de activar autenticacion
+        setNombreUsuarioInternal(usuario.username)
         setIdEquipoActual(usuario.idEquipo)
         setIdOrganizacionActual(usuario.idOrganizacion)
         setTokenUsuario("token_${usuario.idUsuario}")
         setRolActual(1L) // FIXME
+        
+        setIdUsuarioActualInternal(usuario.idUsuario)
+        _isAutenticadoFlow.value = true
+    }
+
+    fun setUsuarioInvitado() {
+        setNombreUsuarioInternal("Invitado")
+        setIdEquipoActual(Long.MIN_VALUE)
+        setIdOrganizacionActual(Long.MIN_VALUE)
+        setTokenUsuario("token_invitado")
+        setRolActual(0L)
+        
+        setIdUsuarioActualInternal(Long.MIN_VALUE)
+        _isAutenticadoFlow.value = true
     }
 }

@@ -119,7 +119,6 @@ class PreMainScreen(
                             tableroFactory = tableroFactory,
                             ajustesFactory = ajustesFactory,
                             leaderboardFactory = leaderboardFactory,
-                            idEquipo = uiState.idEquipo,
                         )
                     )
                 }

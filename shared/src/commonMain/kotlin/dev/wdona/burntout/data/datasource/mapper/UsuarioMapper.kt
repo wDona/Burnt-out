@@ -6,7 +6,7 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
 object UsuarioMapper {
-    fun toDomain(entity: UsuarioEntity, idEquipo: Long): Usuario {
+    fun toDomain(entity: UsuarioEntity): Usuario {
         return Usuario(
             idUsuario = entity.ID_Usuario,
             username = entity.Username,
@@ -15,7 +15,7 @@ object UsuarioMapper {
             riesgoBurnout = entity.Riesgo_Burnout,
             descripcion = entity.Descripcion,
             idOrganizacion = entity.FK_ID_Organizacion,
-            idEquipo = idEquipo
+            idEquipo = entity.FK_ID_Equipo
         )
     }
 
@@ -27,7 +27,8 @@ object UsuarioMapper {
             Nombre = domain.nombre,
             Riesgo_Burnout = domain.riesgoBurnout,
             Descripcion = domain.descripcion,
-            FK_ID_Organizacion = domain.idOrganizacion
+            FK_ID_Organizacion = domain.idOrganizacion,
+            FK_ID_Equipo = domain.idEquipo
         )
     }
 

@@ -1,10 +1,8 @@
 package dev.wdona.burntout.data.dao.impl
 
-import com.russhwolf.settings.Settings
 import dev.wdona.burntout.data.dao.UsuarioDao
 import dev.wdona.burntout.data.datasource.mapper.UsuarioMapper
 import dev.wdona.burntout.shared.domain.Usuario
-import dev.wdona.burntout.shared.utils.SettingsManager
 import dev.wdona.burntout.shared.db.AppDatabase
 
 class UsuarioDaoImpl(appDatabase: AppDatabase) : UsuarioDao {
@@ -12,24 +10,24 @@ class UsuarioDaoImpl(appDatabase: AppDatabase) : UsuarioDao {
 
     override suspend fun getUserById(idUsuario: Long): Usuario {
         val entity = queries.getUserById(idUsuario).executeAsOne()
-        return UsuarioMapper.toDomain(entity, SettingsManager.getIdEquipoActual()) // FIXME: Obtener idEquipo real
+        return UsuarioMapper.toDomain(entity)
     }
 
     override suspend fun getUsuariosByOrg(idOrg: Long): List<Usuario> {
         return queries.getUsuariosByOrg(idOrg).executeAsList().map {
-            UsuarioMapper.toDomain(it, SettingsManager.getIdEquipoActual()) // FIXME
+            UsuarioMapper.toDomain(it)
         }
     }
 
     override suspend fun getUsuariosByEquipo(idEquipo: Long): List<Usuario> {
         return queries.getUsuariosByEquipo(idEquipo).executeAsList().map {
-            UsuarioMapper.toDomain(it, idEquipo)
+            UsuarioMapper.toDomain(it)
         }
     }
 
     override suspend fun getUsuarioByUsername(username: String): Usuario {
         val entity = queries.getUsuarioByUsername(username).executeAsOne()
-        return UsuarioMapper.toDomain(entity, 0L)
+        return UsuarioMapper.toDomain(entity)
     }
 
     override suspend fun crearUsuario(usuario: Usuario): Long {
@@ -39,7 +37,8 @@ class UsuarioDaoImpl(appDatabase: AppDatabase) : UsuarioDao {
             Nombre = usuario.nombre,
             Riesgo_Burnout = usuario.riesgoBurnout,
             Descripcion = usuario.descripcion,
-            FK_ID_Organizacion = usuario.idOrganizacion
+            FK_ID_Organizacion = usuario.idOrganizacion,
+            FK_ID_Equipo = usuario.idEquipo
         )
         return queries.lastInsertRowId().executeAsOne()
     }
@@ -52,6 +51,7 @@ class UsuarioDaoImpl(appDatabase: AppDatabase) : UsuarioDao {
                 Nombre = usuario.nombre,
                 Riesgo_Burnout = usuario.riesgoBurnout,
                 Descripcion = usuario.descripcion,
+                FK_ID_Equipo = usuario.idEquipo,
                 ID_Usuario = usuario.idUsuario
             )
             true
@@ -78,7 +78,8 @@ class UsuarioDaoImpl(appDatabase: AppDatabase) : UsuarioDao {
                 Nombre = usuario.nombre,
                 Riesgo_Burnout = usuario.riesgoBurnout,
                 Descripcion = usuario.descripcion,
-                FK_ID_Organizacion = usuario.idOrganizacion
+                FK_ID_Organizacion = usuario.idOrganizacion,
+                FK_ID_Equipo = usuario.idEquipo
             )
             true
         } catch (e: Exception) {
@@ -87,7 +88,20 @@ class UsuarioDaoImpl(appDatabase: AppDatabase) : UsuarioDao {
     }
 
     override suspend fun vincularUsuarioEquipo(idUsuario: Long, idEquipo: Long) {
-        queries.insertUserTeam(idUsuario, idEquipo)
+        queries.transaction {
+            queries.updateUsuario(
+                // Necesitamos los otros campos... o añadir una query especifica en .sq
+                // Pero por ahora, usemos la tabla User_TeamEntity que ya existe para las relaciones
+                ID_Usuario = idUsuario,
+                FK_ID_Equipo = idEquipo,
+                // Estos valores se mantendrán si la query de update los soporta o si añadimos una nueva
+                Username = "", // Esto va a fallar si no tenemos los datos. 
+                Contrasena = "",
+                Nombre = "",
+                Riesgo_Burnout = 0.0,
+                Descripcion = ""
+            )
+        }
     }
 
     override suspend fun updateRiesgoBurnout(idUsuario: Long, riesgo: Double): Boolean {

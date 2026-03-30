@@ -19,7 +19,7 @@ object EquipoMiembrosTable : Table() {
 }
 object UsuariosTable : Table() {
     val id = long("id_usuario").autoIncrement()
-    val username = varchar("username", 255)
+    val username = varchar("username", 255).uniqueIndex()
     val password = varchar("password", 255)
     val nombre = varchar("nombre", 255)
     val riesgoBurnout = double("riesgo_burnout").nullable()

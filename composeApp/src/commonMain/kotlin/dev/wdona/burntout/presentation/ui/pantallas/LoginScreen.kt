@@ -69,7 +69,6 @@ fun LoginContent(
     settingsViewModel: AjustesViewModel
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val settingsUiState by settingsViewModel.ajustesUiState.collectAsStateWithLifecycle()
 
     var textStateUsuario by remember { mutableStateOf("") }
     var textStatePassword by remember { mutableStateOf("") }
@@ -123,7 +122,7 @@ fun LoginContent(
                         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
                         keyboardActions = KeyboardActions(onNext = { focusManager.moveFocus(FocusDirection.Down) }),
                         modifier = Modifier.onKeyEvent {
-                            if (it.type == KeyEventType.KeyUp && (it.key == Key.Tab || it.key == Key.Enter || it.key == Key.NumPadEnter)) {
+                            if (it.type == KeyEventType.KeyUp && (it.key == Key.Enter || it.key == Key.NumPadEnter)) {
                                 focusManager.moveFocus(FocusDirection.Down)
                                 true
                             } else false
@@ -140,7 +139,7 @@ fun LoginContent(
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
                     keyboardActions = KeyboardActions(onNext = { focusManager.moveFocus(FocusDirection.Down) }),
                     modifier = Modifier.onKeyEvent {
-                        if (it.type == KeyEventType.KeyUp && (it.key == Key.Tab || it.key == Key.Enter || it.key == Key.NumPadEnter)) {
+                        if (it.type == KeyEventType.KeyUp && (it.key == Key.Enter || it.key == Key.NumPadEnter)) {
                             focusManager.moveFocus(FocusDirection.Down)
                             true
                         } else false
@@ -186,7 +185,7 @@ fun LoginContent(
                         viewModel.toggleMode()
                     }
                 ) {
-                    Text(if (uiState.isLogin) "No tienes cuenta? Registrate" else "Ya tienes cuenta? Login")
+                    Text(if (uiState.isLogin) "¿No tienes cuenta? Regístrate" else "¿Ya tienes cuenta? Login")
                 }
 
                 Button(
@@ -199,7 +198,7 @@ fun LoginContent(
 
                 TextButton(
                     onClick = {
-                        SettingsManager.setIdUsuarioActual(Long.MIN_VALUE)
+                        SettingsManager.setUsuarioInvitado()
                     }
                 ) {
                     Text(

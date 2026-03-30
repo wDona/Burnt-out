@@ -38,23 +38,19 @@ class MainScreen(
     private val tableroFactory: TablerosViewModelFactory,
     private val leaderboardFactory: LeaderboardViewModelFactory,
     private val ajustesFactory: AjustesViewModelFactory,
-    private val formularioFactory: FormularioViewModelFactory,
-    private val idEquipo: Long
+    private val formularioFactory: FormularioViewModelFactory
 ) : Screen {
     override val key: ScreenKey = uniqueScreenKey
 
     @Composable
     override fun Content() {
         val tablerosTab = remember { TablerosTab(tableroFactory, tareaFactory) }
-        val perfilTab = remember { PerfilTab(perfilFactory, ajustesFactory) }
+        val equipoTab = remember { EquipoTab(equipoFactory, perfilFactory, ajustesFactory) }
         val leaderboardTab = remember { LeaderboardTab(leaderboardFactory, ajustesFactory, equipoFactory, perfilFactory) }
+        val perfilTab = remember { PerfilTab(perfilFactory, ajustesFactory) }
         val preguntasTab = remember { PreguntasTab(formularioFactory) }
 
         TabNavigator(tablerosTab) { tabNavigator ->
-            val equipoTab = remember { 
-                EquipoTab(equipoFactory, perfilFactory, ajustesFactory, idEquipo)
-            }
-
             Scaffold(
                 content = { paddingValues ->
                     Box(modifier = Modifier.padding(paddingValues).fillMaxSize().background(MaterialTheme.colorScheme.background)) {
@@ -119,8 +115,7 @@ private class TablerosTab(
 private class EquipoTab(
     val factory: EquipoViewModelFactory,
     val perfilFactory: MiPerfilViewModelFactory,
-    val settingsFactory: AjustesViewModelFactory,
-    val idEquipoActual: Long = SettingsManager.getIdEquipoActual()
+    val settingsFactory: AjustesViewModelFactory
 ) : Tab {
     override val key = "EquipoTab"
     @get:Composable
@@ -129,7 +124,7 @@ private class EquipoTab(
 
     @Composable
     override fun Content() {
-        Navigator(EquipoScreen(factory, perfilFactory, settingsFactory, idEquipo = idEquipoActual)) { navigator ->
+        Navigator(EquipoScreen(factory, perfilFactory, settingsFactory, idEquipo = null)) { navigator ->
             CrossfadeTransition(navigator)
         }
     }
