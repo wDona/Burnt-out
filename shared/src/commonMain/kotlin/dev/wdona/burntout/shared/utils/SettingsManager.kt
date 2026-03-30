@@ -39,6 +39,9 @@ object SettingsManager {
     private val _idEquipoActualFlow = MutableStateFlow(getIdEquipoActual())
     val idEquipoActualFlow = _idEquipoActualFlow.asStateFlow()
 
+    private val _nombreUsuarioFlow = MutableStateFlow(getNombreUsuario())
+    val nombreUsuarioFlow = _nombreUsuarioFlow.asStateFlow()
+
     fun clearAll() {
         settings.clear()
 
@@ -46,6 +49,7 @@ object SettingsManager {
         _cuestionarioHoyHechoFlow.value = false
         _idUsuarioActualFlow.value = Long.MIN_VALUE
         _idEquipoActualFlow.value = Long.MIN_VALUE
+        _nombreUsuarioFlow.value = ""
         _sincronizadoEnEstaAperturaFlow.value = false
         _isAutenticadoFlow.value = false
     }
@@ -111,6 +115,7 @@ object SettingsManager {
 
     fun setNombreUsuario(nombre: String) {
         settings.putString(KEY_NOMBRE_USUARIO, nombre)
+        _nombreUsuarioFlow.value = nombre
     }
 
     fun setIdOrganizacionActual(id: Long) {

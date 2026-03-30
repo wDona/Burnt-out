@@ -1,17 +1,13 @@
 package dev.wdona.burntout.presentation.ui.pantallas.equipo
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -29,6 +25,7 @@ import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.LeaderboardV
 import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.EquipoViewModelFactory
 import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.MiPerfilViewModelFactory
 import dev.wdona.burntout.presentation.viewmodel.viewmodels.LeaderboardViewModel
+import dev.wdona.burntout.shared.utils.SettingsManager
 
 class LeaderboardScreen(
     val factory: LeaderboardViewModelFactory,
@@ -44,18 +41,81 @@ class LeaderboardScreen(
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
         val viewModel = rememberScreenModel { factory.create() }
+        val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+        val idUsuarioActual by SettingsManager.idUsuarioActualFlow.collectAsState()
+        val nombreUsuario = SettingsManager.getNombreUsuario()
+
+        var mostrarCrearEquipoDialog by remember { mutableStateOf(false) }
 
         LaunchedEffect(idOrg) {
             viewModel.cargarLeaderboard(idOrg)
+        }
+
+        LaunchedEffect(uiState.createdEquipoId) {
+            uiState.createdEquipoId?.let { idEquipo ->
+                navigator.push(EquipoScreen(equipoFactory, perfilFactory, ajustesFactory, onVolver = { navigator.pop() }, idEquipo = idEquipo))
+                viewModel.resetCreatedEquipoId()
+            }
+        }
+
+        if (mostrarCrearEquipoDialog) {
+            CrearEquipoDialog(
+                defaultNombre = "Equipo de $nombreUsuario",
+                onDismiss = { mostrarCrearEquipoDialog = false },
+                onConfirm = { nombre ->
+                    viewModel.crearEquipo(nombre, idOrg, idUsuarioActual)
+                    mostrarCrearEquipoDialog = false
+                }
+            )
         }
 
         LeaderboardContent(
             leaderboardViewModel = viewModel,
             onEquipoClick = { idEquipo ->
                 navigator.push(EquipoScreen(equipoFactory, perfilFactory, ajustesFactory, onVolver = { navigator.pop() }, idEquipo = idEquipo))
-            }
+            },
+            onCrearEquipoClick = {
+                mostrarCrearEquipoDialog = true
+            },
+            onVolver = onVolver
         )
     }
+}
+
+@Composable
+fun CrearEquipoDialog(defaultNombre: String, onDismiss: () -> Unit, onConfirm: (String) -> Unit) {
+    var nombre by remember { mutableStateOf(defaultNombre) }
+    
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Crear nuevo equipo") },
+        text = {
+            Column {
+                Text("Introduce el nombre para tu nuevo equipo:")
+                Spacer(modifier = Modifier.height(8.dp))
+                OutlinedTextField(
+                    value = nombre,
+                    onValueChange = { nombre = it },
+                    label = { Text("Nombre del equipo") },
+                    singleLine = true
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = { onConfirm(nombre) },
+                enabled = nombre.isNotBlank()
+            ) {
+                Text("Crear")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancelar")
+            }
+        }
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -63,6 +123,7 @@ class LeaderboardScreen(
 fun LeaderboardContent(
     leaderboardViewModel: LeaderboardViewModel,
     onEquipoClick: (Long) -> Unit,
+    onCrearEquipoClick: () -> Unit,
     onVolver: (() -> Unit)? = null
 ) {
     val uiState by leaderboardViewModel.uiState.collectAsStateWithLifecycle()
@@ -73,17 +134,21 @@ fun LeaderboardContent(
 
     ScaffoldBase(
         titulo = titulo,
-        onVolver = onVolver
+        onVolver = onVolver,
+        onFAB = { onCrearEquipoClick() },
+        textoFAB = "Crear equipo",
+        iconFAB = { Icon(Icons.Default.Add, contentDescription = "Crear equipo") }
     ) {
         if (isLoading) {
             BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
                 val tamanio = if (maxWidth < 600.dp) maxWidth else 300.dp
-                (0..3).forEach { _ ->
-                    FilaTextoPlaceholder(
-                        modifier = Modifier
-                            .width(tamanio),
-                        paddingTop = 32
-                    )
+                Column {
+                    (0..3).forEach { _ ->
+                        FilaTextoPlaceholder(
+                            modifier = Modifier.width(tamanio),
+                            paddingTop = 32
+                        )
+                    }
                 }
             }
         } else {
@@ -91,7 +156,7 @@ fun LeaderboardContent(
                 columns = GridCells.Adaptive(minSize = 300.dp),
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)
             ) {
                 items(listaEquipos, key = { it.idEquipo }) { equipo ->
                     EquipoCard(

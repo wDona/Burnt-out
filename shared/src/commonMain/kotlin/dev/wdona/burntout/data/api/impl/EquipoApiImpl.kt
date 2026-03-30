@@ -22,11 +22,11 @@ class EquipoApiImpl(private val client: HttpClient = ApiClient.client) : EquipoA
     override suspend fun getEquiposByOrg(idOrg: Long): List<Equipo> =
         client.get("equipos?idOrg=$idOrg").body()
 
-    override suspend fun crearEquipo(equipo: Equipo): Boolean =
+    override suspend fun crearEquipo(equipo: Equipo): Equipo =
         client.post("equipos") {
             contentType(ContentType.Application.Json)
             setBody(equipo)
-        }.status.isSuccess()
+        }.body()
 
     override suspend fun actualizarEquipo(equipo: Equipo): Boolean =
         client.put("equipos/${equipo.idEquipo}") {

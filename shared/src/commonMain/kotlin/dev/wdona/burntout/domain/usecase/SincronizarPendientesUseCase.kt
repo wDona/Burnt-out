@@ -117,7 +117,7 @@ class SincronizarPendientesUseCase(
         return when (op.tipoAccion) {
             TipoAccion.CREACION.getNombreAccion() -> {
                 val equipo = json.decodeFromString<Equipo>(op.datosJson)
-                equipoRemote.crearEquipo(equipo)
+                equipoRemote.crearEquipo(equipo) != null
             }
             TipoAccion.ACTUALIZACION.getNombreAccion() -> {
                 val equipo = json.decodeFromString<Equipo>(op.datosJson)

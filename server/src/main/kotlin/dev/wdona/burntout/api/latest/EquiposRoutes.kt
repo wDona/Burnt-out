@@ -50,10 +50,29 @@ fun Route.equiposRoutes() {
                     it[puntuacion] = equipo.puntuacion
                     it[idOrganizacion] = equipo.idOrganizacion
                 }[EquiposTable.id]
-                equipo.idMiembros.forEach { mId ->
+                
+                equipo.idMiembros.forEach { idMiembroParam ->
+                    val userRow = UsuariosTable.selectAll().where { UsuariosTable.id eq idMiembroParam }.singleOrNull()
+                    val idEquipoAnterior = userRow?.get(UsuariosTable.idEquipo) ?: 0L
+
+                    EquipoMiembrosTable.deleteWhere { idMiembro eq idMiembroParam }
+                    
                     EquipoMiembrosTable.insert {
                         it[idEquipo] = id
-                        it[idMiembro] = mId
+                        it[idMiembro] = idMiembroParam
+                    }
+                    
+                    UsuariosTable.update({ UsuariosTable.id eq idMiembroParam }) {
+                        it[idEquipo] = id
+                    }
+
+                    if (idEquipoAnterior > 0L && idEquipoAnterior != id) {
+                        val miembrosRestantes = EquipoMiembrosTable
+                            .selectAll().where { EquipoMiembrosTable.idEquipo eq idEquipoAnterior }
+                            .count()
+                        if (miembrosRestantes == 0L) {
+                            EquiposTable.deleteWhere { EquiposTable.id eq idEquipoAnterior }
+                        }
                     }
                 }
                 id

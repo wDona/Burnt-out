@@ -14,8 +14,12 @@ class EquipoRemoteDataSourceImpl(private val equipoApi: EquipoApi) : EquipoRemot
         return equipoApi.getEquiposByOrg(idOrg)
     }
 
-    override suspend fun crearEquipo(equipo: Equipo): Boolean {
-        return equipoApi.crearEquipo(equipo)
+    override suspend fun crearEquipo(equipo: Equipo): Equipo? {
+        return try {
+            equipoApi.crearEquipo(equipo)
+        } catch (e: Exception) {
+            null
+        }
     }
 
     override suspend fun actualizarEquipo(equipo: Equipo): Boolean {

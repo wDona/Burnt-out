@@ -2,7 +2,6 @@ package dev.wdona.burntout.data.repository
 
 import dev.wdona.burntout.data.datasource.local.EquipoLocalDataSource
 import dev.wdona.burntout.data.datasource.local.OperacionPendienteLocalDataSource
-import dev.wdona.burntout.data.datasource.local.UsuarioLocalDataSource
 import dev.wdona.burntout.data.datasource.mapper.EquipoMapper
 import dev.wdona.burntout.data.datasource.remote.EquipoRemoteDataSource
 import dev.wdona.burntout.domain.entity.Entity
@@ -61,37 +60,42 @@ class EquipoRepositoryImpl(
         }
     }
 
-    override suspend fun crearEquipo(equipo: Equipo) {
-        withContext(NonCancellable + Dispatchers.IO) {
-            try {
-                local.crearEquipo(equipo)
-            } catch (e: Exception) {
-                println("Error local al crear equipo: ${e.message}")
-            }
+    override suspend fun crearEquipo(equipo: Equipo): Long = withContext(NonCancellable + Dispatchers.IO) {
+        var localId = -1L
+        try {
+            localId = local.crearEquipo(equipo)
+        } catch (e: Exception) {
+            println("Error local al crear equipo: ${e.message}")
         }
 
-        if (SettingsManager.isUsuarioInvitado()) return
+        if (SettingsManager.isUsuarioInvitado()) return@withContext localId
 
-        withContext(NonCancellable + Dispatchers.IO) {
-            var exito = false
-            try {
-                exito = remote.crearEquipo(equipo)
-            } catch (e: Exception) {
-                println("Servidor invitado al crear equipo: ${e.message}")
+        var idServidor = -1L
+        try {
+            val equipoRemoto = remote.crearEquipo(equipo)
+            if (equipoRemoto != null) {
+                idServidor = equipoRemoto.idEquipo
+                // Actualizamos localmente con el ID real del servidor si es diferente
+                local.insertOrUpdateEquipo(equipoRemoto)
             }
-            try {
-                pendiente.insertOperacionPendiente(
-                    TipoAccion.CREACION.getNombreAccion(),
-                    Entity.EQUIPO.getNombreEntity(),
-                    equipo.idEquipo,
-                    EquipoMapper.toJson(equipo),
-                    System.currentTimeMillis(),
-                    if (exito) 1L else 0L
-                )
-            } catch (e: Exception) {
-                println("Error al registrar operación pendiente: ${e.message}")
-            }
+        } catch (e: Exception) {
+            println("Servidor offline al crear equipo: ${e.message}")
         }
+
+        try {
+            pendiente.insertOperacionPendiente(
+                TipoAccion.CREACION.getNombreAccion(),
+                Entity.EQUIPO.getNombreEntity(),
+                if (idServidor != -1L) idServidor else localId,
+                EquipoMapper.toJson(equipo.copy(idEquipo = if (idServidor != -1L) idServidor else localId)),
+                System.currentTimeMillis(),
+                if (idServidor != -1L) 1L else 0L
+            )
+        } catch (e: Exception) {
+            println("Error al registrar operación pendiente: ${e.message}")
+        }
+        
+        if (idServidor != -1L) idServidor else localId
     }
 
     override suspend fun actualizarEquipo(equipo: Equipo) {
