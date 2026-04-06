@@ -97,6 +97,8 @@ fun Route.equiposRoutes() {
                             idOrganizacion = row[EquiposTable.idOrganizacion],
                             idMiembros = miembros
                         )
+
+                        println("Miembros del equipo $id: $miembros")
                     } else null
                 } ?: return@get call.respond(HttpStatusCode.NotFound)
                 call.respond(equipo)

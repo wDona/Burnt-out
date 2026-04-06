@@ -72,7 +72,12 @@ fun Application.module() {
 
     launch(Dispatchers.IO) {
         System.`in`.bufferedReader().lineSequence().forEach {
-            comandoHandler(it)
+            val comando = it.trim().split(" ")
+            if (comando.isNotEmpty()) {
+                val cmd = comando[0]
+                val args = if (comando.size > 1) comando.subList(1, comando.size) else emptyList()
+                comandoHandler(cmd, args)
+            }
         }
     }
 }
