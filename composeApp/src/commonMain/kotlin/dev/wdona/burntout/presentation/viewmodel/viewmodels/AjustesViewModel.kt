@@ -75,8 +75,6 @@ class AjustesViewModel(private val repository: AjusteRepository) : ScreenModel {
     }
 
     fun cargarUsuarioActual(usuario: Usuario) {
-        assert(_uiStateUsuarioActual.value == null)
-
         _uiStateUsuarioActual.value = usuario
     }
 
@@ -87,5 +85,15 @@ class AjustesViewModel(private val repository: AjusteRepository) : ScreenModel {
 
     fun resetSettings() {
         SettingsManager.clearAll()
+    }
+
+    fun salirDelEquipo() {
+        screenModelScope.launch {
+            val idUsuario = SettingsManager.getIdUsuarioActual()
+            val idEquipo = SettingsManager.getIdEquipoActual()
+            if (idEquipo != 0L && idUsuario != 0L) {
+                repository.salirDelEquipo(idEquipo, idUsuario)
+            }
+        }
     }
 }

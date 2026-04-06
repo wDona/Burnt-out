@@ -62,7 +62,7 @@ actual class OperacionesPendientesViewModelFactory {
         val tableroRepo = TableroRepositoryImpl(tableroLocal, tableroRemote, pendienteDataSource)
 
         val equipoLocal = EquipoLocalDataSourceImpl(EquipoDaoImpl(database))
-        val equipoRepo = EquipoRepositoryImpl(equipoLocal, equipoRemote, pendienteDataSource)
+        val equipoRepo = EquipoRepositoryImpl(equipoLocal, equipoRemote, usuarioRemote, pendienteDataSource)
 
         val ajusteLocal = AjusteLocalDataSourceImpl(AjusteDaoImpl(database))
         val ajusteRepo = AjusteRepositoryImpl(ajusteLocal, ajusteRemote, pendienteDataSource)

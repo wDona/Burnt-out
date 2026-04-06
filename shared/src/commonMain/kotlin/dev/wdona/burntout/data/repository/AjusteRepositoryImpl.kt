@@ -20,8 +20,42 @@ import kotlinx.coroutines.withContext
 class AjusteRepositoryImpl(
     private val localDataSource: AjusteLocalDataSource,
     private val remoteDataSource: AjusteRemoteDataSource,
+    private val equipoRemote: dev.wdona.burntout.data.datasource.remote.EquipoRemoteDataSource,
+    private val usuarioRemote: dev.wdona.burntout.data.datasource.remote.UsuarioRemoteDataSource,
+    private val equipoLocal: dev.wdona.burntout.data.datasource.local.EquipoLocalDataSource,
     private val operacionesPendientesDatasource: OperacionPendienteLocalDataSource
 ) : AjusteRepository {
+
+    override suspend fun salirDelEquipo(idEquipo: Long, idUsuario: Long): Boolean = withContext(NonCancellable + Dispatchers.IO) {
+        try {
+            equipoLocal.removeUsuarioDelEquipo(idEquipo, idUsuario)
+        } catch (e: Exception) {
+            println("Error local al salir del equipo: ${e.message}")
+        }
+
+        if (SettingsManager.isUsuarioInvitado()) return@withContext true
+
+        var exito = false
+        try {
+            exito = equipoRemote.removeUsuarioDelEquipo(idEquipo, idUsuario)
+            if (exito) {
+                try {
+                    val usuarioActualizado = usuarioRemote.getUserById(idUsuario)
+                    SettingsManager.setIdEquipoActual(usuarioActualizado.idEquipo)
+                    
+                    val nuevoEquipo = equipoRemote.getEquipoById(usuarioActualizado.idEquipo)
+                    equipoLocal.insertOrUpdateEquipo(nuevoEquipo)
+                    equipoLocal.addUsuarioAlEquipo(nuevoEquipo.idEquipo, idUsuario)
+                } catch (e: Exception) {
+                    println("Error al sincronizar tras salir del equipo: ${e.message}")
+                }
+            }
+        } catch (e: Exception) {
+            println("Error remoto al salir del equipo: ${e.message}")
+        }
+        
+        exito
+    }
 
     override suspend fun modificarAjuste(idUsuario: Long, ajuste: Ajuste) {
         withContext(NonCancellable + Dispatchers.IO) {

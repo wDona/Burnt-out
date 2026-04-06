@@ -37,12 +37,18 @@ actual class EquipoViewModelFactory(@Transient private val context: Context) : S
         val remoteDataSource = EquipoRemoteDataSourceImpl(api)
         val pendienteDataSource = OperacionPendienteLocalDataSourceImpl(pendienteDao)
 
-        val repository = EquipoRepositoryImpl(localDataSource, remoteDataSource, pendienteDataSource)
+        val usuarioApi = UsuarioApiImpl()
+        val usuarioRemoteDataSource = UsuarioRemoteDataSourceImpl(usuarioApi)
+
+        val repository = EquipoRepositoryImpl(
+            localDataSource,
+            remoteDataSource,
+            usuarioRemoteDataSource,
+            pendienteDataSource
+        )
 
         val usuarioDao = UsuarioDaoImpl(database)
         val usuarioLocalDataSource = UsuarioLocalDataSourceImpl(usuarioDao)
-        val usuarioApi = UsuarioApiImpl()
-        val usuarioRemoteDataSource = UsuarioRemoteDataSourceImpl(usuarioApi)
         val usuarioRepository =
             UsuarioRepositoryImpl(
                 usuarioLocalDataSource,

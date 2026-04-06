@@ -4,6 +4,7 @@ import dev.wdona.burntout.data.datasource.local.EquipoLocalDataSource
 import dev.wdona.burntout.data.datasource.local.OperacionPendienteLocalDataSource
 import dev.wdona.burntout.data.datasource.mapper.EquipoMapper
 import dev.wdona.burntout.data.datasource.remote.EquipoRemoteDataSource
+import dev.wdona.burntout.data.datasource.remote.UsuarioRemoteDataSource
 import dev.wdona.burntout.domain.entity.Entity
 import dev.wdona.burntout.domain.model.TipoAccion
 import dev.wdona.burntout.domain.repository.EquipoRepository
@@ -19,6 +20,7 @@ import kotlinx.coroutines.withContext
 class EquipoRepositoryImpl(
     private val local: EquipoLocalDataSource,
     private val remote: EquipoRemoteDataSource,
+    private val remoteUsuario: UsuarioRemoteDataSource,
     private val pendiente: OperacionPendienteLocalDataSource,
 ) : EquipoRepository {
 
@@ -220,6 +222,18 @@ class EquipoRepositoryImpl(
         var remoteSuccess = false
         try {
             remoteSuccess = remote.removeUsuarioDelEquipo(idEquipo, idUsuario)
+            if (remoteSuccess) {
+                try {
+                    val usuarioActualizado = remoteUsuario.getUserById(idUsuario)
+                    SettingsManager.setIdEquipoActual(usuarioActualizado.idEquipo)
+                    
+                    val nuevoEquipo = remote.getEquipoById(usuarioActualizado.idEquipo)
+                    local.insertOrUpdateEquipo(nuevoEquipo)
+                    local.addUsuarioAlEquipo(nuevoEquipo.idEquipo, idUsuario)
+                } catch (e: Exception) {
+                    println("Error al sincronizar tras salir del equipo: ${e.message}")
+                }
+            }
         } catch (e: Exception) {
             println("Error remoto al eliminar usuario del equipo: ${e.message}")
         }
