@@ -5,12 +5,15 @@ import dev.wdona.burntout.shared.utils.SettingsManager
 
 import dev.wdona.burntout.shared.utils.getCurrentTimestampSeconds
 
-object DatabaseInit {
+object DatabaseActions {
     private var database: AppDatabase? = null
+    private var driver: SqlDriver? = null
 
     fun init(driver: SqlDriver) {
         if (database == null) {
             database = AppDatabase(driver)
+            this.driver = driver
+
             try {
                 // FIXME posiblemente crashee?
                 database?.appDatabaseQueries?.getOrganizacionById(SettingsManager.getIdOrganizacionActual())?.executeAsOneOrNull()
@@ -28,5 +31,17 @@ object DatabaseInit {
 
     fun getDatabase(): AppDatabase {
         return database ?: throw IllegalStateException("Database not initialized. Call init() first.")
+    }
+
+    fun getDriver(): SqlDriver {
+        return driver ?: throw IllegalStateException("Driver not initialized. Call init() first.")
+    }
+
+    fun recreateDB() {
+        database?.appDatabaseQueries?.clearDB()
+        database = null
+
+        val driver = driver!!
+        init(driver)
     }
 }

@@ -23,7 +23,7 @@ import androidx.compose.ui.unit.dp
 import dev.wdona.burntout.presentation.ui.theme.BurntOutMaterialTheme
 import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.*
 import dev.wdona.burntout.shared.db.DatabaseDriverFactory
-import dev.wdona.burntout.shared.db.DatabaseInit
+import dev.wdona.burntout.shared.db.DatabaseActions
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -40,7 +40,7 @@ class MainActivity : ComponentActivity() {
                 try {
                     withContext(Dispatchers.IO) {
                         val driver = DatabaseDriverFactory(applicationContext).createDriver()
-                        DatabaseInit.init(driver)
+                        DatabaseActions.init(driver)
                     }
                     isDatabaseReady = true
                 } catch (e: Exception) {

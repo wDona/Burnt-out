@@ -18,11 +18,11 @@ import dev.wdona.burntout.domain.usecase.AddUsuarioAlEquipoUseCase
 import dev.wdona.burntout.domain.usecase.CargarMiembrosEquipo
 import dev.wdona.burntout.domain.usecase.GetUsuarioByUsernameUseCase
 import dev.wdona.burntout.presentation.viewmodel.viewmodels.EquipoViewModel
-import dev.wdona.burntout.shared.db.DatabaseInit
+import dev.wdona.burntout.shared.db.DatabaseActions
 
 actual class EquipoViewModelFactory {
     actual fun create(): EquipoViewModel {
-        val database = DatabaseInit.getDatabase()
+        val database = DatabaseActions.getDatabase()
 
         val dao = EquipoDaoImpl(database)
         val api = EquipoApiImpl()

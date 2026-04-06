@@ -8,6 +8,7 @@ import dev.wdona.burntout.api.latest.subtareasRoutes
 import dev.wdona.burntout.api.latest.tablerosRoutes
 import dev.wdona.burntout.api.latest.tareasRoutes
 import dev.wdona.burntout.api.latest.usuariosRoutes
+import dev.wdona.burntout.commands.comandoHandler
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
@@ -18,6 +19,8 @@ import io.ktor.server.request.httpMethod
 import io.ktor.server.request.uri
 import io.ktor.server.routing.*
 import dev.wdona.burntout.db.DatabaseFactory
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 fun main() {
     embeddedServer(
@@ -65,5 +68,11 @@ fun Application.module() {
 //            tareasRoutes()
 //            usuariosRoutes()
 //        }
+    }
+
+    launch(Dispatchers.IO) {
+        System.`in`.bufferedReader().lines().forEach {
+            comandoHandler(it)
+        }
     }
 }

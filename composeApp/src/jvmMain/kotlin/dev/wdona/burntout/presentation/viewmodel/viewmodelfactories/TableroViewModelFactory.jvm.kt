@@ -9,11 +9,11 @@ import dev.wdona.burntout.data.datasource.remote.impl.TableroRemoteDataSourceImp
 import dev.wdona.burntout.data.repository.TableroRepositoryImpl
 import dev.wdona.burntout.domain.repository.TableroRepository
 import dev.wdona.burntout.presentation.viewmodel.viewmodels.TablerosViewModel
-import dev.wdona.burntout.shared.db.DatabaseInit
+import dev.wdona.burntout.shared.db.DatabaseActions
 
 actual class TablerosViewModelFactory {
     actual fun create(): TablerosViewModel {
-        val database = DatabaseInit.getDatabase()
+        val database = DatabaseActions.getDatabase()
 
         val dao = TableroDaoImpl(database)
         val api = TableroApiImpl()

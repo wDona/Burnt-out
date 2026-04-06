@@ -9,11 +9,11 @@ import dev.wdona.burntout.data.datasource.remote.impl.UsuarioRemoteDataSourceImp
 import dev.wdona.burntout.data.repository.UsuarioRepositoryImpl
 import dev.wdona.burntout.domain.repository.UsuarioRepository
 import dev.wdona.burntout.presentation.viewmodel.viewmodels.PerfilViewModel
-import dev.wdona.burntout.shared.db.DatabaseInit
+import dev.wdona.burntout.shared.db.DatabaseActions
 
 actual class MiPerfilViewModelFactory {
     actual fun create(): PerfilViewModel {
-        val database = DatabaseInit.getDatabase()
+        val database = DatabaseActions.getDatabase()
 
         val dao = UsuarioDaoImpl(database)
         val api = UsuarioApiImpl()

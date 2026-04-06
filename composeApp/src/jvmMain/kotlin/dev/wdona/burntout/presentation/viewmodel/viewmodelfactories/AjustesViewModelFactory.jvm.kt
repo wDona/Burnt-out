@@ -9,11 +9,11 @@ import dev.wdona.burntout.data.datasource.remote.impl.AjusteRemoteDataSourceImpl
 import dev.wdona.burntout.data.repository.AjusteRepositoryImpl
 import dev.wdona.burntout.domain.repository.AjusteRepository
 import dev.wdona.burntout.presentation.viewmodel.viewmodels.AjustesViewModel
-import dev.wdona.burntout.shared.db.DatabaseInit
+import dev.wdona.burntout.shared.db.DatabaseActions
 
 actual class AjustesViewModelFactory {
     actual fun create(): AjustesViewModel {
-        val database = DatabaseInit.getDatabase()
+        val database = DatabaseActions.getDatabase()
 
         val dao = AjusteDaoImpl(database)
         val api = AjusteApiImpl()

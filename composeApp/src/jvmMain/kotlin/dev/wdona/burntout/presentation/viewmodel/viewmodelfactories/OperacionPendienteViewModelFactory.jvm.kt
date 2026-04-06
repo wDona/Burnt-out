@@ -32,11 +32,11 @@ import dev.wdona.burntout.domain.repository.OperacionesPendientesRepository
 import dev.wdona.burntout.domain.usecase.RefrescarDatosUseCase
 import dev.wdona.burntout.domain.usecase.SincronizarPendientesUseCase
 import dev.wdona.burntout.presentation.viewmodel.viewmodels.OperacionesPendientesViewModel
-import dev.wdona.burntout.shared.db.DatabaseInit
+import dev.wdona.burntout.shared.db.DatabaseActions
 
 actual class OperacionesPendientesViewModelFactory {
     actual fun create(): OperacionesPendientesViewModel {
-        val database = DatabaseInit.getDatabase()
+        val database = DatabaseActions.getDatabase()
 
         val pendienteDao = OperacionPendienteDaoImpl(database)
         val pendienteDataSource = OperacionPendienteLocalDataSourceImpl(pendienteDao)

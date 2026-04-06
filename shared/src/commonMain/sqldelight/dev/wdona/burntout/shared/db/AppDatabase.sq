@@ -416,3 +416,17 @@ getAjusteByIdYUsuario:
 SELECT a.ID_Ajuste, a.Nombre_Ajuste, au.Valor_Ajuste
 FROM AjusteEntity a JOIN Ajuste_UserEntity au ON a.ID_Ajuste = au.ID_Ajuste
 WHERE au.ID_Usuario = ? AND a.ID_Ajuste = ?;
+
+clearDB:
+DELETE FROM SubtareaEntity;
+DELETE FROM TareaEntity;
+DELETE FROM TableroEntity;
+DELETE FROM EquipoEntity;
+DELETE FROM UsuarioEntity;
+DELETE FROM OrganizacionEntity;
+DELETE FROM PreguntaEntity;
+DELETE FROM ResponderEntity;
+DELETE FROM AjusteEntity;
+DELETE FROM Ajuste_UserEntity;
+DELETE FROM User_TeamEntity;
+DELETE FROM OperacionPendienteEntity;

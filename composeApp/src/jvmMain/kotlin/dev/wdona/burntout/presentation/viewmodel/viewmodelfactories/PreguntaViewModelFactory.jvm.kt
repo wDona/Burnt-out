@@ -17,11 +17,11 @@ import dev.wdona.burntout.domain.repository.UsuarioRepository
 import dev.wdona.burntout.domain.usecase.CalcularRiesgoBurnout
 import dev.wdona.burntout.presentation.viewmodel.viewmodels.FormularioViewModel
 import dev.wdona.burntout.presentation.viewmodel.viewmodels.PreguntasInicialesViewModel
-import dev.wdona.burntout.shared.db.DatabaseInit
+import dev.wdona.burntout.shared.db.DatabaseActions
 
 actual class FormularioViewModelFactory {
     actual fun createFormularioViewModel(): FormularioViewModel {
-        val database = DatabaseInit.getDatabase()
+        val database = DatabaseActions.getDatabase()
 
         val dao = PreguntaRespuestaDaoImpl(database)
         val api = PreguntaRespuestaApiImpl()
@@ -73,7 +73,7 @@ actual class FormularioViewModelFactory {
     }
 
     actual fun createPreguntasInicialesViewModel(): PreguntasInicialesViewModel {
-        val database = DatabaseInit.getDatabase()
+        val database = DatabaseActions.getDatabase()
 
         val dao = PreguntaRespuestaDaoImpl(database)
         val api = PreguntaRespuestaApiImpl()

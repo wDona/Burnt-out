@@ -17,6 +17,7 @@ import dev.wdona.burntout.presentation.ui.components.ajustes.FilaAjusteSwitch
 import dev.wdona.burntout.presentation.ui.components.template.ScaffoldBase
 import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.AjustesViewModelFactory
 import dev.wdona.burntout.presentation.viewmodel.viewmodels.AjustesViewModel
+import dev.wdona.burntout.shared.db.DatabaseActions
 import kotlin.text.ifEmpty
 
 class SettingsScreen(val factory: AjustesViewModelFactory) : Screen {
@@ -27,12 +28,19 @@ class SettingsScreen(val factory: AjustesViewModelFactory) : Screen {
         val navigator = LocalNavigator.currentOrThrow // Para poder volver o ir a otra
 
         val viewmodel = rememberScreenModel { factory.create() }
-        SettingsContent(viewmodel, onVolver = { navigator.pop() })
+        SettingsContent(
+            viewmodel,
+            onVolver = { navigator.pop() },
+            onLogout = {
+                DatabaseActions.recreateDB()
+                navigator.popUntilRoot()
+            }
+        )
     }
 }
 
 @Composable
-fun SettingsContent(viewModel: AjustesViewModel, onVolver: () -> Unit) {
+fun SettingsContent(viewModel: AjustesViewModel, onVolver: () -> Unit, onLogout: () -> Unit) {
     val ajustes by viewModel.ajustesUiState.collectAsStateWithLifecycle()
 
     ScaffoldBase(
@@ -56,7 +64,10 @@ fun SettingsContent(viewModel: AjustesViewModel, onVolver: () -> Unit) {
             FilaAjusteInfo("Sincronizado en esta apertura: " + if (ajustes.syncOk) "Sí" else "No")
 
             TextButton(
-                onClick = { viewModel.resetSettings() }
+                onClick = {
+                    viewModel.resetSettings()
+                    onLogout()
+                }
             ) {
                 Text("Resetear Datos de Aplicación (Debug)")
             }

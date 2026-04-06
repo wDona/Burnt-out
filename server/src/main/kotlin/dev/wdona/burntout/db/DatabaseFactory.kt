@@ -5,6 +5,7 @@ import org.jetbrains.exposed.sql.transactions.transaction
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import dev.wdona.burntout.db.tables.*
+import kotlinx.coroutines.NonCancellable
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.selectAll
@@ -72,7 +73,28 @@ object DatabaseFactory {
     }
 
     suspend fun <T> dbQuery(block: () -> T): T =
-        withContext(Dispatchers.IO) {
+        withContext(NonCancellable + Dispatchers.IO) {
             transaction { block() }
         }
+
+    suspend fun clearDB() {
+        withContext(NonCancellable + Dispatchers.IO) {
+            transaction {
+                SchemaUtils.drop(
+                    OrganizacionesTable,
+                    EquiposTable,
+                    EquipoMiembrosTable,
+                    UsuariosTable,
+                    AjustesTable,
+                    TablerosTable,
+                    TareasTable,
+                    SubtareasTable,
+                    PreguntasTable,
+                    RespuestasTable
+                )
+            }
+
+            init()
+        }
+    }
 }

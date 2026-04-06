@@ -9,11 +9,11 @@ import dev.wdona.burntout.data.datasource.local.impl.TareaLocalDataSourceImpl
 import dev.wdona.burntout.data.datasource.remote.impl.TareaRemoteDataSourceImpl
 import dev.wdona.burntout.data.repository.TareaRepositoryImpl
 import dev.wdona.burntout.presentation.viewmodel.viewmodels.TareasViewModel
-import dev.wdona.burntout.shared.db.DatabaseInit
+import dev.wdona.burntout.shared.db.DatabaseActions
 
 actual class TareasViewModelFactory {
     actual fun create(): TareasViewModel {
-        val database = DatabaseInit.getDatabase()
+        val database = DatabaseActions.getDatabase()
 
         val dao = TareaDaoImpl(database)
         val api = TareaApiImpl()

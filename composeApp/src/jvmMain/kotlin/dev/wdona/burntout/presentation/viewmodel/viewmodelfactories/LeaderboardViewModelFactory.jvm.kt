@@ -6,16 +6,15 @@ import dev.wdona.burntout.data.dao.impl.OperacionPendienteDaoImpl
 import dev.wdona.burntout.data.dao.impl.UsuarioDaoImpl
 import dev.wdona.burntout.data.datasource.local.impl.EquipoLocalDataSourceImpl
 import dev.wdona.burntout.data.datasource.local.impl.OperacionPendienteLocalDataSourceImpl
-import dev.wdona.burntout.data.datasource.local.impl.UsuarioLocalDataSourceImpl
 import dev.wdona.burntout.data.datasource.remote.impl.EquipoRemoteDataSourceImpl
 import dev.wdona.burntout.data.repository.EquipoRepositoryImpl
 import dev.wdona.burntout.domain.repository.EquipoRepository
-import dev.wdona.burntout.shared.db.DatabaseInit
+import dev.wdona.burntout.shared.db.DatabaseActions
 import dev.wdona.burntout.presentation.viewmodel.viewmodels.LeaderboardViewModel
 
 actual class LeaderboardViewModelFactory {
     actual fun create(): LeaderboardViewModel {
-        val database = DatabaseInit.getDatabase()
+        val database = DatabaseActions.getDatabase()
 
         val dao = EquipoDaoImpl(database)
         val api = EquipoApiImpl()
