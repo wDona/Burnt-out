@@ -89,18 +89,8 @@ class UsuarioDaoImpl(appDatabase: AppDatabase) : UsuarioDao {
 
     override suspend fun vincularUsuarioEquipo(idUsuario: Long, idEquipo: Long) {
         queries.transaction {
-            queries.updateUsuario(
-                // Necesitamos los otros campos... o añadir una query especifica en .sq
-                // Pero por ahora, usemos la tabla User_TeamEntity que ya existe para las relaciones
-                ID_Usuario = idUsuario,
-                FK_ID_Equipo = idEquipo,
-                // Estos valores se mantendrán si la query de update los soporta o si añadimos una nueva
-                Username = "", // Esto va a fallar si no tenemos los datos. 
-                Contrasena = "",
-                Nombre = "",
-                Riesgo_Burnout = 0.0,
-                Descripcion = ""
-            )
+            queries.insertUserTeam(idUsuario, idEquipo)
+            queries.updateUsuarioTeamId(idEquipo, idUsuario)
         }
     }
 

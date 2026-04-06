@@ -165,10 +165,13 @@ fun EquipoContent(viewModel: EquipoViewModel, esMiEquipo: Boolean, onVolver: (()
                         .fillMaxWidth()
                 ) {
                     items(uiState.miembros) { miembro ->
-                        MiembroCard(miembro, onClick = {
-                            perfilViewModel.cargarUsuario(miembro.idUsuario)
-                            onClickUsuario(miembro.idUsuario)
-                        })
+                        MiembroCard(
+                            miembro,
+                            onClick = {
+                                perfilViewModel.cargarUsuario(miembro.idUsuario)
+                                onClickUsuario(miembro.idUsuario)
+                            }
+                        )
                     }
                 }
             }

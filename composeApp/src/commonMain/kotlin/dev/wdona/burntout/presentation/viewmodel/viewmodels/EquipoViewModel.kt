@@ -36,7 +36,8 @@ class EquipoViewModel(
             _uiState.update { it.copy(isLoading = true, error = null) }
             try {
                 val equipo = repository.getEquipoById(idEquipo)
-                _uiState.update { it.copy(equipo = equipo, isLoading = false) }
+                val miembros = cargarMiembrosEquipoUseCase.invoke(idEquipo)
+                _uiState.update { it.copy(equipo = equipo, miembros = miembros, isLoading = false) }
             } catch (e: Exception) {
                  _uiState.update { it.copy(isLoading = false, error = e.message) }
             }

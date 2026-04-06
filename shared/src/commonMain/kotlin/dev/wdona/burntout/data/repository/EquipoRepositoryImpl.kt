@@ -48,7 +48,9 @@ class EquipoRepositoryImpl(
         if (!SettingsManager.isUsuarioInvitado()) {
             try {
                 val equipoRemoto = remote.getEquipoById(idEquipo)
-                local.insertOrUpdateEquipo(equipoRemoto)
+                val miembros = remote.getMiembrosEquipo(idEquipo)
+                val equipoConMiembros = equipoRemoto.copy(idMiembros = miembros.map { it.idUsuario })
+                local.insertOrUpdateEquipo(equipoConMiembros)
             } catch (e: Exception) {
                 println("Error al sincronizar equipos")
             }
