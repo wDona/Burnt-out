@@ -219,6 +219,56 @@ fun Route.equiposRoutes() {
                         call.respond(HttpStatusCode.NotFound, "Equipo o Usuario no encontrado")
                     }
                 }
+                delete("/{idUsuario}") {
+                    val idEquipo = call.parameters["id"]?.toLongOrNull()
+                        ?: return@delete call.respond(HttpStatusCode.BadRequest)
+                    val idUsuario = call.parameters["idUsuario"]?.toLongOrNull()
+                        ?: return@delete call.respond(HttpStatusCode.BadRequest)
+
+                    println("[${call.request.origin.remoteHost}] DELETE /equipos/$idEquipo/miembros/$idUsuario")
+
+                    val success = dbQuery {
+                        val userRow = UsuariosTable.selectAll().where { UsuariosTable.id eq idUsuario }.singleOrNull()
+                        if (userRow != null) {
+                            val idOrg = userRow[UsuariosTable.idOrganizacion]
+                            val username = userRow[UsuariosTable.username]
+
+                            EquipoMiembrosTable.deleteWhere { 
+                                (EquipoMiembrosTable.idEquipo eq idEquipo) and (EquipoMiembrosTable.idMiembro eq idUsuario)
+                            }
+
+                            val nuevoIdEquipo = EquiposTable.insert {
+                                it[EquiposTable.titulo] = "Equipo de $username"
+                                it[EquiposTable.puntuacion] = 0L
+                                it[EquiposTable.idOrganizacion] = idOrg
+                            }[EquiposTable.id]
+
+                            EquipoMiembrosTable.insert {
+                                it[EquipoMiembrosTable.idEquipo] = nuevoIdEquipo
+                                it[EquipoMiembrosTable.idMiembro] = idUsuario
+                            }
+
+                            UsuariosTable.update({ UsuariosTable.id eq idUsuario }) {
+                                it[UsuariosTable.idEquipo] = nuevoIdEquipo
+                            }
+
+                            val restantes = EquipoMiembrosTable
+                                .selectAll().where { EquipoMiembrosTable.idEquipo eq idEquipo }
+                                .count()
+                            if (restantes == 0L) {
+                                EquiposTable.deleteWhere { EquiposTable.id eq idEquipo }
+                                println("Equipo $idEquipo eliminado por quedarse sin miembros.")
+                            }
+                            true
+                        } else false
+                    }
+
+                    if (success) {
+                        call.respond(HttpStatusCode.OK, "Usuario movido a un nuevo equipo individual")
+                    } else {
+                        call.respond(HttpStatusCode.NotFound, "Usuario no encontrado")
+                    }
+                }
             }
         }
     }
