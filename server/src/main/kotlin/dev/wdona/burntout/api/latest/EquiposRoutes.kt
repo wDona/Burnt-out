@@ -167,6 +167,8 @@ fun Route.equiposRoutes() {
                     val teamExists = dbQuery {
                         EquiposTable.selectAll().where { EquiposTable.id eq id }.count() > 0
                     }
+                    println("Miembros del equipo $id: $miembros")
+
                     if (!teamExists) return@get call.respond(HttpStatusCode.NotFound)
                     call.respond(miembros)
                 }
