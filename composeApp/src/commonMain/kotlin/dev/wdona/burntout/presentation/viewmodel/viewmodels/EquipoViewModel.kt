@@ -107,4 +107,22 @@ class EquipoViewModel(
     fun resetUserAddedSuccess() {
         _uiState.update { it.copy(userAddedSuccess = false) }
     }
+
+    fun salirDelEquipo(idEquipo: Long, idUsuario: Long) {
+        screenModelScope.launch {
+            _uiState.update { it.copy(isLoading = true, error = null) }
+            try {
+                val success = repository.removeUsuarioDelEquipo(idEquipo, idUsuario)
+                if (success) {
+                    cargarMiembrosEquipo(idEquipo)
+                    _uiState.update { it.copy(isLoading = false) }
+                } else {
+                    _uiState.update { it.copy(isLoading = false, error = "Error al salir del equipo") }
+                }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(isLoading = false, error = e.message) }
+            }
+        }
+    }
+
 }

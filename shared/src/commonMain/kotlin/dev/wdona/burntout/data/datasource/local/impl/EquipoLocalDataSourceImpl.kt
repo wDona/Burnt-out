@@ -41,4 +41,8 @@ class EquipoLocalDataSourceImpl(private val equipoDao: EquipoDao) : EquipoLocalD
     override suspend fun addUsuarioAlEquipo(idEquipo: Long, idUsuario: Long): Boolean {
         return equipoDao.addUsuarioAlEquipo(idEquipo, idUsuario)
     }
+
+    override suspend fun removeUsuarioDelEquipo(idEquipo: Long, idUsuario: Long): Boolean {
+        return equipoDao.removeUsuarioDelEquipo(idEquipo, idUsuario)
+    }
 }

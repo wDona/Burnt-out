@@ -102,7 +102,12 @@ fun DetalleTableroContent(
                         .weight(1f) // Ocupa el espacio restante
                 ) {
                     items(listaTareas) { tarea ->
-                        CardTarea(tarea = tarea, onClick = { onIrATarea(tarea.idTarea, idTablero)}, onCompletar = {})
+                        CardTarea(
+                            tarea = tarea,
+                            onClick = { onIrATarea(tarea.idTarea, idTablero) },
+                            onDelete = { tareasViewModel.eliminarTarea(tarea.idTarea, idTablero) },
+                            onCompletar = {}
+                        )
                     }
                 }
             }

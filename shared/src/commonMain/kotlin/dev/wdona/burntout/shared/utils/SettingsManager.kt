@@ -6,8 +6,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 object SettingsManager {
-    // TODO: Hardcodear usuario invitado
     private val settings = createSettings()
+    
     private const val KEY_ID_USUARIO_ACTUAL = "id_usuario_actual"
     private const val KEY_NOMBRE_USUARIO = "nombre_usuario"
     private const val KEY_ID_ORGANIZACION_ACTUAL = "id_organizacion"
@@ -17,62 +17,67 @@ object SettingsManager {
     private const val KEY_RIESGO_CE_USUARIO_ACTUAL = "riesgo_ce_usuario_actual"
     private const val KEY_RIESGO_D_USUARIO_ACTUAL = "riesgo_d_usuario_actual"
     private const val KEY_RIESGO_RP_USUARIO_ACTUAL = "riesgo_rp_usuario_actual"
-    private val KEY_ULTIMA_FECHA_CUESTIONARIO get() = "ultima_fecha_cuestionario_${getIdUsuarioActual()}"
     private const val KEY_SINCRONIZADO_EN_ESTA_APERTURA = "sincronizado_en_esta_apertura"
-    private val KEY_PRIMER_CUESTIONARIO_HECHO get() = "cuestionario_inicial_hecho_${getIdUsuarioActual()}"
 
-    private val _primerCuestionarioHechoFlow = MutableStateFlow(getPrimerCuestionarioHecho())
-    val primerCuestionarioHechoFlow = _primerCuestionarioHechoFlow.asStateFlow()
-
-    private val _cuestionarioHoyHechoFlow = MutableStateFlow(esCuestionarioHoyHecho())
-    val cuestionarioHoyHechoFlow = _cuestionarioHoyHechoFlow.asStateFlow()
-
-    private val _sincronizadoEnEstaAperturaFlow = MutableStateFlow(getSincronizadoEnEstaApertura())
-    val sincronizadoEnEstaAperturaFlow = _sincronizadoEnEstaAperturaFlow.asStateFlow()
-
-    private val _isAutenticadoFlow = MutableStateFlow(isAutenticado())
-    val isAutenticadoFlow = _isAutenticadoFlow.asStateFlow()
-
-    private val _idUsuarioActualFlow = MutableStateFlow(getIdUsuarioActual())
+    private val _idUsuarioActualFlow = MutableStateFlow(settings.getLong(KEY_ID_USUARIO_ACTUAL, Long.MIN_VALUE))
     val idUsuarioActualFlow = _idUsuarioActualFlow.asStateFlow()
 
-    private val _idEquipoActualFlow = MutableStateFlow(getIdEquipoActual())
-    val idEquipoActualFlow = _idEquipoActualFlow.asStateFlow()
-
-    private val _nombreUsuarioFlow = MutableStateFlow(getNombreUsuario())
+    private val _nombreUsuarioFlow = MutableStateFlow(settings.getString(KEY_NOMBRE_USUARIO, ""))
     val nombreUsuarioFlow = _nombreUsuarioFlow.asStateFlow()
 
-    fun clearAll() {
-        settings.clear()
+    private val _idEquipoActualFlow = MutableStateFlow(settings.getLong(KEY_ID_EQUIPO_ACTUAL, Long.MIN_VALUE))
+    val idEquipoActualFlow = _idEquipoActualFlow.asStateFlow()
 
-        _primerCuestionarioHechoFlow.value = false
-        _cuestionarioHoyHechoFlow.value = false
-        _idUsuarioActualFlow.value = Long.MIN_VALUE
-        _idEquipoActualFlow.value = Long.MIN_VALUE
-        _nombreUsuarioFlow.value = ""
-        _sincronizadoEnEstaAperturaFlow.value = false
-        _isAutenticadoFlow.value = false
+    private val _idOrganizacionActualFlow = MutableStateFlow(settings.getLong(KEY_ID_ORGANIZACION_ACTUAL, Long.MIN_VALUE))
+    val idOrganizacionActualFlow = _idOrganizacionActualFlow.asStateFlow()
+
+    private val _rolActualFlow = MutableStateFlow(settings.getLong(KEY_ROL_ACTUAL, Long.MIN_VALUE))
+    val rolActualFlow = _rolActualFlow.asStateFlow()
+
+    private val _tokenUsuarioFlow = MutableStateFlow(settings.getString(KEY_TOKEN_USUARIO, ""))
+    val tokenUsuarioFlow = _tokenUsuarioFlow.asStateFlow()
+
+    private val _isAutenticadoFlow = MutableStateFlow(settings.hasKey(KEY_ID_USUARIO_ACTUAL))
+    val isAutenticadoFlow = _isAutenticadoFlow.asStateFlow()
+
+    private val _sincronizadoEnEstaAperturaFlow = MutableStateFlow(settings.getBoolean(KEY_SINCRONIZADO_EN_ESTA_APERTURA, false))
+    val sincronizadoEnEstaAperturaFlow = _sincronizadoEnEstaAperturaFlow.asStateFlow()
+
+    private val KEY_ULTIMA_FECHA_CUESTIONARIO get() = "ultima_fecha_cuestionario_${_idUsuarioActualFlow.value}"
+    private val KEY_PRIMER_CUESTIONARIO_HECHO get() = "cuestionario_inicial_hecho_${_idUsuarioActualFlow.value}"
+
+    private val _primerCuestionarioHechoFlow = MutableStateFlow(settings.getBoolean("cuestionario_inicial_hecho_${settings.getLong(KEY_ID_USUARIO_ACTUAL, Long.MIN_VALUE)}", false))
+    val primerCuestionarioHechoFlow = _primerCuestionarioHechoFlow.asStateFlow()
+
+    private val _cuestionarioHoyHechoFlow = MutableStateFlow(false)
+    val cuestionarioHoyHechoFlow = _cuestionarioHoyHechoFlow.asStateFlow()
+
+    init {
+        _cuestionarioHoyHechoFlow.value = checkCuestionarioHoyHecho()
     }
 
-    private fun setIdUsuarioActualInternal(id: Long?) {
-        val safeId = id ?: Long.MIN_VALUE
-        settings.putLong(KEY_ID_USUARIO_ACTUAL, safeId)
-        
-        _primerCuestionarioHechoFlow.value = getPrimerCuestionarioHecho()
-        _cuestionarioHoyHechoFlow.value = esCuestionarioHoyHecho()
-        _idUsuarioActualFlow.value = safeId
+    private fun checkCuestionarioHoyHecho(): Boolean {
+        val ultimaFecha = settings.getString(KEY_ULTIMA_FECHA_CUESTIONARIO, "")
+        val fechaHoy = getCurrentDateString()
+        return ultimaFecha == fechaHoy
     }
 
-    fun getIdUsuarioActual(): Long {
-        return settings.getLong(KEY_ID_USUARIO_ACTUAL, Long.MIN_VALUE)
-    }
+    fun getIdUsuarioActual(): Long = _idUsuarioActualFlow.value
+    fun getNombreUsuario(): String = _nombreUsuarioFlow.value
+    fun getIdEquipoActual(): Long = _idEquipoActualFlow.value
+    fun getIdOrganizacionActual(): Long = _idOrganizacionActualFlow.value
+    fun getRolActual(): Long = _rolActualFlow.value
+    fun getTokenUsuario(): String = _tokenUsuarioFlow.value
+    fun getPrimerCuestionarioHecho(): Boolean = _primerCuestionarioHechoFlow.value
+    fun esCuestionarioHoyHecho(): Boolean = _cuestionarioHoyHechoFlow.value
+    fun getSincronizadoEnEstaApertura(): Boolean = _sincronizadoEnEstaAperturaFlow.value
+    fun isAutenticado(): Boolean = _isAutenticadoFlow.value
+    fun isUsuarioInvitado(): Boolean = getIdUsuarioActual() == Long.MIN_VALUE
 
     fun setTokenUsuario(token: String?) {
-        settings.putString(KEY_TOKEN_USUARIO, token ?: "")
-    }
-
-    fun getTokenUsuario(): String {
-        return settings.getString(KEY_TOKEN_USUARIO, "")
+        val safeToken = token ?: ""
+        settings.putString(KEY_TOKEN_USUARIO, safeToken)
+        _tokenUsuarioFlow.value = safeToken
     }
 
     fun setPrimerCuestionarioHecho(primerCuestionario: Boolean) {
@@ -80,41 +85,14 @@ object SettingsManager {
         _primerCuestionarioHechoFlow.value = primerCuestionario
     }
 
-    fun getPrimerCuestionarioHecho(): Boolean {
-        return settings.getBoolean(KEY_PRIMER_CUESTIONARIO_HECHO, false)
-    }
-
-    fun isUsuarioInvitado(): Boolean {
-        return getIdUsuarioActual() == Long.MIN_VALUE
-    }
-
-    fun getIdEquipoActual(): Long {
-        return settings.getLong(KEY_ID_EQUIPO_ACTUAL, Long.MIN_VALUE)
-    }
-
-    fun getRolActual(): Long {
-        return settings.getLong(KEY_ROL_ACTUAL, Long.MIN_VALUE)
-    }
-
-    fun getIdOrganizacionActual(): Long {
-        return settings.getLong(KEY_ID_ORGANIZACION_ACTUAL, Long.MIN_VALUE)
-    }
-
-    fun getNombreUsuario(): String {
-        return settings.getString(KEY_NOMBRE_USUARIO, "")
-    }
-
-    private fun setNombreUsuarioInternal(nombre: String) {
-        settings.putString(KEY_NOMBRE_USUARIO, nombre)
-        _nombreUsuarioFlow.value = nombre
-    }
-
     fun setIdOrganizacionActual(id: Long) {
         settings.putLong(KEY_ID_ORGANIZACION_ACTUAL, id)
+        _idOrganizacionActualFlow.value = id
     }
 
     fun setRolActual(id: Long) {
         settings.putLong(KEY_ROL_ACTUAL, id)
+        _rolActualFlow.value = id
     }
 
     fun setIdEquipoActual(id: Long) {
@@ -122,28 +100,9 @@ object SettingsManager {
         _idEquipoActualFlow.value = id
     }
 
-    fun setRiesgoCEUsuarioActual(riesgo: Double) {
-        settings.putDouble(KEY_RIESGO_CE_USUARIO_ACTUAL, riesgo)
-    }
-
-    fun getRiesgoCEUsuarioActual(): Double {
-        return settings.getDouble(KEY_RIESGO_CE_USUARIO_ACTUAL, -1.0)
-    }
-
-    fun setRiesgoDUsuarioActual(riesgo: Double) {
-        settings.putDouble(KEY_RIESGO_D_USUARIO_ACTUAL, riesgo)
-    }
-
-    fun getRiesgoDUsuarioActual(): Double {
-        return settings.getDouble(KEY_RIESGO_D_USUARIO_ACTUAL, -1.0)
-    }
-
-    fun setRiesgoRPUsuarioActual(riesgo: Double) {
-        settings.putDouble(KEY_RIESGO_RP_USUARIO_ACTUAL, riesgo)
-    }
-
-    fun getRiesgoRPUsuarioActual(): Double {
-        return settings.getDouble(KEY_RIESGO_RP_USUARIO_ACTUAL, -1.0)
+    fun setSincronizadoEnEstaApertura(sincronizado: Boolean) {
+        settings.putBoolean(KEY_SINCRONIZADO_EN_ESTA_APERTURA, sincronizado)
+        _sincronizadoEnEstaAperturaFlow.value = sincronizado
     }
 
     fun setUltimaFechaCuestionarioHoy() {
@@ -152,45 +111,57 @@ object SettingsManager {
         _cuestionarioHoyHechoFlow.value = true
     }
 
-    fun esCuestionarioHoyHecho(): Boolean {
-        val ultimaFecha = settings.getString(KEY_ULTIMA_FECHA_CUESTIONARIO, "")
-        val fechaHoy = getCurrentDateString()
-        return ultimaFecha == fechaHoy
-    }
-
-    fun getSincronizadoEnEstaApertura(): Boolean {
-        return settings.getBoolean(KEY_SINCRONIZADO_EN_ESTA_APERTURA, false)
-    }
-
-    fun setSincronizadoEnEstaApertura(sincronizado: Boolean) {
-        settings.putBoolean(KEY_SINCRONIZADO_EN_ESTA_APERTURA, sincronizado)
-        _sincronizadoEnEstaAperturaFlow.value = sincronizado
-    }
-
-    fun isAutenticado(): Boolean {
-        return settings.hasKey(KEY_ID_USUARIO_ACTUAL)
-    }
+    fun setRiesgoCEUsuarioActual(riesgo: Double) = settings.putDouble(KEY_RIESGO_CE_USUARIO_ACTUAL, riesgo)
+    fun getRiesgoCEUsuarioActual(): Double = settings.getDouble(KEY_RIESGO_CE_USUARIO_ACTUAL, -1.0)
+    fun setRiesgoDUsuarioActual(riesgo: Double) = settings.putDouble(KEY_RIESGO_D_USUARIO_ACTUAL, riesgo)
+    fun getRiesgoDUsuarioActual(): Double = settings.getDouble(KEY_RIESGO_D_USUARIO_ACTUAL, -1.0)
+    fun setRiesgoRPUsuarioActual(riesgo: Double) = settings.putDouble(KEY_RIESGO_RP_USUARIO_ACTUAL, riesgo)
+    fun getRiesgoRPUsuarioActual(): Double = settings.getDouble(KEY_RIESGO_RP_USUARIO_ACTUAL, -1.0)
 
     fun setUsuarioActual(usuario: Usuario) {
-        // Establecer todo ANTES de activar autenticacion
-        setNombreUsuarioInternal(usuario.username)
+        settings.putString(KEY_NOMBRE_USUARIO, usuario.username)
+        _nombreUsuarioFlow.value = usuario.username
+        
         setIdEquipoActual(usuario.idEquipo)
         setIdOrganizacionActual(usuario.idOrganizacion)
         setTokenUsuario("token_${usuario.idUsuario}")
-        setRolActual(1L) // FIXME
+        setRolActual(1L)
         
-        setIdUsuarioActualInternal(usuario.idUsuario)
+        settings.putLong(KEY_ID_USUARIO_ACTUAL, usuario.idUsuario)
+        _idUsuarioActualFlow.value = usuario.idUsuario
+        
         _isAutenticadoFlow.value = true
+        _primerCuestionarioHechoFlow.value = settings.getBoolean(KEY_PRIMER_CUESTIONARIO_HECHO, false)
+        _cuestionarioHoyHechoFlow.value = checkCuestionarioHoyHecho()
     }
 
     fun setUsuarioInvitado() {
-        setNombreUsuarioInternal("Invitado")
+        val invitadoName = "Invitado"
+        settings.putString(KEY_NOMBRE_USUARIO, invitadoName)
+        _nombreUsuarioFlow.value = invitadoName
+        
         setIdEquipoActual(Long.MIN_VALUE)
         setIdOrganizacionActual(Long.MIN_VALUE)
         setTokenUsuario("token_invitado")
         setRolActual(0L)
         
-        setIdUsuarioActualInternal(Long.MIN_VALUE)
+        settings.putLong(KEY_ID_USUARIO_ACTUAL, Long.MIN_VALUE)
+        _idUsuarioActualFlow.value = Long.MIN_VALUE
+        
         _isAutenticadoFlow.value = true
+    }
+
+    fun clearAll() {
+        settings.clear()
+        _idUsuarioActualFlow.value = Long.MIN_VALUE
+        _nombreUsuarioFlow.value = ""
+        _idEquipoActualFlow.value = Long.MIN_VALUE
+        _idOrganizacionActualFlow.value = Long.MIN_VALUE
+        _rolActualFlow.value = Long.MIN_VALUE
+        _tokenUsuarioFlow.value = ""
+        _isAutenticadoFlow.value = false
+        _sincronizadoEnEstaAperturaFlow.value = false
+        _primerCuestionarioHechoFlow.value = false
+        _cuestionarioHoyHechoFlow.value = false
     }
 }

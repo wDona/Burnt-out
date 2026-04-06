@@ -144,7 +144,21 @@ fun EquipoContent(viewModel: EquipoViewModel, esMiEquipo: Boolean, onVolver: (()
         onVolver = onVolver,
         onFAB = if (esMiEquipo) { { onClickAddUsuario() } } else null,
         textoFAB = if (esMiEquipo) "Añadir usuario" else null,
-        iconFAB = if (esMiEquipo) { { Icon(Icons.Default.Add, contentDescription = "Añadir usuario") } } else null
+        iconFAB = if (esMiEquipo) { { Icon(Icons.Default.Add, contentDescription = "Añadir usuario") } } else null,
+        onSalirEquipo = if (esMiEquipo) {
+            {
+                val idUsuario = SettingsManager.getIdUsuarioActual()
+                if (idUsuario != Long.MIN_VALUE) {
+                    viewModel.salirDelEquipo(
+                        uiState.equipo!!.idEquipo,
+                        idUsuario
+                    )
+
+
+                    onVolver?.invoke()
+                }
+            }
+        } else null
     ) {
          Box(modifier = Modifier.fillMaxSize()) {
             if (uiState.isLoading) {

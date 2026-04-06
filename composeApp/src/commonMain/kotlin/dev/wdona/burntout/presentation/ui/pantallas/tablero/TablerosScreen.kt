@@ -45,6 +45,7 @@ class TablerosScreen(
 
         MenuTableros(
             tablerosViewModel = tablerosViewModel,
+            idOrg = idOrg,
             onIrACrearTablero = { 
                 navigator.push(MenuCrearTableroScreen(tableroFactory)) 
             },
@@ -64,6 +65,7 @@ class TablerosScreen(
     @Composable
     fun MenuTableros(
         tablerosViewModel: TablerosViewModel,
+        idOrg: Long,
         onIrACrearTablero: () -> Unit,
         onVerTablero: (Long, String) -> Unit
     ) {
@@ -95,6 +97,9 @@ class TablerosScreen(
                             tablero,
                             onClick = {
                                 onVerTablero(tablero.idTablero, tablero.titulo)
+                            },
+                            onDelete = {
+                                tablerosViewModel.eliminarTablero(tablero.idTablero, idOrg)
                             }
                         )
                     }

@@ -195,7 +195,42 @@ class EquipoRepositoryImpl(
                     TipoAccion.ACTUALIZACION.getNombreAccion(),
                     Entity.EQUIPO.getNombreEntity(),
                     idEquipo,
-                    "{\"idUsuario\":$idUsuario}",
+                    "{\"idUsuario\":$idUsuario, \"accion\":\"ADD\"}",
+                    System.currentTimeMillis(),
+                    0L
+                )
+            } catch (e: Exception) {
+                println("Error al registrar operación pendiente: ${e.message}")
+            }
+        }
+
+        remoteSuccess || localSuccess
+    }
+
+    override suspend fun removeUsuarioDelEquipo(idEquipo: Long, idUsuario: Long): Boolean = withContext(NonCancellable + Dispatchers.IO) {
+        val localSuccess = try {
+            local.removeUsuarioDelEquipo(idEquipo, idUsuario)
+        } catch (e: Exception) {
+            println("Error local al eliminar usuario del equipo: ${e.message}")
+            false
+        }
+
+        if (SettingsManager.isUsuarioInvitado()) return@withContext localSuccess
+
+        var remoteSuccess = false
+        try {
+            remoteSuccess = remote.removeUsuarioDelEquipo(idEquipo, idUsuario)
+        } catch (e: Exception) {
+            println("Error remoto al eliminar usuario del equipo: ${e.message}")
+        }
+
+        if (!remoteSuccess) {
+            try {
+                pendiente.insertOperacionPendiente(
+                    TipoAccion.ACTUALIZACION.getNombreAccion(),
+                    Entity.EQUIPO.getNombreEntity(),
+                    idEquipo,
+                    "{\"idUsuario\":$idUsuario, \"accion\":\"REMOVE\"}",
                     System.currentTimeMillis(),
                     0L
                 )

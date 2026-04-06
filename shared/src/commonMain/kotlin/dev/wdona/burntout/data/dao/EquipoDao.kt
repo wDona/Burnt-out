@@ -11,4 +11,5 @@ interface EquipoDao {
     suspend fun insertOrUpdateEquipo(equipo: Equipo): Boolean
     suspend fun updatePuntuacion(idEquipo: Long, puntos: Long): Boolean
     suspend fun addUsuarioAlEquipo(idEquipo: Long, idUsuario: Long): Boolean
+    suspend fun removeUsuarioDelEquipo(idEquipo: Long, idUsuario: Long): Boolean
 }

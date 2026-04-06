@@ -76,6 +76,20 @@ class EquipoDaoImpl(appDatabase: AppDatabase) : EquipoDao {
             queries.transaction {
                 queries.deleteUserFromAllTeams(idUsuario)
                 queries.insertUserTeam(idUsuario, idEquipo)
+                queries.updateUsuarioTeamId(idEquipo, idUsuario)
+                queries.deleteEmptyTeams()
+            }
+            true
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    override suspend fun removeUsuarioDelEquipo(idEquipo: Long, idUsuario: Long): Boolean {
+        return try {
+            queries.transaction {
+                queries.deleteUserTeam(idUsuario, idEquipo)
+                queries.updateUsuarioTeamId(0L, idUsuario) // 0 o null segun convención
                 queries.deleteEmptyTeams()
             }
             true

@@ -25,6 +25,7 @@ fun ScaffoldBase(
     onAjustes: (() -> Unit)? = null,
     onFAB: (() -> Unit)? = null,
     onSaltar: (() -> Unit)? = null,
+    onSalirEquipo: (() -> Unit)? = null,
     fabEnabled: Boolean = true,
     textoFAB: String? = null,
     iconFAB: @Composable (() -> Unit)? = null,
@@ -43,6 +44,7 @@ fun ScaffoldBase(
                 onAjustes = onAjustes,
                 titleIcon = titleIcon,
                 onSaltar = onSaltar,
+                onSalirEquipo = onSalirEquipo,
                 windowInsets = topBarWindowInsets
             )
         },

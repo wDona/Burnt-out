@@ -11,4 +11,5 @@ interface EquipoApi {
     suspend fun eliminarEquipo(idEquipo: Long): Boolean
     suspend fun getMiembrosEquipo(idEquipo: Long): List<Usuario>
     suspend fun addUsuarioAlEquipo(idEquipo: Long, idUsuario: Long): Boolean
+    suspend fun removeUsuarioDelEquipo(idEquipo: Long, idUsuario: Long): Boolean
 }
