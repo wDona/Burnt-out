@@ -71,7 +71,7 @@ fun Application.module() {
     }
 
     launch(Dispatchers.IO) {
-        System.`in`.bufferedReader().lines().forEach {
+        System.`in`.bufferedReader().lineSequence().forEach {
             comandoHandler(it)
         }
     }
