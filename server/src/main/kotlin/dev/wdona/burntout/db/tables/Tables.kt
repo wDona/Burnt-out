@@ -9,7 +9,7 @@ object EquiposTable : Table() {
     val id = long("id_equipo").autoIncrement()
     val titulo = varchar("titulo", 255)
     val puntuacion = long("puntuacion").nullable()
-    val idOrganizacion = long("id_organizacion") // .references(OrganizacionesTable.id)
+    val idOrganizacion = long("id_organizacion") .references(OrganizacionesTable.id)
     override val primaryKey = PrimaryKey(id)
 }
 object EquipoMiembrosTable : Table() {
@@ -30,7 +30,7 @@ object UsuariosTable : Table() {
 }
 object AjustesTable : Table() {
     val id = long("id_ajuste").autoIncrement()
-    val idUsuario = long("id_usuario") // .references(UsuariosTable.id)
+    val idUsuario = long("id_usuario") .references(UsuariosTable.id)
     val nombre = varchar("nombre", 255)
     val valorAjuste = varchar("valor_ajuste", 255)
     override val primaryKey = PrimaryKey(id)
