@@ -65,7 +65,14 @@ actual class OperacionesPendientesViewModelFactory {
         val equipoRepo = EquipoRepositoryImpl(equipoLocal, equipoRemote, usuarioRemote, pendienteDataSource)
 
         val ajusteLocal = AjusteLocalDataSourceImpl(AjusteDaoImpl(database))
-        val ajusteRepo = AjusteRepositoryImpl(ajusteLocal, ajusteRemote, pendienteDataSource)
+        val ajusteRepo = AjusteRepositoryImpl(
+            ajusteLocal,
+            ajusteRemote,
+            equipoRemote,
+            usuarioRemote,
+            equipoLocal,
+            pendienteDataSource
+        )
 
         val refrescarDatos = RefrescarDatosUseCase(tableroRepo, equipoRepo, ajusteRepo)
 
