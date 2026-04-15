@@ -29,7 +29,7 @@ data class AjustesUiState(
 class AjustesViewModel(private val repository: AjusteRepository) : ScreenModel {
     
     val ajustesUiState = combine(
-        SettingsManager.primerCuestionarioHechoFlow,
+        SettingsManager.esUltimoCuestionarioHecho,
         SettingsManager.cuestionarioHoyHechoFlow,
         SettingsManager.sincronizadoEnEstaAperturaFlow,
         SettingsManager.idEquipoActualFlow,

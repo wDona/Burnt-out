@@ -26,7 +26,16 @@ class PreguntaRespuestaRepositoryImpl(
     private val repositoryScope = CoroutineScope(Dispatchers.Default)
 
     override suspend fun getPreguntasByOrg(idOrg: Long): List<Pregunta> = withContext(NonCancellable + Dispatchers.IO) {
-        if (!SettingsManager.isUsuarioInvitado()) {
+        val currentLocal = local.getPreguntasByOrg(idOrg)
+        if (currentLocal.isEmpty() && !SettingsManager.isUsuarioInvitado()) {
+            try {
+                val remoteList = remote.getPreguntasByOrg(idOrg)
+                remoteList.forEach { local.upsertPregunta(it) }
+                return@withContext remoteList
+            } catch (e: Exception) {
+                println("Error bajando preguntas iniciales: ${e.message}")
+            }
+        } else if (!SettingsManager.isUsuarioInvitado()) {
             repositoryScope.launch {
                 try {
                     val remoteList = remote.getPreguntasByOrg(idOrg)

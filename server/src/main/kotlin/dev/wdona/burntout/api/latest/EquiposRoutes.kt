@@ -90,6 +90,9 @@ fun Route.equiposRoutes() {
                         val miembros = EquipoMiembrosTable
                             .selectAll().where { EquipoMiembrosTable.idEquipo eq id }
                             .map { it[EquipoMiembrosTable.idMiembro] }
+                        
+                        println("Miembros del equipo $id: $miembros")
+                        
                         Equipo(
                             idEquipo = row[EquiposTable.id],
                             titulo = row[EquiposTable.titulo],
@@ -97,8 +100,6 @@ fun Route.equiposRoutes() {
                             idOrganizacion = row[EquiposTable.idOrganizacion],
                             idMiembros = miembros
                         )
-
-                        println("Miembros del equipo $id: $miembros")
                     } else null
                 } ?: return@get call.respond(HttpStatusCode.NotFound)
                 call.respond(equipo)

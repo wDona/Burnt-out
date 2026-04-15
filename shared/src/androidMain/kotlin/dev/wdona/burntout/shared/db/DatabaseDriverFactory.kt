@@ -8,17 +8,24 @@ import dev.wdona.burntout.shared.db.AppDatabase
 import java.io.File
 
 actual class DatabaseDriverFactory(private val context: Context) {
-    actual fun createDriver(): SqlDriver {
-        val databasePath = "burntout.db"
-        val dbFile = File(databasePath)
-        val driver: SqlDriver = AndroidSqliteDriver(AppDatabase.Schema, context, databasePath)
+    companion object {
+        private var driverInstance: SqlDriver? = null
+        private var appDatabaseInstance: AppDatabase? = null
+    }
 
-        val database = AppDatabase(driver)
-        if (database.appDatabaseQueries.getOrganizacionById(SettingsManager.getIdOrganizacionActual()).executeAsOneOrNull() == null) {
-            insertarDatosIniciales(database)
+    actual fun createDriver(): SqlDriver {
+        if (driverInstance == null) {
+            val databasePath = "burntout.db"
+            val dbFile = File(databasePath)
+            driverInstance = AndroidSqliteDriver(AppDatabase.Schema, context, databasePath)
+            
+            appDatabaseInstance = AppDatabase(driverInstance!!)
+            if (appDatabaseInstance!!.appDatabaseQueries.getOrganizacionById(SettingsManager.getIdOrganizacionActual()).executeAsOneOrNull() == null) {
+                insertarDatosIniciales(appDatabaseInstance!!)
+            }
         }
 
-        return driver
+        return driverInstance!!
     }
 
     private fun insertarDatosIniciales(database: AppDatabase) {

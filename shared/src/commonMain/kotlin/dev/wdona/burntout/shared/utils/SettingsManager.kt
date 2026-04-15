@@ -1,6 +1,5 @@
 package dev.wdona.burntout.shared.utils
 
-import com.russhwolf.settings.Settings
 import dev.wdona.burntout.shared.domain.Usuario
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -46,8 +45,8 @@ object SettingsManager {
     private val KEY_ULTIMA_FECHA_CUESTIONARIO get() = "ultima_fecha_cuestionario_${_idUsuarioActualFlow.value}"
     private val KEY_PRIMER_CUESTIONARIO_HECHO get() = "cuestionario_inicial_hecho_${_idUsuarioActualFlow.value}"
 
-    private val _primerCuestionarioHechoFlow = MutableStateFlow(settings.getBoolean("cuestionario_inicial_hecho_${settings.getLong(KEY_ID_USUARIO_ACTUAL, Long.MIN_VALUE)}", false))
-    val primerCuestionarioHechoFlow = _primerCuestionarioHechoFlow.asStateFlow()
+    private val _esUltimoCuestionarioHecho = MutableStateFlow(settings.getBoolean("cuestionario_inicial_hecho_${settings.getLong(KEY_ID_USUARIO_ACTUAL, Long.MIN_VALUE)}", false))
+    val esUltimoCuestionarioHecho = _esUltimoCuestionarioHecho.asStateFlow()
 
     private val _cuestionarioHoyHechoFlow = MutableStateFlow(false)
     val cuestionarioHoyHechoFlow = _cuestionarioHoyHechoFlow.asStateFlow()
@@ -56,8 +55,9 @@ object SettingsManager {
         _cuestionarioHoyHechoFlow.value = checkCuestionarioHoyHecho()
     }
 
-    private fun checkCuestionarioHoyHecho(): Boolean {
-        val ultimaFecha = settings.getString(KEY_ULTIMA_FECHA_CUESTIONARIO, "")
+    private fun checkCuestionarioHoyHecho(idUsuario: Long = _idUsuarioActualFlow.value): Boolean {
+        val key = "ultima_fecha_cuestionario_$idUsuario"
+        val ultimaFecha = settings.getString(key, "")
         val fechaHoy = getCurrentDateString()
         return ultimaFecha == fechaHoy
     }
@@ -68,8 +68,23 @@ object SettingsManager {
     fun getIdOrganizacionActual(): Long = _idOrganizacionActualFlow.value
     fun getRolActual(): Long = _rolActualFlow.value
     fun getTokenUsuario(): String = _tokenUsuarioFlow.value
-    fun getPrimerCuestionarioHecho(): Boolean = _primerCuestionarioHechoFlow.value
-    fun esCuestionarioHoyHecho(): Boolean = _cuestionarioHoyHechoFlow.value
+
+    fun setPrimerCuestionarioHecho(primerCuestionario: Boolean) {
+        settings.putBoolean(KEY_PRIMER_CUESTIONARIO_HECHO, primerCuestionario)
+        _esUltimoCuestionarioHecho.value = primerCuestionario
+    }
+
+    fun getPrimerCuestionarioHecho(): Boolean {
+        return settings.getBoolean(KEY_PRIMER_CUESTIONARIO_HECHO, false)
+    }
+
+    fun esCuestionarioHoyHecho(): Boolean {
+        val isHoyHecho = checkCuestionarioHoyHecho()
+        if (_cuestionarioHoyHechoFlow.value != isHoyHecho) {
+            _cuestionarioHoyHechoFlow.value = isHoyHecho
+        }
+        return isHoyHecho
+    }
     fun getSincronizadoEnEstaApertura(): Boolean = _sincronizadoEnEstaAperturaFlow.value
     fun isAutenticado(): Boolean = _isAutenticadoFlow.value
     fun isUsuarioInvitado(): Boolean = getIdUsuarioActual() == Long.MIN_VALUE
@@ -78,11 +93,6 @@ object SettingsManager {
         val safeToken = token ?: ""
         settings.putString(KEY_TOKEN_USUARIO, safeToken)
         _tokenUsuarioFlow.value = safeToken
-    }
-
-    fun setPrimerCuestionarioHecho(primerCuestionario: Boolean) {
-        settings.putBoolean(KEY_PRIMER_CUESTIONARIO_HECHO, primerCuestionario)
-        _primerCuestionarioHechoFlow.value = primerCuestionario
     }
 
     fun setIdOrganizacionActual(id: Long) {
@@ -131,7 +141,7 @@ object SettingsManager {
         _idUsuarioActualFlow.value = usuario.idUsuario
         
         _isAutenticadoFlow.value = true
-        _primerCuestionarioHechoFlow.value = settings.getBoolean(KEY_PRIMER_CUESTIONARIO_HECHO, false)
+        _esUltimoCuestionarioHecho.value = settings.getBoolean(KEY_PRIMER_CUESTIONARIO_HECHO, false)
         _cuestionarioHoyHechoFlow.value = checkCuestionarioHoyHecho()
     }
 
@@ -161,7 +171,7 @@ object SettingsManager {
         _tokenUsuarioFlow.value = ""
         _isAutenticadoFlow.value = false
         _sincronizadoEnEstaAperturaFlow.value = false
-        _primerCuestionarioHechoFlow.value = false
+        _esUltimoCuestionarioHecho.value = false
         _cuestionarioHoyHechoFlow.value = false
     }
 }
