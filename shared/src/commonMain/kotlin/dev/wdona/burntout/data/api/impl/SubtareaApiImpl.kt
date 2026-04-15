@@ -3,6 +3,7 @@ package dev.wdona.burntout.data.api.impl
 import dev.wdona.burntout.data.api.SubtareaApi
 import dev.wdona.burntout.shared.domain.Subtarea
 import dev.wdona.burntout.shared.network.ApiClient
+import dev.wdona.burntout.shared.utils.Logger
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.delete
@@ -19,22 +20,31 @@ import kotlinx.serialization.Serializable
 private data class CompletadoRequest(val completado: Boolean)
 
 class SubtareaApiImpl(private val client: HttpClient = ApiClient.client) : SubtareaApi {
+    private val TAG = "SubtareaApiImpl"
 
-    override suspend fun getSubtareasByTarea(idTarea: Long): List<Subtarea> =
-        client.get("subtareas?idTarea=$idTarea").body()
+    override suspend fun getSubtareasByTarea(idTarea: Long): List<Subtarea> {
+        Logger.d(TAG, "getSubtareasByTarea: $idTarea")
+        return client.get("subtareas?idTarea=$idTarea").body()
+    }
 
-    override suspend fun crearSubtarea(subtarea: Subtarea): HttpResponse =
-        client.post("subtareas") {
+    override suspend fun crearSubtarea(subtarea: Subtarea): HttpResponse {
+        Logger.d(TAG, "crearSubtarea: $subtarea")
+        return client.post("subtareas") {
             contentType(ContentType.Application.Json)
             setBody(subtarea)
         }
+    }
 
-    override suspend fun actualizarSubtarea(subtarea: Subtarea): HttpResponse =
-        client.patch("subtareas/${subtarea.idSubtarea}") {
+    override suspend fun actualizarSubtarea(subtarea: Subtarea): HttpResponse {
+        Logger.d(TAG, "actualizarSubtarea: $subtarea")
+        return client.patch("subtareas/${subtarea.idSubtarea}") {
             contentType(ContentType.Application.Json)
             setBody(CompletadoRequest(subtarea.completado))
         }
+    }
 
-    override suspend fun eliminarSubtarea(idSubtarea: Long): HttpResponse =
-        client.delete("subtareas/$idSubtarea")
+    override suspend fun eliminarSubtarea(idSubtarea: Long): HttpResponse {
+        Logger.d(TAG, "eliminarSubtarea: $idSubtarea")
+        return client.delete("subtareas/$idSubtarea")
+    }
 }
