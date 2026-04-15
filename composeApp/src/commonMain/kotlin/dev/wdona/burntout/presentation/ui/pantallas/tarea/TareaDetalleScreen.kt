@@ -96,8 +96,8 @@ fun TareaDetalleContent(viewModel: TareasViewModel, onVolver: () -> Unit) {
 
     ScaffoldBase(
         titulo = "Editar Tarea: " + (tarea?.titulo ?: ""),
-        onVolver = onVolver,
-        onFAB = ejecutarEnvio,
+        onVolver = { onVolver() },
+        onFAB = { ejecutarEnvio() },
         textoFAB = "Editar Tarea"
     ) {
         Column(

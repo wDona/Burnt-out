@@ -17,11 +17,10 @@ class TareaDaoImpl(appDatabase: AppDatabase) : TareaDao {
         )
     }
 
-    override suspend fun getTareaById(idTarea: Long): Tarea {
+    override suspend fun getTareaById(idTarea: Long): Tarea? {
         Logger.d(TAG, "getTareaById: $idTarea")
-        return TareaMapper.toDomain(
-            queries.getTareaById(idTarea).executeAsOne()
-        )
+        val entity = queries.getTareaById(idTarea).executeAsOneOrNull()
+        return entity?.let { TareaMapper.toDomain(it) }
     }
 
     override suspend fun crearTarea(tarea: Tarea) : Long {

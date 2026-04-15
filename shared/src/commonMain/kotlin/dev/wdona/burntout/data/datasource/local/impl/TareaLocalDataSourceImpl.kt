@@ -12,7 +12,7 @@ class TareaLocalDataSourceImpl(private val dao: TareaDao) : TareaLocalDataSource
     override suspend fun getTareaById(
         idTarea: Long,
         idTablero: Long
-    ): Tarea = dao.getTareaById(idTarea)
+    ): Tarea? = dao.getTareaById(idTarea)
 
     override suspend fun crearTarea(tarea: Tarea) : Long =
         dao.crearTarea(tarea)
@@ -27,4 +27,7 @@ class TareaLocalDataSourceImpl(private val dao: TareaDao) : TareaLocalDataSource
         dao.eliminarTareasByTableroId(idTablero)
     }
 
+    override suspend fun insertOrUpdateTarea(tarea: Tarea): Boolean {
+        return dao.insertOrUpdateTarea(tarea)
+    }
 }

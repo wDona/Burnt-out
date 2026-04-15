@@ -29,7 +29,7 @@ class TareaRepositoryImpl(
                 try {
                     val tareas = remote.getTareasByTablero(tableroId)
                     local.eliminarTareasPorTablero(tableroId)
-                    tareas.forEach { local.crearTarea(it) }
+                    tareas.forEach { local.insertOrUpdateTarea(it) }
                 } catch (e: Exception) {
                     println("Servidor offline (getTareas): ${e.message}")
                 }
@@ -43,8 +43,9 @@ class TareaRepositoryImpl(
             repositoryScope.launch {
                 try {
                     val tarea = remote.getTareaById(idTarea, idTablero)
-                    local.eliminarTarea(tarea.idTarea)
-                    local.crearTarea(tarea)
+                    if (tarea != null) {
+                        local.insertOrUpdateTarea(tarea)
+                    }
                 } catch (e: Exception) {
                     println("Servidor offline (getTareaById): ${e.message}")
                 }

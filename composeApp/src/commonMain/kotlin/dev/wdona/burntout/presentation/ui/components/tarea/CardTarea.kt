@@ -59,6 +59,10 @@ fun CardTarea(tarea: Tarea, onClick: () -> Unit, onDelete: () -> Unit, onComplet
                 tint = color
             )
             Text(
+                text = tarea.idTarea.toString(),
+                textAlign = TextAlign.Start,
+            )
+            Text(
                 text = tarea.titulo,
                 textAlign = TextAlign.Start,
                 modifier = Modifier.weight(1f)

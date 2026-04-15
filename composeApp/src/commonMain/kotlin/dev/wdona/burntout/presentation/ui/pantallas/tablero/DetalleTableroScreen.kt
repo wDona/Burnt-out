@@ -93,7 +93,7 @@ fun DetalleTableroContent(
                         .padding(16.dp)
                 )
             } else {
-                Text( "Estado, Titulo, Asignado" )
+                Text( "IdTarea, Estado, Titulo, Asignado" )
                 LazyColumn(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(12.dp),

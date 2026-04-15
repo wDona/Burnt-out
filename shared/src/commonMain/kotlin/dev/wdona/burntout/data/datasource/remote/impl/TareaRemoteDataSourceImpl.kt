@@ -13,6 +13,10 @@ class TareaRemoteDataSourceImpl(private val api: TareaApi) : TareaRemoteDataSour
         idTablero: Long
     ): Tarea = api.getTareaById(idTarea, idTablero)
 
+    override suspend fun insertOrUpdateTarea(tarea: Tarea): Boolean {
+        return false //fixme todo
+    }
+
     override suspend fun crearTarea(tarea: Tarea): Long {
         val response = api.crearTarea(tarea)
 
