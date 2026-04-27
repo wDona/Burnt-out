@@ -10,8 +10,9 @@ import dev.wdona.burntout.domain.repository.TableroRepository
 import dev.wdona.burntout.shared.domain.Tablero
 import dev.wdona.burntout.shared.utils.SettingsManager
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
 import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 
 class TableroRepositoryImpl(
@@ -20,126 +21,144 @@ class TableroRepositoryImpl(
     private val pendiente: OperacionPendienteLocalDataSource
 ) : TableroRepository {
 
+    private val mutex = Mutex()
+
     override suspend fun getTablerosByEquipo(idOrg: Long, idEquipo: Long): List<Tablero> = withContext(NonCancellable + Dispatchers.IO) {
-        if (!SettingsManager.isUsuarioInvitado()) {
-            try {
-                val tableros = remote.getTablerosByOrg(idOrg, idEquipo)
-                local.eliminarTablerosPorOrg(idOrg)
-                tableros.forEach { local.insertOrUpdateTablero(it) }
-            } catch (e: Exception) {
-                println("Servidor offline (getTablerosByOrg): ${e.message}")
+        mutex.withLock {
+            if (!SettingsManager.isUsuarioInvitado()) {
+                try {
+                    val tableros = remote.getTablerosByOrg(idOrg, idEquipo)
+                    tableros.forEach { local.insertOrUpdateTablero(it) }
+                } catch (e: Exception) {
+                    println("Servidor offline (getTablerosByOrg): ${e.message}")
+                }
             }
+            local.getTablerosByOrg(idOrg).filter { it.idEquipo == null || it.idEquipo == idEquipo }
         }
-        local.getTablerosByOrg(idOrg).filter { it.idEquipo == null || it.idEquipo == idEquipo }
     }
 
-    override suspend fun getTableroById(idTablero: Long): Tablero? = withContext(NonCancellable + Dispatchers.IO) {
-        if (!SettingsManager.isUsuarioInvitado()) {
-            try {
-                val tablero = remote.getTableroById(idTablero)
-                local.insertOrUpdateTablero(tablero)
-            } catch (e: Exception) {
-                println("Servidor offline (getTableroById): ${e.message}")
+    override suspend fun getTableroById(idTablero: Long): Tablero = withContext(NonCancellable + Dispatchers.IO) {
+        mutex.withLock {
+            if (!SettingsManager.isUsuarioInvitado()) {
+                try {
+                    val tablero = remote.getTableroById(idTablero)
+                    local.insertOrUpdateTablero(tablero)
+                } catch (e: Exception) {
+                    println("Servidor offline (getTableroById): ${e.message}")
+                }
             }
+            local.getTableroById(idTablero)
         }
-        local.getTableroById(idTablero)
     }
 
     override suspend fun crearTablero(tablero: Tablero) {
         withContext(NonCancellable + Dispatchers.IO) {
-            try {
-                local.crearTablero(tablero)
-            } catch (e: Exception) {
-                println("Error local al crear tablero: ${e.message}")
-            }
-        }
+            mutex.withLock {
+                var idProvisionaln: Long = -1
+                try {
+                    idProvisionaln = local.crearTablero(tablero)
+                } catch (e: Exception) {
+                    println("Error local al crear tablero: ${e.message}")
+                }
 
-        if (SettingsManager.isUsuarioInvitado()) return
+                if (SettingsManager.isUsuarioInvitado()) return@withLock
 
-        withContext(NonCancellable + Dispatchers.IO) {
-            var exito = false
-            try {
-                exito = remote.crearTablero(tablero)
-            } catch (e: Exception) {
-                println("Servidor offline al crear tablero: ${e.message}")
-            }
-            try {
-                pendiente.insertOperacionPendiente(
-                    TipoAccion.CREACION.getNombreAccion(),
-                    Entity.TABLERO.getNombreEntity(),
-                    tablero.idTablero,
-                    TableroMapper.toJson(tablero),
-                    System.currentTimeMillis(),
-                    if (exito) 1L else 0L
+                var tableroCreado: Tablero? = null
+                try {
+                    tableroCreado = remote.crearTablero(tablero)
+                } catch (e: Exception) {
+                    println("Servidor offline al crear tablero: ${e.message}")
+                }
+
+                if (tableroCreado != null) {
+                    if (idProvisionaln > 0L && idProvisionaln != tableroCreado.idTablero) {
+                        local.eliminarTablero(idProvisionaln)
+                    }
+                    local.insertOrUpdateTablero(tableroCreado)
+                }
+
+                val tableroPendiente = tableroCreado ?: tablero.copy(
+                    idTablero = if (idProvisionaln > 0L) idProvisionaln else tablero.idTablero
                 )
-            } catch (e: Exception) {
-                println("Error al registrar operación pendiente: ${e.message}")
+                val tableroIdParaPendiente = tableroPendiente.idTablero
+                try {
+                    pendiente.insertOperacionPendiente(
+                        TipoAccion.CREACION.getNombreAccion(),
+                        Entity.TABLERO.getNombreEntity(),
+                        tableroIdParaPendiente,
+                        TableroMapper.toJson(tableroPendiente),
+                        System.currentTimeMillis(),
+                        if (tableroCreado != null) 1L else 0L
+                    )
+                } catch (e: Exception) {
+                    println("Error al registrar operación pendiente: ${e.message}")
+                }
             }
         }
     }
 
     override suspend fun actualizarTablero(tablero: Tablero) {
         withContext(NonCancellable + Dispatchers.IO) {
-            try {
-                local.actualizarTablero(tablero)
-            } catch (e: Exception) {
-                println("Error local al actualizar tablero: ${e.message}")
-            }
-        }
+            mutex.withLock {
+                try {
+                    local.actualizarTablero(tablero)
+                } catch (e: Exception) {
+                    println("Error local al actualizar tablero: ${e.message}")
+                }
 
-        if (SettingsManager.isUsuarioInvitado()) return
+                if (SettingsManager.isUsuarioInvitado()) return@withLock
 
-        withContext(NonCancellable + Dispatchers.IO) {
-            var exito = false
-            try {
-                exito = remote.actualizarTablero(tablero)
-            } catch (e: Exception) {
-                println("Servidor offline al actualizar tablero: ${e.message}")
-            }
-            try {
-                pendiente.insertOperacionPendiente(
-                    TipoAccion.ACTUALIZACION.getNombreAccion(),
-                    Entity.TABLERO.getNombreEntity(),
-                    tablero.idTablero,
-                    TableroMapper.toJson(tablero),
-                    System.currentTimeMillis(),
-                    if (exito) 1L else 0L
-                )
-            } catch (e: Exception) {
-                println("Error al registrar operación pendiente: ${e.message}")
+                var exito = false
+                try {
+                    exito = remote.actualizarTablero(tablero)
+                } catch (e: Exception) {
+                    println("Servidor offline al actualizar tablero: ${e.message}")
+                }
+                try {
+                    pendiente.insertOperacionPendiente(
+                        TipoAccion.ACTUALIZACION.getNombreAccion(),
+                        Entity.TABLERO.getNombreEntity(),
+                        tablero.idTablero,
+                        TableroMapper.toJson(tablero),
+                        System.currentTimeMillis(),
+                        if (exito) 1L else 0L
+                    )
+                } catch (e: Exception) {
+                    println("Error al registrar operación pendiente: ${e.message}")
+                }
             }
         }
     }
 
     override suspend fun eliminarTablero(idTablero: Long) {
         withContext(NonCancellable + Dispatchers.IO) {
-            try {
-                local.eliminarTablero(idTablero)
-            } catch (e: Exception) {
-                println("Error local al eliminar tablero: ${e.message}")
-            }
-        }
+            mutex.withLock {
+                try {
+                    local.eliminarTablero(idTablero)
+                } catch (e: Exception) {
+                    println("Error local al eliminar tablero: ${e.message}")
+                }
 
-        if (SettingsManager.isUsuarioInvitado()) return
+                if (SettingsManager.isUsuarioInvitado()) return@withLock
 
-        withContext(NonCancellable + Dispatchers.IO) {
-            var exito = false
-            try {
-                exito = remote.eliminarTablero(idTablero)
-            } catch (e: Exception) {
-                println("Servidor offline al eliminar tablero: ${e.message}")
-            }
-            try {
-                pendiente.insertOperacionPendiente(
-                    TipoAccion.ELIMINACION.getNombreAccion(),
-                    Entity.TABLERO.getNombreEntity(),
-                    idTablero,
-                    "",
-                    System.currentTimeMillis(),
-                    if (exito) 1L else 0L
-                )
-            } catch (e: Exception) {
-                println("Error al registrar operación pendiente: ${e.message}")
+                var exito = false
+                try {
+                    exito = remote.eliminarTablero(idTablero)
+                } catch (e: Exception) {
+                    println("Servidor offline al eliminar tablero: ${e.message}")
+                }
+                try {
+                    pendiente.insertOperacionPendiente(
+                        TipoAccion.ELIMINACION.getNombreAccion(),
+                        Entity.TABLERO.getNombreEntity(),
+                        idTablero,
+                        "",
+                        System.currentTimeMillis(),
+                        if (exito) 1L else 0L
+                    )
+                } catch (e: Exception) {
+                    println("Error al registrar operación pendiente: ${e.message}")
+                }
             }
         }
     }

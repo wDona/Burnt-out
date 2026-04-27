@@ -17,9 +17,13 @@ class TablerosViewModel(private val repository: TableroRepository) : ScreenModel
     private val _listaTableros = MutableStateFlow<List<Tablero>>(emptyList())
     val listaTableros: StateFlow<List<Tablero>> = _listaTableros
 
+    private suspend fun recargarTableros(idOrg: Long, idEquipo: Long) {
+        _listaTableros.value = repository.getTablerosByEquipo(idOrg, idEquipo)
+    }
+
     fun cargarTableros(idOrg: Long, idEquipo: Long) {
         screenModelScope.launch {
-            _listaTableros.value = repository.getTablerosByEquipo(idOrg, idEquipo)
+            recargarTableros(idOrg, idEquipo)
         }
     }
 
@@ -29,24 +33,25 @@ class TablerosViewModel(private val repository: TableroRepository) : ScreenModel
         }
     }
 
-    fun crearTablero(tablero: Tablero) {
+    fun crearTablero(tablero: Tablero, onComplete: (() -> Unit)? = null) {
         screenModelScope.launch {
             repository.crearTablero(tablero)
-            cargarTableros(tablero.idOrganizacion, SettingsManager.getIdEquipoActual())
+            recargarTableros(tablero.idOrganizacion, SettingsManager.getIdEquipoActual())
+            onComplete?.invoke()
         }
     }
 
     fun actualizarTablero(tablero: Tablero) {
         screenModelScope.launch {
             repository.actualizarTablero(tablero)
-            cargarTableros(tablero.idOrganizacion, SettingsManager.getIdEquipoActual())
+            recargarTableros(tablero.idOrganizacion, SettingsManager.getIdEquipoActual())
         }
     }
 
     fun eliminarTablero(idTablero: Long, idOrg: Long) {
         screenModelScope.launch {
             repository.eliminarTablero(idTablero)
-            cargarTableros(idOrg, SettingsManager.getIdEquipoActual())
+            recargarTableros(idOrg, SettingsManager.getIdEquipoActual())
         }
     }
 }

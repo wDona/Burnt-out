@@ -4,7 +4,7 @@ import dev.wdona.burntout.shared.domain.Tablero
 
 interface TableroRepository {
     suspend fun getTablerosByEquipo(idOrg: Long, idEquipo: Long) : List<Tablero>
-    suspend fun getTableroById(idTablero: Long) : Tablero?
+    suspend fun getTableroById(idTablero: Long) : Tablero
     suspend fun crearTablero(tablero: Tablero)
     suspend fun actualizarTablero(tablero: Tablero)
     suspend fun eliminarTablero(idTablero: Long)

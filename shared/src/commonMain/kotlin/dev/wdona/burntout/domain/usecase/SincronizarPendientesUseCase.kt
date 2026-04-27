@@ -1,7 +1,5 @@
 package dev.wdona.burntout.domain.usecase
 
-import com.russhwolf.settings.Settings
-import dev.wdona.burntout.data.datasource.mapper.AjusteMapper
 import dev.wdona.burntout.data.datasource.remote.AjusteRemoteDataSource
 import dev.wdona.burntout.data.datasource.remote.EquipoRemoteDataSource
 import dev.wdona.burntout.data.datasource.remote.OrganizacionRemoteDataSource
@@ -102,7 +100,7 @@ class SincronizarPendientesUseCase(
         return when (op.tipoAccion) {
             TipoAccion.CREACION.getNombreAccion() -> {
                 val tablero = json.decodeFromString<Tablero>(op.datosJson)
-                tableroRemote.crearTablero(tablero)
+                tableroRemote.crearTablero(tablero).idTablero > 0L
             }
             TipoAccion.ACTUALIZACION.getNombreAccion() -> {
                 val tablero = json.decodeFromString<Tablero>(op.datosJson)
@@ -164,7 +162,7 @@ class SincronizarPendientesUseCase(
             val idUsuario = SettingsManager.getIdUsuarioActual()
             ajusteRemote.modificarAjuste(idUsuario, ajuste)
             true
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             false
         }
     }
@@ -204,7 +202,7 @@ class SincronizarPendientesUseCase(
             val respuesta = json.decodeFromString<Respuesta>(op.datosJson)
             preguntaRespuestaRemote.responderPregunta(respuesta)
             true
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             false
         }
     }

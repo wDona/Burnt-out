@@ -26,7 +26,6 @@ import cafe.adriel.voyager.core.screen.uniqueScreenKey
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import dev.wdona.burntout.presentation.ui.components.template.ScaffoldBase
-import dev.wdona.burntout.presentation.ui.pantallas.SettingsContent
 import dev.wdona.burntout.shared.domain.Tablero
 import dev.wdona.burntout.shared.utils.SettingsManager
 
@@ -51,21 +50,24 @@ class MenuCrearTableroScreen(val factory: TablerosViewModelFactory) : Screen {
 @Composable
 fun MenuCrearTableroContent(tablerosViewModel: TablerosViewModel, onVolver: () -> Unit) {
     var textStateNombreTablero by remember { mutableStateOf("") }
+    var creandoTablero by remember { mutableStateOf(false) }
 
     val ejecutarEnvio: () -> Unit = {
-        if (textStateNombreTablero.isNotBlank()) {
+        if (!creandoTablero && textStateNombreTablero.isNotBlank()) {
+            creandoTablero = true
             tablerosViewModel.crearTablero(
                 Tablero(
                     0L,
                     textStateNombreTablero,
                     SettingsManager.getIdOrganizacionActual(), // FIXME
                     SettingsManager.getIdEquipoActual() // FIXME
-                )
+                ),
+                onComplete = {
+                    creandoTablero = false
+                    textStateNombreTablero = ""
+                    onVolver()
+                }
             )
-
-            textStateNombreTablero = ""
-            onVolver()
-
         }
 
     }
