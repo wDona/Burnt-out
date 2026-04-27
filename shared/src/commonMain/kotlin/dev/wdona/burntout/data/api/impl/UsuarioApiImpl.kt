@@ -15,6 +15,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
 import io.ktor.http.HttpStatusCode
+import dev.wdona.burntout.shared.domain.RegistroRequest
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -29,10 +30,22 @@ class UsuarioApiImpl(private val client: HttpClient = ApiClient.client) : Usuari
     override suspend fun getUsuariosByOrg(idOrg: Long): List<Usuario> =
         client.get("usuarios?idOrg=$idOrg").body<List<Usuario>>().also { Logger.d(TAG, "getUsuariosByOrg: $it") }
 
+    override suspend fun registrar(request: RegistroRequest): Usuario =
+        client.post("usuarios") {
+            contentType(ContentType.Application.Json)
+            setBody(request)
+        }.body<Usuario>().also { Logger.d(TAG, "registrar: $it") }
+
     override suspend fun crearUsuario(usuario: Usuario): Long =
         client.post("usuarios") {
             contentType(ContentType.Application.Json)
-            setBody(usuario)
+            setBody(RegistroRequest(
+                username = usuario.username,
+                password = usuario.password,
+                nombre = usuario.nombre,
+                modo = "CREAR_ORG",
+                nombreOrg = "Org de ${usuario.nombre}"
+            ))
         }.body<Usuario>().also { Logger.d(TAG, "crearUsuario: $it") }.idUsuario
 
     override suspend fun actualizarUsuario(usuario: Usuario): Boolean =

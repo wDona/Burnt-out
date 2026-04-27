@@ -1,11 +1,13 @@
 package dev.wdona.burntout.domain.repository
 
+import dev.wdona.burntout.shared.domain.RegistroRequest
 import dev.wdona.burntout.shared.domain.Usuario
 
 interface UsuarioRepository {
     suspend fun getUserById(idUsuario: Long): Usuario
     suspend fun getUsuariosByOrg(idOrg: Long): List<Usuario>
     suspend fun getUsuariosByEquipo(idEquipo: Long): List<Usuario>
+    suspend fun registrar(request: RegistroRequest): Usuario
     suspend fun crearUsuario(usuario: Usuario)
     suspend fun actualizarUsuario(usuario: Usuario)
     suspend fun eliminarUsuario(idUsuario: Long)

@@ -1,26 +1,29 @@
 package dev.wdona.burntout.presentation.ui.pantallas
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import cafe.adriel.voyager.core.model.rememberScreenModel
-import cafe.adriel.voyager.core.screen.Screen
-import cafe.adriel.voyager.core.screen.ScreenKey
-import cafe.adriel.voyager.core.screen.uniqueScreenKey
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.currentOrThrow
-import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.LoginViewModelFactory
-import dev.wdona.burntout.presentation.viewmodel.viewmodels.LoginViewModel
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -36,15 +39,20 @@ import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import cafe.adriel.voyager.core.model.rememberScreenModel
+import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.core.screen.ScreenKey
+import cafe.adriel.voyager.core.screen.uniqueScreenKey
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
 import dev.wdona.burntout.presentation.ui.components.template.ScaffoldBase
 import dev.wdona.burntout.presentation.ui.theme.BurntOutMaterialTheme
 import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.AjustesViewModelFactory
+import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.LoginViewModelFactory
 import dev.wdona.burntout.presentation.viewmodel.viewmodels.AjustesViewModel
+import dev.wdona.burntout.presentation.viewmodel.viewmodels.LoginViewModel
 import dev.wdona.burntout.shared.utils.SettingsManager
 
 class LoginScreen(private val factory: LoginViewModelFactory, private val settingsFactory: AjustesViewModelFactory) : Screen {
@@ -60,7 +68,6 @@ class LoginScreen(private val factory: LoginViewModelFactory, private val settin
             viewModel = viewModel,
             settingsViewModel = settingsViewModel
         )
-
     }
 }
 
@@ -76,145 +83,227 @@ fun LoginContent(
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
+    var textStateNombre by remember { mutableStateOf("") }
     var textStateUsuario by remember { mutableStateOf("") }
     var textStatePassword by remember { mutableStateOf("") }
-    var textStateNombre by remember { mutableStateOf("") }
+    var modoRegistro by remember { mutableStateOf("CREAR_ORG") }
+    var textStateNombreOrg by remember { mutableStateOf("") }
+    var textStateCodigo by remember { mutableStateOf("") }
+    var modificado by remember { mutableStateOf(false) }
 
     val isError = uiState.error != null
-    val success = uiState.success
-
     val focusManager = LocalFocusManager.current
+
+    LaunchedEffect(uiState.isLogin) {
+        modoRegistro = "CREAR_ORG"
+        textStateNombreOrg = ""
+        textStateCodigo = ""
+    }
 
     val enviarAccion = {
         if (uiState.isLogin) {
             viewModel.login(textStateUsuario, textStatePassword, settingsViewModel)
         } else {
-            viewModel.register(textStateUsuario, textStatePassword, textStateNombre.trim(), settingsViewModel)
+            viewModel.register(
+                username = textStateUsuario,
+                contrasena = textStatePassword,
+                nombre = textStateNombre.trim(),
+                settingsViewModel = settingsViewModel,
+                modo = modoRegistro,
+                nombreOrg = textStateNombreOrg.trim().ifBlank { null },
+                codigoInvitacion = textStateCodigo.trim().ifBlank { null }
+            )
         }
         textStateUsuario = ""
         textStatePassword = ""
         textStateNombre = ""
+        textStateNombreOrg = ""
+        textStateCodigo = ""
         focusManager.clearFocus()
-
-        if (success) {
-            uiState.isLogin = true
-        }
     }
 
+    val registroValido = textStateNombre.isNotBlank() &&
+            (modoRegistro == "CREAR_ORG" || textStateCodigo.isNotBlank())
+
     ScaffoldBase {
-        Column (
+        Column(
             horizontalAlignment = CenterHorizontally,
             verticalArrangement = Arrangement.Center,
             modifier = Modifier.fillMaxSize()
-        ){
-            Column (
-                modifier = Modifier.width(340.dp),
-            ){
+        ) {
+            Column(
+                modifier = Modifier
+                    .width(340.dp)
+                    .verticalScroll(rememberScrollState()),
+            ) {
                 Text(
                     text = if (uiState.isLogin) "Login" else "Registrate",
                     style = MaterialTheme.typography.titleLarge,
                     modifier = Modifier.padding(bottom = 16.dp)
                 )
-                Text(
-                    style = MaterialTheme.typography.bodySmall.copy(color = BurntOutMaterialTheme.getWarningColor()),
-                    text = "No uses contrasenas privadas, \ncualquiera podra acceder a tu cuenta",
-                    modifier = Modifier.padding(bottom = 16.dp)
-                )
                 if (!uiState.isLogin) {
-                    OutlinedTextField(
-                        value = textStateNombre,
-                        onValueChange = { textStateNombre = it },
-                        label = { Text("Nombre") },
-                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
-                        keyboardActions = KeyboardActions(onNext = { focusManager.moveFocus(FocusDirection.Down) }),
-                        modifier = Modifier.onKeyEvent {
-                            if (it.type == KeyEventType.KeyUp && (it.key == Key.Enter || it.key == Key.NumPadEnter)) {
-                                focusManager.moveFocus(FocusDirection.Down)
-                                true
-                            } else false
-                        },
-                        singleLine = true
+                    Text(
+                        style = MaterialTheme.typography.bodySmall.copy(color = BurntOutMaterialTheme.getWarningColor()),
+                        text = "No uses contrasenas privadas, \ncualquiera podra acceder a tu cuenta",
+                        modifier = Modifier.padding(bottom = 16.dp)
                     )
                 }
+
+                AnimatedVisibility(!uiState.isLogin) {
+                    Column {
+                        OutlinedTextField(
+                            value = textStateNombre,
+                            onValueChange = { textStateNombre = it },
+                            label = { Text("Nombre*") },
+                            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                            keyboardActions = KeyboardActions(onNext = { focusManager.moveFocus(FocusDirection.Down) }),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .onKeyEvent {
+                                    if (it.type == KeyEventType.KeyUp && (it.key == Key.Enter || it.key == Key.NumPadEnter)) {
+                                        focusManager.moveFocus(FocusDirection.Down); true
+                                    } else false
+                                },
+                            singleLine = true
+                        )
+
+                        SingleChoiceSegmentedButtonRow(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 8.dp)
+                        ) {
+                            SegmentedButton(
+                                selected = modoRegistro == "CREAR_ORG",
+                                onClick = { modoRegistro = "CREAR_ORG"; textStateCodigo = "" },
+                                shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2),
+                                label = { Text("Crear org") }
+                            )
+                            SegmentedButton(
+                                selected = modoRegistro == "UNIRSE",
+                                onClick = { modoRegistro = "UNIRSE"; textStateNombreOrg = "" },
+                                shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2),
+                                label = { Text("Unirme a org") }
+                            )
+                        }
+
+                        AnimatedVisibility(modoRegistro == "CREAR_ORG") {
+                            OutlinedTextField(
+                                value = if (modificado) {
+                                    textStateNombreOrg
+                                } else {
+                                    "Mi Organizacion"
+                                },
+                                onValueChange = {
+                                        textStateNombreOrg = it
+                                        modificado = true
+                                                },
+                                label = { Text("Nombre de la organización*") },
+                                placeholder = { Text("Org de ${textStateNombre.ifBlank { "Mi Organizacion" }}") },
+                                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                                keyboardActions = KeyboardActions(onNext = { focusManager.moveFocus(FocusDirection.Down) }),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(bottom = 4.dp),
+                                singleLine = true
+                            )
+                        }
+
+                        AnimatedVisibility(modoRegistro == "UNIRSE") {
+                            OutlinedTextField(
+                                value = textStateCodigo,
+                                onValueChange = { textStateCodigo = it.uppercase().trim() },
+                                label = { Text("Código de invitación*") },
+                                placeholder = { Text("ACME-X7K2PQ") },
+                                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                                keyboardActions = KeyboardActions(onNext = { focusManager.moveFocus(FocusDirection.Down) }),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(bottom = 4.dp),
+                                singleLine = true
+                            )
+                        }
+                    }
+                }
+
                 OutlinedTextField(
                     value = textStateUsuario,
                     onValueChange = {
                         if (it.contains(' ')) return@OutlinedTextField
-                        textStateUsuario = it.trim() },
-                    label = { Text("Usuario") },
+                        textStateUsuario = it.trim()
+                    },
+                    label = { Text("Usuario*") },
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
                     keyboardActions = KeyboardActions(onNext = { focusManager.moveFocus(FocusDirection.Down) }),
-                    modifier = Modifier.onKeyEvent {
-                        if (it.type == KeyEventType.KeyUp && (it.key == Key.Enter || it.key == Key.NumPadEnter)) {
-                            focusManager.moveFocus(FocusDirection.Down)
-                            true
-                        } else false
-                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .onKeyEvent {
+                            if (it.type == KeyEventType.KeyUp && (it.key == Key.Enter || it.key == Key.NumPadEnter)) {
+                                focusManager.moveFocus(FocusDirection.Down); true
+                            } else false
+                        },
                     singleLine = true
                 )
+
                 OutlinedTextField(
                     value = textStatePassword,
                     onValueChange = { textStatePassword = it.trim() },
-                    label = { Text("Password") },
+                    label = { Text("Password*") },
                     visualTransformation = PasswordVisualTransformation(),
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
                     keyboardActions = KeyboardActions(onDone = { enviarAccion() }),
-                    modifier = Modifier.onKeyEvent {
-                        if (it.type == KeyEventType.KeyUp && (it.key == Key.Enter || it.key == Key.NumPadEnter)) {
-                            enviarAccion()
-                            true
-                        } else false
-                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .onKeyEvent {
+                            if (it.type == KeyEventType.KeyUp && (it.key == Key.Enter || it.key == Key.NumPadEnter)) {
+                                enviarAccion(); true
+                            } else false
+                        },
                     singleLine = true
                 )
 
                 if (uiState.isLoading) {
                     Text(
                         text = "Cargando...",
-                        style = MaterialTheme.typography.bodySmall
+                        style = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier.padding(top = 4.dp)
                     )
                 } else if (isError) {
                     Text(
                         text = "Error: ${uiState.error}",
                         style = MaterialTheme.typography.bodySmall
-                            .copy(color = BurntOutMaterialTheme.getErrorColor())
+                            .copy(color = BurntOutMaterialTheme.getErrorColor()),
+                        modifier = Modifier.padding(top = 4.dp)
                     )
-                } else if (success) {
+                } else if (uiState.success) {
                     Text(
                         text = "Success",
                         style = MaterialTheme.typography.bodySmall
-                            .copy(color = BurntOutMaterialTheme.getSuccessColor())
+                            .copy(color = BurntOutMaterialTheme.getSuccessColor()),
+                        modifier = Modifier.padding(top = 4.dp)
                     )
                 }
 
-                TextButton(
-                    onClick = {
-                        viewModel.toggleMode()
-                    }
-                ) {
+                TextButton(onClick = { viewModel.toggleMode() }) {
                     Text(if (uiState.isLogin) "¿No tienes cuenta? Regístrate" else "¿Ya tienes cuenta? Login")
                 }
 
                 Button(
                     onClick = enviarAccion,
-                    enabled = !uiState.isLoading && textStateUsuario.isNotBlank() && textStatePassword.isNotBlank()
-                            && (uiState.isLogin || textStateNombre.isNotBlank())
+                    enabled = !uiState.isLoading
+                            && textStateUsuario.isNotBlank()
+                            && textStatePassword.isNotBlank()
+                            && (uiState.isLogin || registroValido)
                 ) {
                     Text(if (uiState.isLogin) "Login" else "Registrate")
                 }
 
-                TextButton(
-                    onClick = {
-                        SettingsManager.setUsuarioInvitado()
-                    }
-                ) {
+                TextButton(onClick = { SettingsManager.setUsuarioInvitado() }) {
                     Text(
                         text = "Entrar como invitado",
                         style = MaterialTheme.typography.bodySmall
                     )
                 }
             }
-
         }
     }
 }

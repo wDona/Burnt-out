@@ -26,6 +26,7 @@ object UsuariosTable : Table() {
     val descripcion = text("descripcion").nullable()
     val idOrganizacion = long("id_organizacion")
     val idEquipo = long("id_equipo")
+    val rol = varchar("rol", 20).default("MEMBER")
     override val primaryKey = PrimaryKey(id)
 }
 object AjustesTable : Table() {
@@ -58,6 +59,17 @@ object SubtareasTable : Table() {
     val completado = bool("completado")
     val idTarea = long("id_tarea_perteneciente")
     override val primaryKey = PrimaryKey(id)
+}
+object InvitacionesTable : Table() {
+    val code = varchar("code", 50)
+    val idOrganizacion = long("id_organizacion").references(OrganizacionesTable.id)
+    val rol = varchar("rol", 20)
+    val creadoPor = long("creado_por")
+    val creadoEn = long("creado_en")
+    val expiraEn = long("expira_en").nullable()
+    val usadoEn = long("usado_en").nullable()
+    val usadoPor = long("usado_por").nullable()
+    override val primaryKey = PrimaryKey(code)
 }
 object PreguntasTable : Table() {
     val id = long("id_pregunta").autoIncrement()

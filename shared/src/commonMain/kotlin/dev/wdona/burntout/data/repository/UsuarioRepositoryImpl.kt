@@ -7,6 +7,7 @@ import dev.wdona.burntout.data.datasource.remote.UsuarioRemoteDataSource
 import dev.wdona.burntout.domain.entity.Entity
 import dev.wdona.burntout.domain.model.TipoAccion
 import dev.wdona.burntout.domain.repository.UsuarioRepository
+import dev.wdona.burntout.shared.domain.RegistroRequest
 import dev.wdona.burntout.shared.domain.Usuario
 import dev.wdona.burntout.shared.utils.SettingsManager
 import kotlinx.coroutines.CoroutineScope
@@ -22,6 +23,12 @@ class UsuarioRepositoryImpl(
 ) : UsuarioRepository {
 
     private val repositoryScope = CoroutineScope(Dispatchers.Default)
+
+    override suspend fun registrar(request: RegistroRequest): Usuario = withContext(NonCancellable + Dispatchers.IO) {
+        val usuario = remote.registrar(request)
+        local.insertOrUpdateUsuario(usuario)
+        usuario
+    }
 
     override suspend fun getUserById(idUsuario: Long): Usuario = withContext(NonCancellable + Dispatchers.IO) {
         if (idUsuario == Long.MIN_VALUE) {

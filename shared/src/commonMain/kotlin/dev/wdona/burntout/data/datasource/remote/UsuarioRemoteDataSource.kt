@@ -1,8 +1,10 @@
 package dev.wdona.burntout.data.datasource.remote
 
+import dev.wdona.burntout.shared.domain.RegistroRequest
 import dev.wdona.burntout.shared.domain.Usuario
 
 interface UsuarioRemoteDataSource {
+    suspend fun registrar(request: RegistroRequest): Usuario
     suspend fun getUserById(idUsuario: Long): Usuario
     suspend fun getUsuariosByOrg(idOrg: Long): List<Usuario>
     suspend fun getUsuarioByUsername(username: String): Usuario?

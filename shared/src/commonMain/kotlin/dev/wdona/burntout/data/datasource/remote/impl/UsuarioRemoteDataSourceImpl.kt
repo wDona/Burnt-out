@@ -2,9 +2,14 @@ package dev.wdona.burntout.data.datasource.remote.impl
 
 import dev.wdona.burntout.data.api.UsuarioApi
 import dev.wdona.burntout.data.datasource.remote.UsuarioRemoteDataSource
+import dev.wdona.burntout.shared.domain.RegistroRequest
 import dev.wdona.burntout.shared.domain.Usuario
 
 class UsuarioRemoteDataSourceImpl(private val usuarioApi: UsuarioApi) : UsuarioRemoteDataSource {
+    override suspend fun registrar(request: RegistroRequest): Usuario {
+        return usuarioApi.registrar(request)
+    }
+
     override suspend fun getUserById(idUsuario: Long): Usuario {
         return usuarioApi.getUserById(idUsuario)
     }

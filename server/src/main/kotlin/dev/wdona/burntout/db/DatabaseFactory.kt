@@ -12,22 +12,23 @@ import org.jetbrains.exposed.sql.selectAll
 
 object DatabaseFactory {
     private val tables = arrayOf(
-        SubtareasTable,
-        TareasTable,
-        TablerosTable,
-        EquipoMiembrosTable,
-        RespuestasTable,
-        PreguntasTable,
-        AjustesTable,
-        UsuariosTable,
+        OrganizacionesTable,
         EquiposTable,
-        OrganizacionesTable
+        UsuariosTable,
+        AjustesTable,
+        PreguntasTable,
+        RespuestasTable,
+        EquipoMiembrosTable,
+        TablerosTable,
+        TareasTable,
+        SubtareasTable,
+        InvitacionesTable
     )
 
     fun init() {
         Database.connect("jdbc:sqlite:server.db", driver = "org.sqlite.JDBC")
         transaction {
-            SchemaUtils.create(*tables) // * es pasar los datos del array 1 a 1
+            SchemaUtils.createMissingTablesAndColumns(*tables)
             insertDatosBase()
         }
     }
@@ -85,7 +86,7 @@ object DatabaseFactory {
     suspend fun clearDB() {
         dbQuery {
             SchemaUtils.drop(*tables)
-            SchemaUtils.create(*tables)
+            SchemaUtils.createMissingTablesAndColumns(*tables)
             insertDatosBase()
         }
     }

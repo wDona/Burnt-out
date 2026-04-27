@@ -1,6 +1,7 @@
 package dev.wdona.burntout
 
 import dev.wdona.burntout.api.latest.ajustesRoutes
+import dev.wdona.burntout.api.latest.invitacionesRoutes
 import dev.wdona.burntout.api.latest.equiposRoutes
 import dev.wdona.burntout.api.latest.organizacionesRoutes
 import dev.wdona.burntout.api.latest.preguntasRespuestasRoutes
@@ -49,6 +50,7 @@ fun Application.module() {
         route("/api/v1") {
             ajustesRoutes()
             equiposRoutes()
+            invitacionesRoutes()
             organizacionesRoutes()
             preguntasRespuestasRoutes()
             subtareasRoutes()

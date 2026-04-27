@@ -135,7 +135,7 @@ object SettingsManager {
         setIdEquipoActual(usuario.idEquipo)
         setIdOrganizacionActual(usuario.idOrganizacion)
         setTokenUsuario("token_${usuario.idUsuario}")
-        setRolActual(1L)
+        setRolActual(if (usuario.rol == "ADMIN") 1L else 0L)
         
         settings.putLong(KEY_ID_USUARIO_ACTUAL, usuario.idUsuario)
         _idUsuarioActualFlow.value = usuario.idUsuario

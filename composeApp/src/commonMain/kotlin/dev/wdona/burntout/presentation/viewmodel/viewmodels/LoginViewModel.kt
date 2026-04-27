@@ -3,6 +3,7 @@ package dev.wdona.burntout.presentation.viewmodel.viewmodels
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
 import dev.wdona.burntout.domain.repository.UsuarioRepository
+import dev.wdona.burntout.shared.domain.RegistroRequest
 import dev.wdona.burntout.shared.domain.Usuario
 import dev.wdona.burntout.shared.utils.OfflineIdGenerator
 import dev.wdona.burntout.shared.utils.SettingsManager
@@ -49,34 +50,30 @@ class LoginViewModel(private val usuarioRepository: UsuarioRepository) : ScreenM
         }
     }
 
-    fun register(username: String, contrasena: String, nombre: String, settingsViewModel: AjustesViewModel) {
+    fun register(
+        username: String,
+        contrasena: String,
+        nombre: String,
+        settingsViewModel: AjustesViewModel,
+        modo: String = "CREAR_ORG",
+        nombreOrg: String? = null,
+        codigoInvitacion: String? = null
+    ) {
         screenModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
             try {
-                val existe = usuarioRepository.existeUsuario(username)
-                if (existe) {
-                    _uiState.update { it.copy(isLoading = false, error = "El usuario ya existe") }
-                    return@launch
-                }
-
-                val nuevoUsuario = Usuario(
-                    idUsuario = OfflineIdGenerator.newId(),
+                val request = RegistroRequest(
                     username = username,
                     password = contrasena,
                     nombre = nombre,
-                    riesgoBurnout = 0.0,
-                    descripcion = "",
-                    idOrganizacion = 1L, // Default
-                    idEquipo = 0L
+                    modo = modo,
+                    nombreOrg = nombreOrg ?: "Org de $nombre",
+                    codigoInvitacion = codigoInvitacion
                 )
-                
-                usuarioRepository.crearUsuario(nuevoUsuario)
-                
-                // Login automatico tras registro
-                val usuarioLogeado = usuarioRepository.login(username, contrasena)
-                
-                SettingsManager.setUsuarioActual(usuarioLogeado)
-                settingsViewModel.cargarUsuarioActual(usuarioLogeado)
+                val usuarioRegistrado = usuarioRepository.registrar(request)
+
+                SettingsManager.setUsuarioActual(usuarioRegistrado)
+                settingsViewModel.cargarUsuarioActual(usuarioRegistrado)
                 SettingsManager.setPrimerCuestionarioHecho(false)
 
                 _uiState.update { it.copy(isLoading = false, success = true) }
