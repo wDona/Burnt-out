@@ -72,7 +72,8 @@ class TareaDaoImpl(appDatabase: AppDatabase) : TareaDao {
                 Descripcion = tarea.descripcion,
                 Estado = tarea.estado,
                 FK_ID_Tabl = tarea.idTableroPerteneciente,
-                FK_ID_Usuario = tarea.idUsuarioAsignado
+                FK_ID_Usuario = tarea.idUsuarioAsignado,
+                Is_Deleted = if (tarea.isDeleted) 1L else 0L
             )
         } catch (e: Exception) {
             Logger.d(TAG, "Error insertOrUpdateTarea: ${e.message}")

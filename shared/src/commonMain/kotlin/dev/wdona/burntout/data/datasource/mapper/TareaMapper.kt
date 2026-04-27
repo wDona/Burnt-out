@@ -16,7 +16,8 @@ class TareaMapper {
                 estado = tareaEntity.Estado,
                 idTableroPerteneciente = tareaEntity.FK_ID_Tabl,
                 idUsuarioAsignado = tareaEntity.FK_ID_Usuario,
-                idSubtareas = idSubtareas
+                idSubtareas = idSubtareas,
+                isDeleted = tareaEntity.Is_Deleted != 0L
             )
         }
 
@@ -27,7 +28,8 @@ class TareaMapper {
                 Descripcion = tarea.descripcion,
                 Estado = tarea.estado,
                 FK_ID_Tabl = tarea.idTableroPerteneciente,
-                FK_ID_Usuario = tarea.idUsuarioAsignado
+                FK_ID_Usuario = tarea.idUsuarioAsignado,
+                Is_Deleted = if (tarea.isDeleted) 1L else 0L
             )
         }
 
@@ -39,7 +41,8 @@ class TareaMapper {
                 estado = tareaEntity.Estado,
                 idTableroPerteneciente = tareaEntity.FK_ID_Tabl,
                 idUsuarioAsignado = tareaEntity.FK_ID_Usuario,
-                idSubtareas = emptyList()
+                idSubtareas = emptyList(),
+                isDeleted = tareaEntity.Is_Deleted != 0L
             )
         }
 

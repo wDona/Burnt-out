@@ -66,7 +66,8 @@ class TableroDaoImpl(appDatabase: AppDatabase) : TableroDao {
                 tablero.idTablero,
                 tablero.titulo,
                 tablero.idEquipo,
-                tablero.idOrganizacion
+                tablero.idOrganizacion,
+                if (tablero.isDeleted) 1L else 0L
             )
             true
         } catch (e: Exception) {

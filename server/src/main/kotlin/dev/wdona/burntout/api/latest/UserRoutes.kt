@@ -30,7 +30,8 @@ private fun rowToUsuario(it: ResultRow) = Usuario(
     descripcion = it[UsuariosTable.descripcion],
     idOrganizacion = it[UsuariosTable.idOrganizacion],
     idEquipo = it[UsuariosTable.idEquipo],
-    rol = it[UsuariosTable.rol]
+    rol = it[UsuariosTable.rol],
+    isDeleted = it[UsuariosTable.isDeleted]
 )
 fun Route.usuariosRoutes() {
     route("/usuarios") {
@@ -39,7 +40,7 @@ fun Route.usuariosRoutes() {
             val idEquipo = call.request.queryParameters["idEquipo"]?.toLongOrNull()
             println("[${call.request.origin.remoteHost}] GET /usuarios idOrg=$idOrg idEquipo=$idEquipo")
             val resultado = dbQuery {
-                val query = UsuariosTable.selectAll()
+                val query = UsuariosTable.selectAll().where { UsuariosTable.isDeleted eq false }
                 if (idOrg != null) {
                     query.andWhere { UsuariosTable.idOrganizacion eq idOrg }
                 }
@@ -55,7 +56,7 @@ fun Route.usuariosRoutes() {
             println("[${call.request.origin.remoteHost}] POST /usuarios username=${request.username} modo=${request.modo}")
 
             val existe = dbQuery {
-                UsuariosTable.selectAll().where { UsuariosTable.username eq request.username }.count() > 0
+                UsuariosTable.selectAll().where { (UsuariosTable.username eq request.username) and (UsuariosTable.isDeleted eq false) }.count() > 0
             }
             if (existe) {
                 return@post call.respond(HttpStatusCode.Conflict, "El nombre de usuario ya existe")
@@ -94,7 +95,7 @@ fun Route.usuariosRoutes() {
             println("[${call.request.origin.remoteHost}] POST /usuarios/login username=${request.username} password=${request.contrasena}")
             val usuario = dbQuery {
                 UsuariosTable.selectAll().where {
-                    (UsuariosTable.username eq request.username) and (UsuariosTable.password eq request.contrasena)
+                    (UsuariosTable.username eq request.username) and (UsuariosTable.password eq request.contrasena) and (UsuariosTable.isDeleted eq false)
                 }.map { rowToUsuario(it) }.singleOrNull()
             } ?: return@post call.respond(HttpStatusCode.Unauthorized)
             call.respond(usuario)
@@ -103,7 +104,7 @@ fun Route.usuariosRoutes() {
             val username = call.parameters["username"] ?: return@get call.respond(HttpStatusCode.BadRequest)
             println("[${call.request.origin.remoteHost}] GET /usuarios/existe/$username")
             val existe = dbQuery {
-                UsuariosTable.selectAll().where { UsuariosTable.username eq username }.count() > 0
+                UsuariosTable.selectAll().where { (UsuariosTable.username eq username) and (UsuariosTable.isDeleted eq false) }.count() > 0
             }
             call.respond(existe)
         }
@@ -113,7 +114,7 @@ fun Route.usuariosRoutes() {
                     ?: return@get call.respond(HttpStatusCode.BadRequest)
                 println("[${call.request.origin.remoteHost}] GET /usuarios/$id")
                 val usuario = dbQuery {
-                    UsuariosTable.selectAll().where { UsuariosTable.id eq id }
+                    UsuariosTable.selectAll().where { (UsuariosTable.id eq id) and (UsuariosTable.isDeleted eq false) }
                         .map { rowToUsuario(it) }.singleOrNull()
                 } ?: return@get call.respond(HttpStatusCode.NotFound)
                 call.respond(usuario)
@@ -132,6 +133,7 @@ fun Route.usuariosRoutes() {
                         it[descripcion] = usuario.descripcion
                         it[idOrganizacion] = usuario.idOrganizacion
                         it[idEquipo] = usuario.idEquipo
+                        it[isDeleted] = usuario.isDeleted
                     }
                 }
                 if (updatedCount == 0) return@put call.respond(HttpStatusCode.NotFound)
@@ -142,7 +144,9 @@ fun Route.usuariosRoutes() {
                     ?: return@delete call.respond(HttpStatusCode.BadRequest)
                 println("[${call.request.origin.remoteHost}] DELETE /usuarios/$id")
                 val deletedCount = dbQuery {
-                    UsuariosTable.deleteWhere { UsuariosTable.id eq id }
+                    UsuariosTable.update({ (UsuariosTable.id eq id) and (UsuariosTable.isDeleted eq false) }) {
+                        it[isDeleted] = true
+                    }
                 }
                 if (deletedCount == 0) return@delete call.respond(HttpStatusCode.NotFound)
                 call.respond(HttpStatusCode.NoContent)
@@ -152,7 +156,7 @@ fun Route.usuariosRoutes() {
             val username = call.parameters["username"] ?: return@get call.respond(HttpStatusCode.BadRequest)
             println("[${call.request.origin.remoteHost}] GET /usuarios/username/$username")
             val usuario = dbQuery {
-                UsuariosTable.selectAll().where { UsuariosTable.username eq username }
+                UsuariosTable.selectAll().where { (UsuariosTable.username eq username) and (UsuariosTable.isDeleted eq false) }
                     .map { rowToUsuario(it) }.singleOrNull()
             } ?: return@get call.respond(HttpStatusCode.NotFound)
             call.respond(usuario)
@@ -243,7 +247,7 @@ private suspend fun unirseConCodigo(request: RegistroRequest, codigo: String): U
         }
 
         val preguntas = PreguntasTable.selectAll()
-            .where { PreguntasTable.idOrganizacion eq idOrg }
+            .where { (PreguntasTable.idOrganizacion eq idOrg) and (PreguntasTable.isDeleted eq false) }
             .map { it[PreguntasTable.id] }
 
         preguntas.forEach { preguntaId ->

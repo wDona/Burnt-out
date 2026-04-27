@@ -29,7 +29,8 @@ class OrganizacionDaoImpl(appDatabase: AppDatabase) : OrganizacionDao {
         return try {
             queries.upsertOrganizacion(
                 ID_Org = organizacion.idOrganizacion,
-                Org_Name = organizacion.nombre
+                Org_Name = organizacion.nombre,
+                Is_Deleted = if (organizacion.isDeleted) 1L else 0L
             )
             true
         } catch (e: Exception) {

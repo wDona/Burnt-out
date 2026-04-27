@@ -39,7 +39,8 @@ class EquipoDaoImpl(appDatabase: AppDatabase) : EquipoDao {
                 equipo.idEquipo,
                 equipo.titulo,
                 equipo.puntuacion ?: 0,
-                equipo.idOrganizacion
+                equipo.idOrganizacion,
+                if (equipo.isDeleted) 1L else 0L
             )
             true
         } catch (e: Exception) {

@@ -91,7 +91,8 @@ class UsuarioDaoImpl(appDatabase: AppDatabase) : UsuarioDao {
                 Riesgo_Burnout = usuario.riesgoBurnout,
                 Descripcion = usuario.descripcion,
                 FK_ID_Organizacion = usuario.idOrganizacion,
-                FK_ID_Equipo = usuario.idEquipo
+                FK_ID_Equipo = usuario.idEquipo,
+                Is_Deleted = if (usuario.isDeleted) 1L else 0L
             )
             true
         } catch (e: Exception) {

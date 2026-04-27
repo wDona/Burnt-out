@@ -6,6 +6,7 @@ import kotlinx.serialization.Serializable
 class Ajuste(
     val idAjuste: Long,
     val nombre: String,
-    val valorAjuste: String
+    val valorAjuste: String,
+    val isDeleted: Boolean = false
 ) {
 }

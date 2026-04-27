@@ -14,10 +14,11 @@ fun Route.organizacionesRoutes() {
         get {
             println("[${call.request.origin.remoteHost}] GET /organizaciones")
             val todas = dbQuery {
-                OrganizacionesTable.selectAll().map {
+                OrganizacionesTable.selectAll().where { OrganizacionesTable.isDeleted eq false }.map {
                     Organizacion(
                         idOrganizacion = it[OrganizacionesTable.id],
-                        nombre = it[OrganizacionesTable.nombre]
+                        nombre = it[OrganizacionesTable.nombre],
+                        isDeleted = it[OrganizacionesTable.isDeleted]
                     )
                 }
             }
@@ -29,6 +30,7 @@ fun Route.organizacionesRoutes() {
             val nuevaId = dbQuery {
                 OrganizacionesTable.insert {
                     it[nombre] = organizacion.nombre
+                    it[isDeleted] = organizacion.isDeleted
                 }[OrganizacionesTable.id]
             }
             call.respond(HttpStatusCode.Created, organizacion.copy(idOrganizacion = nuevaId))
@@ -39,11 +41,12 @@ fun Route.organizacionesRoutes() {
                     ?: return@get call.respond(HttpStatusCode.BadRequest)
                 println("[${call.request.origin.remoteHost}] GET /organizaciones/$id")
                 val organizacion = dbQuery {
-                    OrganizacionesTable .selectAll().where { OrganizacionesTable.id eq id }
+                    OrganizacionesTable .selectAll().where { (OrganizacionesTable.id eq id) and (OrganizacionesTable.isDeleted eq false) }
                         .map {
                             Organizacion(
                                 idOrganizacion = it[OrganizacionesTable.id],
-                                nombre = it[OrganizacionesTable.nombre]
+                                nombre = it[OrganizacionesTable.nombre],
+                                isDeleted = it[OrganizacionesTable.isDeleted]
                             )
                         }
                         .singleOrNull()
@@ -58,6 +61,7 @@ fun Route.organizacionesRoutes() {
                 val updatedCount = dbQuery {
                     OrganizacionesTable.update({ OrganizacionesTable.id eq id }) {
                         it[nombre] = organizacion.nombre
+                        it[isDeleted] = organizacion.isDeleted
                     }
                 }
                 if (updatedCount == 0) return@put call.respond(HttpStatusCode.NotFound)
@@ -68,7 +72,9 @@ fun Route.organizacionesRoutes() {
                     ?: return@delete call.respond(HttpStatusCode.BadRequest)
                 println("[${call.request.origin.remoteHost}] DELETE /organizaciones/$id")
                 val deletedCount = dbQuery {
-                    OrganizacionesTable.deleteWhere { OrganizacionesTable.id eq id }
+                    OrganizacionesTable.update({ (OrganizacionesTable.id eq id) and (OrganizacionesTable.isDeleted eq false) }) {
+                        it[isDeleted] = true
+                    }
                 }
                 if (deletedCount == 0) return@delete call.respond(HttpStatusCode.NotFound)
                 call.respond(HttpStatusCode.NoContent)

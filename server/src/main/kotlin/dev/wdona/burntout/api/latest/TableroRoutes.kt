@@ -16,7 +16,7 @@ fun Route.tablerosRoutes() {
             val idEquipo = call.request.queryParameters["idEquipo"]?.toLongOrNull()
             println("[${call.request.origin.remoteHost}] GET /tableros idOrg=$idOrg idEquipo=$idEquipo")
             val resultado = dbQuery {
-                val query = TablerosTable.selectAll()
+                val query = TablerosTable.selectAll().where { TablerosTable.isDeleted eq false }
                 if (idOrg != null) {
                     query.andWhere { TablerosTable.idOrganizacion eq idOrg }
                 }
@@ -28,7 +28,8 @@ fun Route.tablerosRoutes() {
                         idTablero = it[TablerosTable.id],
                         titulo = it[TablerosTable.titulo],
                         idOrganizacion = it[TablerosTable.idOrganizacion],
-                        idEquipo = it[TablerosTable.idEquipo]
+                        idEquipo = it[TablerosTable.idEquipo],
+                        isDeleted = it[TablerosTable.isDeleted]
                     )
                 }
             }
@@ -42,6 +43,7 @@ fun Route.tablerosRoutes() {
                     it[titulo] = tablero.titulo
                     it[idOrganizacion] = tablero.idOrganizacion
                     it[idEquipo] = tablero.idEquipo
+                    it[isDeleted] = tablero.isDeleted
                 }[TablerosTable.id]
             }
             call.respond(HttpStatusCode.Created, tablero.copy(idTablero = nuevoId))
@@ -52,12 +54,13 @@ fun Route.tablerosRoutes() {
                     ?: return@get call.respond(HttpStatusCode.BadRequest)
                 println("[${call.request.origin.remoteHost}] GET /tableros/$id")
                 val tablero = dbQuery {
-                    TablerosTable .selectAll().where { TablerosTable.id eq id }.map {
+                    TablerosTable .selectAll().where { (TablerosTable.id eq id) and (TablerosTable.isDeleted eq false) }.map {
                         Tablero(
                             idTablero = it[TablerosTable.id],
                             titulo = it[TablerosTable.titulo],
                             idOrganizacion = it[TablerosTable.idOrganizacion],
-                            idEquipo = it[TablerosTable.idEquipo]
+                            idEquipo = it[TablerosTable.idEquipo],
+                            isDeleted = it[TablerosTable.isDeleted]
                         )
                     }.singleOrNull()
                 } ?: return@get call.respond(HttpStatusCode.NotFound)
@@ -73,6 +76,7 @@ fun Route.tablerosRoutes() {
                         it[titulo] = tablero.titulo
                         it[idOrganizacion] = tablero.idOrganizacion
                         it[idEquipo] = tablero.idEquipo
+                        it[isDeleted] = tablero.isDeleted
                     }
                 }
                 if (updatedCount == 0) return@put call.respond(HttpStatusCode.NotFound)
@@ -83,7 +87,9 @@ fun Route.tablerosRoutes() {
                     ?: return@delete call.respond(HttpStatusCode.BadRequest)
                 println("[${call.request.origin.remoteHost}] DELETE /tableros/$id")
                 val deletedCount = dbQuery {
-                    TablerosTable.deleteWhere { TablerosTable.id eq id }
+                    TablerosTable.update({ (TablerosTable.id eq id) and (TablerosTable.isDeleted eq false) }) {
+                        it[isDeleted] = true
+                    }
                 }
                 if (deletedCount == 0) return@delete call.respond(HttpStatusCode.NotFound)
                 call.respond(HttpStatusCode.NoContent)

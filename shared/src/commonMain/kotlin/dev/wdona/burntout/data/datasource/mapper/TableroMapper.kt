@@ -12,7 +12,8 @@ object TableroMapper {
             idTablero = entity.ID_Tabl,
             titulo = entity.Titulo,
             idOrganizacion = entity.FK_ID_Org,
-            idEquipo = entity.FK_ID_Equipo
+            idEquipo = entity.FK_ID_Equipo,
+            isDeleted = entity.Is_Deleted != 0L
         )
     }
 
@@ -21,7 +22,8 @@ object TableroMapper {
             ID_Tabl = domain.idTablero,
             Titulo = domain.titulo,
             FK_ID_Org = domain.idOrganizacion,
-            FK_ID_Equipo = domain.idEquipo
+            FK_ID_Equipo = domain.idEquipo,
+            Is_Deleted = if (domain.isDeleted) 1L else 0L
         )
     }
 

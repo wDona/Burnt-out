@@ -17,11 +17,12 @@ fun Route.ajustesRoutes() {
                 ?: return@get call.respond(HttpStatusCode.BadRequest)
             println("[${call.request.origin.remoteHost}] GET /ajustes/$idUsuario")
             val ajustes = dbQuery {
-                AjustesTable .selectAll().where { AjustesTable.idUsuario eq idUsuario }.map {
+                AjustesTable .selectAll().where { (AjustesTable.idUsuario eq idUsuario) and (AjustesTable.isDeleted eq false) }.map {
                     Ajuste(
                         idAjuste = it[AjustesTable.id],
                         nombre = it[AjustesTable.nombre],
-                        valorAjuste = it[AjustesTable.valorAjuste]
+                        valorAjuste = it[AjustesTable.valorAjuste],
+                        isDeleted = it[AjustesTable.isDeleted]
                     )
                 }
             }
@@ -37,9 +38,10 @@ fun Route.ajustesRoutes() {
                     it[AjustesTable.idUsuario] = idUsuario
                     it[nombre] = ajuste.nombre
                     it[valorAjuste] = ajuste.valorAjuste
+                    it[isDeleted] = ajuste.isDeleted
                 }[AjustesTable.id]
             }
-            call.respond(HttpStatusCode.Created, Ajuste(nuevoId, ajuste.nombre, ajuste.valorAjuste))
+            call.respond(HttpStatusCode.Created, Ajuste(nuevoId, ajuste.nombre, ajuste.valorAjuste, ajuste.isDeleted))
         }
         route("/{id}") {
             put {
@@ -53,10 +55,11 @@ fun Route.ajustesRoutes() {
                     AjustesTable.update({ (AjustesTable.id eq id) and (AjustesTable.idUsuario eq idUsuario) }) {
                         it[nombre] = ajuste.nombre
                         it[valorAjuste] = ajuste.valorAjuste
+                        it[isDeleted] = ajuste.isDeleted
                     }
                 }
                 if (updatedCount == 0) return@put call.respond(HttpStatusCode.NotFound)
-                call.respond(Ajuste(id, ajuste.nombre, ajuste.valorAjuste))
+                call.respond(Ajuste(id, ajuste.nombre, ajuste.valorAjuste, ajuste.isDeleted))
             }
             delete {
                 val idUsuario = call.parameters["idUsuario"]?.toLongOrNull()
@@ -65,7 +68,9 @@ fun Route.ajustesRoutes() {
                     ?: return@delete call.respond(HttpStatusCode.BadRequest)
                 println("[${call.request.origin.remoteHost}] DELETE /ajustes/$idUsuario/$id")
                 val deletedCount = dbQuery {
-                    AjustesTable.deleteWhere { (AjustesTable.id eq id) and (AjustesTable.idUsuario eq idUsuario) }
+                    AjustesTable.update({ (AjustesTable.id eq id) and (AjustesTable.idUsuario eq idUsuario) and (AjustesTable.isDeleted eq false) }) {
+                        it[isDeleted] = true
+                    }
                 }
                 if (deletedCount == 0) return@delete call.respond(HttpStatusCode.NotFound)
                 call.respond(HttpStatusCode.NoContent)

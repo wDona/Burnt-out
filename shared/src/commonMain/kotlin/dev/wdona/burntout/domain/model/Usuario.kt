@@ -12,5 +12,6 @@ data class Usuario(
     val descripcion: String?,
     val idOrganizacion: Long,
     val idEquipo: Long,
-    val rol: String = "MEMBER"
+    val rol: String = "MEMBER",
+    val isDeleted: Boolean = false
 )

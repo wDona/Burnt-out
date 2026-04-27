@@ -9,10 +9,8 @@ import dev.wdona.burntout.domain.entity.Entity
 import dev.wdona.burntout.domain.model.TipoAccion
 import dev.wdona.burntout.shared.domain.Tarea
 import dev.wdona.burntout.shared.utils.SettingsManager
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class TareaRepositoryImpl(
@@ -21,41 +19,38 @@ class TareaRepositoryImpl(
     private val pendiente: OperacionPendienteLocalDataSource
 ) : TareaRepository {
 
-    private val repositoryScope = CoroutineScope(Dispatchers.Default)
-
     override suspend fun getTareasByTableroId(tableroId: Long): List<Tarea> = withContext(NonCancellable + Dispatchers.IO) {
         if (!SettingsManager.isUsuarioInvitado()) {
-            repositoryScope.launch {
-                try {
-                    val serverTareas = remote.getTareasByTablero(tableroId)
-                    val serverIds = serverTareas.map { it.idTarea }.toSet()
-                    val localTareas = local.getTareasByTablero(tableroId)
-                    localTareas
-                        .filter { it.idTarea > 0 && it.idTarea !in serverIds }
-                        .forEach { local.eliminarTarea(it.idTarea) }
-                    serverTareas.forEach { local.insertOrUpdateTarea(it) }
-                } catch (e: Exception) {
-                    println("Servidor offline (getTareas): ${e.message}")
-                }
+            try {
+                val serverTareas = remote.getTareasByTablero(tableroId)
+
+                // Sincronizacion aditiva: no borramos en lectura para no vaciar cache local por desajustes de IDs.
+                serverTareas.forEach { local.insertOrUpdateTarea(it) }
+            } catch (e: Exception) {
+                println("Servidor offline (getTareas): ${e.message}")
             }
         }
         local.getTareasByTablero(tableroId)
     }
 
     override suspend fun getTareaById(idTarea: Long, idTablero: Long): Tarea? = withContext(NonCancellable + Dispatchers.IO) {
-        if (!SettingsManager.isUsuarioInvitado()) {
-            repositoryScope.launch {
-                try {
-                    val tarea = remote.getTareaById(idTarea, idTablero)
-                    if (tarea != null) {
-                        local.insertOrUpdateTarea(tarea)
-                    }
-                } catch (e: Exception) {
-                    println("Servidor offline (getTareaById): ${e.message}")
-                }
-            }
+        val tareaLocal = local.getTareaById(idTarea, idTablero)
+
+        if (SettingsManager.isUsuarioInvitado()) {
+            return@withContext tareaLocal
         }
-        local.getTareaById(idTarea, idTablero)
+
+        try {
+            val tareaRemota = remote.getTareaById(idTarea, idTablero)
+            if (tareaRemota != null) {
+                local.insertOrUpdateTarea(tareaRemota)
+            }
+            tareaRemota ?: tareaLocal
+        } catch (e: Exception) {
+            // Si el servidor responde 404 pero tenemos cache local, seguimos con ella.
+            println("Servidor offline (getTareaById): ${e.message}")
+            tareaLocal
+        }
     }
 
     override suspend fun crearTarea(tarea: Tarea) {

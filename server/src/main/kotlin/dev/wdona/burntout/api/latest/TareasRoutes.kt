@@ -20,9 +20,9 @@ fun Route.tareasRoutes() {
             println("[${call.request.origin.remoteHost}] GET /tareas idTablero=$idTablero")
             val resultado = dbQuery {
                 val query = if (idTablero != null) {
-                    TareasTable .selectAll().where { TareasTable.idTablero eq idTablero }
+                    TareasTable .selectAll().where { (TareasTable.idTablero eq idTablero) and (TareasTable.isDeleted eq false) }
                 } else {
-                    TareasTable.selectAll()
+                    TareasTable.selectAll().where { TareasTable.isDeleted eq false }
                 }
                 query.map { row ->
                     val tId = row[TareasTable.id]
@@ -34,7 +34,8 @@ fun Route.tareasRoutes() {
                         estado = row[TareasTable.estado],
                         idTableroPerteneciente = row[TareasTable.idTablero],
                         idUsuarioAsignado = row[TareasTable.idUsuarioAsignado],
-                        idSubtareas = subtareas.ifEmpty { null }
+                        idSubtareas = subtareas.ifEmpty { null },
+                        isDeleted = row[TareasTable.isDeleted]
                     )
                 }
             }
@@ -50,6 +51,7 @@ fun Route.tareasRoutes() {
                     it[estado] = tarea.estado
                     it[idTablero] = tarea.idTableroPerteneciente
                     it[idUsuarioAsignado] = tarea.idUsuarioAsignado
+                    it[isDeleted] = tarea.isDeleted
                 }[TareasTable.id]
             }
             call.respond(HttpStatusCode.Created, tarea.copy(idTarea = nuevoId))
@@ -60,7 +62,7 @@ fun Route.tareasRoutes() {
                     ?: return@get call.respond(HttpStatusCode.BadRequest)
                 println("[${call.request.origin.remoteHost}] GET /tareas/$id")
                 val tarea = dbQuery {
-                    val row = TareasTable .selectAll().where { TareasTable.id eq id }.singleOrNull()
+                    val row = TareasTable .selectAll().where { (TareasTable.id eq id) and (TareasTable.isDeleted eq false) }.singleOrNull()
                     if (row != null) {
                         val subtareas = SubtareasTable .selectAll().where { SubtareasTable.idTarea eq id }.map { it[SubtareasTable.id] }
                         Tarea(
@@ -70,7 +72,8 @@ fun Route.tareasRoutes() {
                             estado = row[TareasTable.estado],
                             idTableroPerteneciente = row[TareasTable.idTablero],
                             idUsuarioAsignado = row[TareasTable.idUsuarioAsignado],
-                            idSubtareas = subtareas.ifEmpty { null }
+                            idSubtareas = subtareas.ifEmpty { null },
+                            isDeleted = row[TareasTable.isDeleted]
                         )
                     } else null
                 } ?: return@get call.respond(HttpStatusCode.NotFound)
@@ -88,6 +91,7 @@ fun Route.tareasRoutes() {
                         it[estado] = tarea.estado
                         it[idTablero] = tarea.idTableroPerteneciente
                         it[idUsuarioAsignado] = tarea.idUsuarioAsignado
+                        it[isDeleted] = tarea.isDeleted
                     }
                 }
                 if (updatedCount == 0) return@put call.respond(HttpStatusCode.NotFound)
@@ -98,7 +102,9 @@ fun Route.tareasRoutes() {
                     ?: return@delete call.respond(HttpStatusCode.BadRequest)
                 println("[${call.request.origin.remoteHost}] DELETE /tareas/$id")
                 val deletedCount = dbQuery {
-                    TareasTable.deleteWhere { TareasTable.id eq id }
+                    TareasTable.update({ (TareasTable.id eq id) and (TareasTable.isDeleted eq false) }) {
+                        it[isDeleted] = true
+                    }
                 }
                 if (deletedCount == 0) return@delete call.respond(HttpStatusCode.NotFound)
                 call.respond(HttpStatusCode.NoContent)
@@ -109,11 +115,11 @@ fun Route.tareasRoutes() {
                 val request = call.receive<EstadoRequest>()
                 println("[${call.request.origin.remoteHost}] PATCH /tareas/$id/estado estado=${request.estado}")
                 val updatedTarea = dbQuery {
-                    val count = TareasTable.update({ TareasTable.id eq id }) {
+                    val count = TareasTable.update({ (TareasTable.id eq id) and (TareasTable.isDeleted eq false) }) {
                         it[estado] = request.estado
                     }
                     if (count > 0) {
-                        val row = TareasTable .selectAll().where { TareasTable.id eq id }.single()
+                        val row = TareasTable .selectAll().where { (TareasTable.id eq id) and (TareasTable.isDeleted eq false) }.single()
                         val subtareas = SubtareasTable .selectAll().where { SubtareasTable.idTarea eq id }.map { it[SubtareasTable.id] }
                         Tarea(
                             idTarea = row[TareasTable.id],
@@ -122,7 +128,8 @@ fun Route.tareasRoutes() {
                             estado = row[TareasTable.estado],
                             idTableroPerteneciente = row[TareasTable.idTablero],
                             idUsuarioAsignado = row[TareasTable.idUsuarioAsignado],
-                            idSubtareas = subtareas.ifEmpty { null }
+                            idSubtareas = subtareas.ifEmpty { null },
+                            isDeleted = row[TareasTable.isDeleted]
                         )
                     } else null
                 } ?: return@patch call.respond(HttpStatusCode.NotFound)

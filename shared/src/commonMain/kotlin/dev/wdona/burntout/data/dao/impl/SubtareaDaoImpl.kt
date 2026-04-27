@@ -34,7 +34,8 @@ class SubtareaDaoImpl(appDatabase: AppDatabase) : SubtareaDao {
                 ID_Subtarea = subtarea.idSubtarea,
                 Titulo = subtarea.titulo,
                 Completado = if (subtarea.completado) 1L else 0L,
-                FK_ID_Tarea = subtarea.idTareaPerteneciente
+                FK_ID_Tarea = subtarea.idTareaPerteneciente,
+                Is_Deleted = if (subtarea.isDeleted) 1L else 0L
             )
             true
         } catch (e: Exception) {

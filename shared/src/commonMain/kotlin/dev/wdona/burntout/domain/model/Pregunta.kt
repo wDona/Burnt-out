@@ -7,5 +7,6 @@ data class Pregunta(
     val idPregunta: Long,
     val pregunta: String,
     val idOrganizacion: Long,
-    val categoria: String = "CE" // Default para compatibilidad
+    val categoria: String = "CE", // Default para compatibilidad
+    val isDeleted: Boolean = false
 )

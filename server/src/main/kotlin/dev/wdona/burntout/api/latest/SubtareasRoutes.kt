@@ -19,9 +19,9 @@ fun Route.subtareasRoutes() {
             println("[${call.request.origin.remoteHost}] GET /subtareas idTarea=$idTarea")
             val resultado = dbQuery {
                 val query = if (idTarea != null) {
-                    SubtareasTable .selectAll().where { SubtareasTable.idTarea eq idTarea }
+                    SubtareasTable .selectAll().where { (SubtareasTable.idTarea eq idTarea) and (SubtareasTable.isDeleted eq false) }
                 } else {
-                    SubtareasTable.selectAll()
+                    SubtareasTable.selectAll().where { SubtareasTable.isDeleted eq false }
                 }
                 query.map {
                     Subtarea(
@@ -29,7 +29,8 @@ fun Route.subtareasRoutes() {
                         titulo = it[SubtareasTable.titulo],
                         descripcion = it[SubtareasTable.descripcion],
                         completado = it[SubtareasTable.completado],
-                        idTareaPerteneciente = it[SubtareasTable.idTarea]
+                        idTareaPerteneciente = it[SubtareasTable.idTarea],
+                        isDeleted = it[SubtareasTable.isDeleted]
                     )
                 }
             }
@@ -44,6 +45,7 @@ fun Route.subtareasRoutes() {
                     it[descripcion] = subtarea.descripcion
                     it[completado] = subtarea.completado
                     it[idTarea] = subtarea.idTareaPerteneciente
+                    it[isDeleted] = subtarea.isDeleted
                 }[SubtareasTable.id]
             }
             call.respond(HttpStatusCode.Created, subtarea.copy(idSubtarea = nuevoId))
@@ -54,13 +56,14 @@ fun Route.subtareasRoutes() {
                     ?: return@get call.respond(HttpStatusCode.BadRequest)
                 println("[${call.request.origin.remoteHost}] GET /subtareas/$id")
                 val subtarea = dbQuery {
-                    SubtareasTable .selectAll().where { SubtareasTable.id eq id }.map {
+                    SubtareasTable .selectAll().where { (SubtareasTable.id eq id) and (SubtareasTable.isDeleted eq false) }.map {
                         Subtarea(
                             idSubtarea = it[SubtareasTable.id],
                             titulo = it[SubtareasTable.titulo],
                             descripcion = it[SubtareasTable.descripcion],
                             completado = it[SubtareasTable.completado],
-                            idTareaPerteneciente = it[SubtareasTable.idTarea]
+                            idTareaPerteneciente = it[SubtareasTable.idTarea],
+                            isDeleted = it[SubtareasTable.isDeleted]
                         )
                     }.singleOrNull()
                 } ?: return@get call.respond(HttpStatusCode.NotFound)
@@ -72,20 +75,21 @@ fun Route.subtareasRoutes() {
                 val request = call.receive<CompletadoRequest>()
                 println("[${call.request.origin.remoteHost}] PATCH /subtareas/$id completado=${request.completado}")
                 val isSuccess = dbQuery {
-                    val count = SubtareasTable.update({ SubtareasTable.id eq id }) {
+                    val count = SubtareasTable.update({ (SubtareasTable.id eq id) and (SubtareasTable.isDeleted eq false) }) {
                         it[completado] = request.completado
                     }
                     count > 0
                 }
                 if (!isSuccess) return@patch call.respond(HttpStatusCode.NotFound)
                 val updatedSubtarea = dbQuery {
-                    SubtareasTable .selectAll().where { SubtareasTable.id eq id }.map {
+                    SubtareasTable .selectAll().where { (SubtareasTable.id eq id) and (SubtareasTable.isDeleted eq false) }.map {
                         Subtarea(
                             idSubtarea = it[SubtareasTable.id],
                             titulo = it[SubtareasTable.titulo],
                             descripcion = it[SubtareasTable.descripcion],
                             completado = it[SubtareasTable.completado],
-                            idTareaPerteneciente = it[SubtareasTable.idTarea]
+                            idTareaPerteneciente = it[SubtareasTable.idTarea],
+                            isDeleted = it[SubtareasTable.isDeleted]
                         )
                     }.single()
                 }
@@ -96,7 +100,9 @@ fun Route.subtareasRoutes() {
                     ?: return@delete call.respond(HttpStatusCode.BadRequest)
                 println("[${call.request.origin.remoteHost}] DELETE /subtareas/$id")
                 val deletedCount = dbQuery {
-                    SubtareasTable.deleteWhere { SubtareasTable.id eq id }
+                    SubtareasTable.update({ (SubtareasTable.id eq id) and (SubtareasTable.isDeleted eq false) }) {
+                        it[isDeleted] = true
+                    }
                 }
                 if (deletedCount == 0) return@delete call.respond(HttpStatusCode.NotFound)
                 call.respond(HttpStatusCode.NoContent)

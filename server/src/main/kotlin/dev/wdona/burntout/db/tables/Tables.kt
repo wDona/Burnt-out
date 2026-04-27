@@ -3,6 +3,7 @@ import org.jetbrains.exposed.sql.Table
 object OrganizacionesTable : Table() {
     val id = long("id_organizacion").autoIncrement()
     val nombre = varchar("nombre", 255)
+    val isDeleted = bool("is_deleted").default(false)
     override val primaryKey = PrimaryKey(id)
 }
 object EquiposTable : Table() {
@@ -10,6 +11,7 @@ object EquiposTable : Table() {
     val titulo = varchar("titulo", 255)
     val puntuacion = long("puntuacion").nullable()
     val idOrganizacion = long("id_organizacion") .references(OrganizacionesTable.id)
+    val isDeleted = bool("is_deleted").default(false)
     override val primaryKey = PrimaryKey(id)
 }
 object EquipoMiembrosTable : Table() {
@@ -27,6 +29,7 @@ object UsuariosTable : Table() {
     val idOrganizacion = long("id_organizacion")
     val idEquipo = long("id_equipo")
     val rol = varchar("rol", 20).default("MEMBER")
+    val isDeleted = bool("is_deleted").default(false)
     override val primaryKey = PrimaryKey(id)
 }
 object AjustesTable : Table() {
@@ -34,6 +37,7 @@ object AjustesTable : Table() {
     val idUsuario = long("id_usuario") .references(UsuariosTable.id)
     val nombre = varchar("nombre", 255)
     val valorAjuste = varchar("valor_ajuste", 255)
+    val isDeleted = bool("is_deleted").default(false)
     override val primaryKey = PrimaryKey(id)
 }
 object TablerosTable : Table() {
@@ -41,6 +45,7 @@ object TablerosTable : Table() {
     val titulo = varchar("titulo", 255)
     val idOrganizacion = long("id_organizacion")
     val idEquipo = long("id_equipo").nullable()
+    val isDeleted = bool("is_deleted").default(false)
     override val primaryKey = PrimaryKey(id)
 }
 object TareasTable : Table() {
@@ -50,6 +55,7 @@ object TareasTable : Table() {
     val estado = varchar("estado", 50)
     val idTablero = long("id_tablero_perteneciente")
     val idUsuarioAsignado = long("id_usuario_asignado")
+    val isDeleted = bool("is_deleted").default(false)
     override val primaryKey = PrimaryKey(id)
 }
 object SubtareasTable : Table() {
@@ -58,6 +64,7 @@ object SubtareasTable : Table() {
     val descripcion = text("descripcion").nullable()
     val completado = bool("completado")
     val idTarea = long("id_tarea_perteneciente")
+    val isDeleted = bool("is_deleted").default(false)
     override val primaryKey = PrimaryKey(id)
 }
 object InvitacionesTable : Table() {
@@ -76,6 +83,7 @@ object PreguntasTable : Table() {
     val pregunta = text("pregunta")
     val idOrganizacion = long("id_organizacion")
     val categoria = varchar("categoria", 50)
+    val isDeleted = bool("is_deleted").default(false)
     override val primaryKey = PrimaryKey(id)
 }
 object RespuestasTable : Table() {

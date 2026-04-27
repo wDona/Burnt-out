@@ -15,7 +15,8 @@ object UsuarioMapper {
             riesgoBurnout = entity.Riesgo_Burnout,
             descripcion = entity.Descripcion,
             idOrganizacion = entity.FK_ID_Organizacion,
-            idEquipo = entity.FK_ID_Equipo
+            idEquipo = entity.FK_ID_Equipo,
+            isDeleted = entity.Is_Deleted != 0L
         )
     }
 
@@ -28,7 +29,8 @@ object UsuarioMapper {
             Riesgo_Burnout = domain.riesgoBurnout,
             Descripcion = domain.descripcion,
             FK_ID_Organizacion = domain.idOrganizacion,
-            FK_ID_Equipo = domain.idEquipo
+            FK_ID_Equipo = domain.idEquipo,
+            Is_Deleted = if (domain.isDeleted) 1L else 0L
         )
     }
 

@@ -18,16 +18,17 @@ fun Route.preguntasRespuestasRoutes() {
             println("[${call.request.origin.remoteHost}] GET /preguntas idOrg=$idOrg")
             val resultado = dbQuery {
                 val query = if (idOrg != null) {
-                    PreguntasTable .selectAll().where { PreguntasTable.idOrganizacion eq idOrg }
+                    PreguntasTable .selectAll().where { (PreguntasTable.idOrganizacion eq idOrg) and (PreguntasTable.isDeleted eq false) }
                 } else {
-                    PreguntasTable.selectAll()
+                    PreguntasTable.selectAll().where { PreguntasTable.isDeleted eq false }
                 }
                 query.map {
                     Pregunta(
                         idPregunta = it[PreguntasTable.id],
                         pregunta = it[PreguntasTable.pregunta],
                         idOrganizacion = it[PreguntasTable.idOrganizacion],
-                        categoria = it[PreguntasTable.categoria]
+                        categoria = it[PreguntasTable.categoria],
+                        isDeleted = it[PreguntasTable.isDeleted]
                     )
                 }
             }
@@ -41,6 +42,7 @@ fun Route.preguntasRespuestasRoutes() {
                     it[PreguntasTable.pregunta] = pregunta.pregunta
                     it[idOrganizacion] = pregunta.idOrganizacion
                     it[categoria] = pregunta.categoria
+                    it[isDeleted] = pregunta.isDeleted
                 }[PreguntasTable.id]
             }
             call.respond(HttpStatusCode.Created, pregunta.copy(idPregunta = nuevaId))
@@ -51,12 +53,13 @@ fun Route.preguntasRespuestasRoutes() {
                     ?: return@get call.respond(HttpStatusCode.BadRequest)
                 println("[${call.request.origin.remoteHost}] GET /preguntas/$id")
                 val pregunta = dbQuery {
-                    PreguntasTable .selectAll().where { PreguntasTable.id eq id }.map {
+                    PreguntasTable .selectAll().where { (PreguntasTable.id eq id) and (PreguntasTable.isDeleted eq false) }.map {
                         Pregunta(
                             idPregunta = it[PreguntasTable.id],
                             pregunta = it[PreguntasTable.pregunta],
                             idOrganizacion = it[PreguntasTable.idOrganizacion],
-                            categoria = it[PreguntasTable.categoria]
+                            categoria = it[PreguntasTable.categoria],
+                            isDeleted = it[PreguntasTable.isDeleted]
                         )
                     }.singleOrNull()
                 } ?: return@get call.respond(HttpStatusCode.NotFound)
@@ -72,6 +75,7 @@ fun Route.preguntasRespuestasRoutes() {
                         it[PreguntasTable.pregunta] = pregunta.pregunta
                         it[idOrganizacion] = pregunta.idOrganizacion
                         it[categoria] = pregunta.categoria
+                        it[isDeleted] = pregunta.isDeleted
                     }
                 }
                 if (updatedCount == 0) return@put call.respond(HttpStatusCode.NotFound)
@@ -82,7 +86,9 @@ fun Route.preguntasRespuestasRoutes() {
                     ?: return@delete call.respond(HttpStatusCode.BadRequest)
                 println("[${call.request.origin.remoteHost}] DELETE /preguntas/$id")
                 val deletedCount = dbQuery {
-                    PreguntasTable.deleteWhere { PreguntasTable.id eq id }
+                    PreguntasTable.update({ (PreguntasTable.id eq id) and (PreguntasTable.isDeleted eq false) }) {
+                        it[isDeleted] = true
+                    }
                 }
                 if (deletedCount == 0) return@delete call.respond(HttpStatusCode.NotFound)
                 call.respond(HttpStatusCode.NoContent)

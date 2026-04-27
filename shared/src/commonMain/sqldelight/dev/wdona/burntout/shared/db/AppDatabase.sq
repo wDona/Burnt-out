@@ -1,6 +1,7 @@
 CREATE TABLE OrganizacionEntity (
     ID_Org INTEGER NOT NULL PRIMARY KEY,
-    Org_Name TEXT NOT NULL
+    Org_Name TEXT NOT NULL,
+    Is_Deleted INTEGER NOT NULL DEFAULT 0
 );
 
 CREATE TABLE UsuarioEntity (
@@ -12,12 +13,14 @@ CREATE TABLE UsuarioEntity (
     Descripcion TEXT,
     FK_ID_Organizacion INTEGER NOT NULL,
     FK_ID_Equipo INTEGER NOT NULL DEFAULT 0,
+    Is_Deleted INTEGER NOT NULL DEFAULT 0,
     FOREIGN KEY(FK_ID_Organizacion) REFERENCES OrganizacionEntity(ID_Org)
 );
 
 CREATE TABLE AjusteEntity (
     ID_Ajuste INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-    Nombre_Ajuste TEXT NOT NULL
+    Nombre_Ajuste TEXT NOT NULL,
+    Is_Deleted INTEGER NOT NULL DEFAULT 0
 );
 
 CREATE TABLE TableroEntity (
@@ -25,6 +28,7 @@ CREATE TABLE TableroEntity (
     Titulo TEXT NOT NULL,
     FK_ID_Org INTEGER NOT NULL,
     FK_ID_Equipo INTEGER,
+    Is_Deleted INTEGER NOT NULL DEFAULT 0,
     FOREIGN KEY(FK_ID_Org) REFERENCES OrganizacionEntity(ID_Org)
 );
 
@@ -33,6 +37,7 @@ CREATE TABLE EquipoEntity (
     Titulo TEXT NOT NULL,
     Puntuacion INTEGER DEFAULT 0,
     FK_ID_Org INTEGER NOT NULL,
+    Is_Deleted INTEGER NOT NULL DEFAULT 0,
     FOREIGN KEY(FK_ID_Org) REFERENCES OrganizacionEntity(ID_Org)
 );
 
@@ -41,6 +46,7 @@ CREATE TABLE PreguntaEntity (
     Pregunta TEXT NOT NULL,
     Categoria TEXT NOT NULL DEFAULT 'CE',
     FK_ID_Org INTEGER NOT NULL,
+    Is_Deleted INTEGER NOT NULL DEFAULT 0,
     FOREIGN KEY(FK_ID_Org) REFERENCES OrganizacionEntity(ID_Org)
 );
 
@@ -51,6 +57,7 @@ CREATE TABLE TareaEntity (
     Estado TEXT NOT NULL,
     FK_ID_Tabl INTEGER NOT NULL,
     FK_ID_Usuario INTEGER NOT NULL,
+    Is_Deleted INTEGER NOT NULL DEFAULT 0,
     FOREIGN KEY(FK_ID_Tabl) REFERENCES TableroEntity(ID_Tabl),
     FOREIGN KEY(FK_ID_Usuario) REFERENCES UsuarioEntity(ID_Usuario)
 );
@@ -60,6 +67,7 @@ CREATE TABLE SubtareaEntity (
     Titulo TEXT NOT NULL,
     Completado INTEGER NOT NULL,
     FK_ID_Tarea INTEGER NOT NULL,
+    Is_Deleted INTEGER NOT NULL DEFAULT 0,
     FOREIGN KEY(FK_ID_Tarea) REFERENCES TareaEntity(ID_Tarea)
 );
 
@@ -159,14 +167,14 @@ VALUES(?, ?, ?, ?, ?);
 
 -- Usar esta para sincronizar (ID específico)
 upsertTarea:
-INSERT OR REPLACE INTO TareaEntity(ID_Tarea, Titulo, Descripcion, Estado, FK_ID_Tabl, FK_ID_Usuario)
-VALUES(?, ?, ?, ?, ?, ?);
+INSERT OR REPLACE INTO TareaEntity(ID_Tarea, Titulo, Descripcion, Estado, FK_ID_Tabl, FK_ID_Usuario, Is_Deleted)
+VALUES(?, ?, ?, ?, ?, ?, ?);
 
 getTareaById:
-SELECT * FROM TareaEntity WHERE ID_Tarea = ?;
+SELECT * FROM TareaEntity WHERE ID_Tarea = ? AND Is_Deleted = 0;
 
 getTareasByTablero:
-SELECT * FROM TareaEntity WHERE FK_ID_Tabl = ?;
+SELECT * FROM TareaEntity WHERE FK_ID_Tabl = ? AND Is_Deleted = 0;
 
 updateTareaById:
 UPDATE TareaEntity SET Titulo = ?, Descripcion = ?, Estado = ? WHERE ID_Tarea = ?;
@@ -175,10 +183,10 @@ assignTareaToUsuario:
 UPDATE TareaEntity SET FK_ID_Usuario = ? WHERE ID_Tarea = ?;
 
 deleteTareaById:
-DELETE FROM TareaEntity WHERE ID_Tarea = ?;
+UPDATE TareaEntity SET Is_Deleted = 1 WHERE ID_Tarea = ?;
 
 deleteTareasByTablero:
-DELETE FROM TareaEntity WHERE FK_ID_Tabl = ?;
+UPDATE TareaEntity SET Is_Deleted = 1 WHERE FK_ID_Tabl = ?;
 
 -- ===== Operaciones Pendientes =====
 insertOperacionPendiente:
@@ -204,23 +212,23 @@ INSERT INTO TableroEntity(Titulo, FK_ID_Equipo, FK_ID_Org)
 VALUES(?, ?, ?);
 
 upsertTablero:
-INSERT OR REPLACE INTO TableroEntity(ID_Tabl, Titulo, FK_ID_Equipo, FK_ID_Org)
-VALUES(?, ?, ?, ?);
+INSERT OR REPLACE INTO TableroEntity(ID_Tabl, Titulo, FK_ID_Equipo, FK_ID_Org, Is_Deleted)
+VALUES(?, ?, ?, ?, ?);
 
 getTableroById:
-SELECT * FROM TableroEntity WHERE ID_Tabl = ?;
+SELECT * FROM TableroEntity WHERE ID_Tabl = ? AND Is_Deleted = 0;
 
 getTablerosByOrg:
-SELECT * FROM TableroEntity WHERE FK_ID_Org = ?;
+SELECT * FROM TableroEntity WHERE FK_ID_Org = ? AND Is_Deleted = 0;
 
 updateTablero:
 UPDATE TableroEntity SET Titulo = ?, FK_ID_Equipo = ? WHERE ID_Tabl = ?;
 
 deleteTablero:
-DELETE FROM TableroEntity WHERE ID_Tabl = ?;
+UPDATE TableroEntity SET Is_Deleted = 1 WHERE ID_Tabl = ?;
 
 deleteTablerosByOrg:
-DELETE FROM TableroEntity WHERE FK_ID_Org = ?;
+UPDATE TableroEntity SET Is_Deleted = 1 WHERE FK_ID_Org = ?;
 
 -- ===== Equipos =====
 insertEquipo:
@@ -228,29 +236,29 @@ INSERT INTO EquipoEntity(Titulo, FK_ID_Org)
 VALUES(?, ?);
 
 upsertEquipo:
-INSERT OR REPLACE INTO EquipoEntity(ID_Equipo, Titulo, Puntuacion, FK_ID_Org)
-VALUES(?, ?, ?, ?);
+INSERT OR REPLACE INTO EquipoEntity(ID_Equipo, Titulo, Puntuacion, FK_ID_Org, Is_Deleted)
+VALUES(?, ?, ?, ?, ?);
 
 getEquipoById:
-SELECT * FROM EquipoEntity WHERE ID_Equipo = ?;
+SELECT * FROM EquipoEntity WHERE ID_Equipo = ? AND Is_Deleted = 0;
 
 getEquiposByOrg:
-SELECT * FROM EquipoEntity WHERE FK_ID_Org = ?;
+SELECT * FROM EquipoEntity WHERE FK_ID_Org = ? AND Is_Deleted = 0;
 
 updateEquipo:
 UPDATE EquipoEntity SET Titulo = ? WHERE ID_Equipo = ?;
 
 deleteEquipo:
-DELETE FROM EquipoEntity WHERE ID_Equipo = ?;
+UPDATE EquipoEntity SET Is_Deleted = 1 WHERE ID_Equipo = ?;
 
 deleteEquiposByOrg:
-DELETE FROM EquipoEntity WHERE FK_ID_Org = ?;
+UPDATE EquipoEntity SET Is_Deleted = 1 WHERE FK_ID_Org = ?;
 
 updatePuntuacionEquipo:
 UPDATE EquipoEntity SET Puntuacion = Puntuacion + ? WHERE ID_Equipo = ?;
 
 getLeaderboard:
-SELECT * FROM EquipoEntity ORDER BY Puntuacion DESC;
+SELECT * FROM EquipoEntity WHERE Is_Deleted = 0 ORDER BY Puntuacion DESC;
 
 -- ==== Usuarios ====
 insertUsuario:
@@ -258,22 +266,22 @@ INSERT INTO UsuarioEntity(Username, Contrasena, Nombre, Riesgo_Burnout, Descripc
 VALUES(?, ?, ?, ?, ?, ?, ?);
 
 upsertUsuario:
-INSERT OR REPLACE INTO UsuarioEntity(ID_Usuario, Username, Contrasena, Nombre, Riesgo_Burnout, Descripcion, FK_ID_Organizacion, FK_ID_Equipo)
-VALUES(?, ?, ?, ?, ?, ?, ?, ?);
+INSERT OR REPLACE INTO UsuarioEntity(ID_Usuario, Username, Contrasena, Nombre, Riesgo_Burnout, Descripcion, FK_ID_Organizacion, FK_ID_Equipo, Is_Deleted)
+VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 getUserById:
-SELECT * FROM UsuarioEntity WHERE ID_Usuario = ?;
+SELECT * FROM UsuarioEntity WHERE ID_Usuario = ? AND Is_Deleted = 0;
 
 getUsuariosByOrg:
-SELECT * FROM UsuarioEntity WHERE FK_ID_Organizacion = ?;
+SELECT * FROM UsuarioEntity WHERE FK_ID_Organizacion = ? AND Is_Deleted = 0;
 
 getUsuarioByUsername:
-SELECT * FROM UsuarioEntity WHERE Username = ?;
+SELECT * FROM UsuarioEntity WHERE Username = ? AND Is_Deleted = 0;
 
 getUsuariosByEquipo:
 SELECT u.*
 FROM UsuarioEntity u JOIN User_TeamEntity ut ON u.ID_Usuario = ut.ID_Usuario
-WHERE ut.ID_Equipo = ?;
+WHERE ut.ID_Equipo = ? AND u.Is_Deleted = 0;
 
 updateUsuario:
 UPDATE UsuarioEntity SET Username = ?, Contrasena = ?, Nombre = ?, Riesgo_Burnout = ?, Descripcion = ?, FK_ID_Equipo = ? WHERE ID_Usuario = ?;
@@ -282,48 +290,48 @@ updateUsuarioTeamId:
 UPDATE UsuarioEntity SET FK_ID_Equipo = ? WHERE ID_Usuario = ?;
 
 deleteUsuario:
-DELETE FROM UsuarioEntity WHERE ID_Usuario = ?;
+UPDATE UsuarioEntity SET Is_Deleted = 1 WHERE ID_Usuario = ?;
 
 deleteUsuariosByOrg:
-DELETE FROM UsuarioEntity WHERE FK_ID_Organizacion = ?;
+UPDATE UsuarioEntity SET Is_Deleted = 1 WHERE FK_ID_Organizacion = ?;
 
 updateRiesgoBurnout:
 UPDATE UsuarioEntity SET Riesgo_Burnout = ? WHERE ID_Usuario = ?;
 
 getUsuariosConRiesgoAlto:
-SELECT * FROM UsuarioEntity WHERE Riesgo_Burnout > ?;
+SELECT * FROM UsuarioEntity WHERE Riesgo_Burnout > ? AND Is_Deleted = 0;
 
 -- ====== SUBTAREAS ======
 insertSubtarea:
 INSERT INTO SubtareaEntity(Titulo, Completado, FK_ID_Tarea) VALUES(?, ?, ?);
 
 upsertSubtarea:
-INSERT OR REPLACE INTO SubtareaEntity(ID_Subtarea, Titulo, Completado, FK_ID_Tarea) VALUES(?, ?, ?, ?);
+INSERT OR REPLACE INTO SubtareaEntity(ID_Subtarea, Titulo, Completado, FK_ID_Tarea, Is_Deleted) VALUES(?, ?, ?, ?, ?);
 
 getSubtareasByTarea:
-SELECT * FROM SubtareaEntity WHERE FK_ID_Tarea = ?;
+SELECT * FROM SubtareaEntity WHERE FK_ID_Tarea = ? AND Is_Deleted = 0;
 
 updateSubtarea:
 UPDATE SubtareaEntity SET Titulo = ?, Completado = ? WHERE ID_Subtarea = ?;
 
 deleteSubtarea:
-DELETE FROM SubtareaEntity WHERE ID_Subtarea = ?;
+UPDATE SubtareaEntity SET Is_Deleted = 1 WHERE ID_Subtarea = ?;
 
 -- ====== PREGUNTAS / ENCUESTAS ======
 insertPregunta:
 INSERT INTO PreguntaEntity(Pregunta, Categoria, FK_ID_Org) VALUES(?, ?, ?);
 
 upsertPregunta:
-INSERT OR REPLACE INTO PreguntaEntity(ID_Pregunta, Pregunta, Categoria, FK_ID_Org) VALUES(?, ?, ?, ?);
+INSERT OR REPLACE INTO PreguntaEntity(ID_Pregunta, Pregunta, Categoria, FK_ID_Org, Is_Deleted) VALUES(?, ?, ?, ?, ?);
 
 getPreguntasByOrg:
-SELECT * FROM PreguntaEntity WHERE FK_ID_Org = ?;
+SELECT * FROM PreguntaEntity WHERE FK_ID_Org = ? AND Is_Deleted = 0;
 
 updatePregunta:
 UPDATE PreguntaEntity SET Pregunta = ?, Categoria = ? WHERE ID_Pregunta = ?;
 
 deletePregunta:
-DELETE FROM PreguntaEntity WHERE ID_Pregunta = ?;
+UPDATE PreguntaEntity SET Is_Deleted = 1 WHERE ID_Pregunta = ?;
 
 -- ====== RESPUESTAS ======
 insertRespuesta:
@@ -388,34 +396,36 @@ deleteUserFromAllTeams:
 DELETE FROM User_TeamEntity WHERE ID_Usuario = ?;
 
 deleteEmptyTeams:
-DELETE FROM EquipoEntity WHERE ID_Equipo NOT IN (SELECT DISTINCT ID_Equipo FROM User_TeamEntity);
+UPDATE EquipoEntity SET Is_Deleted = 1
+WHERE ID_Equipo NOT IN (SELECT DISTINCT ID_Equipo FROM User_TeamEntity)
+AND Is_Deleted = 0;
 
 -- ====== ORGANIZACIONES ======
 getAllOrganizaciones:
-SELECT * FROM OrganizacionEntity;
+SELECT * FROM OrganizacionEntity WHERE Is_Deleted = 0;
 
 upsertOrganizacion:
-INSERT OR REPLACE INTO OrganizacionEntity(ID_Org, Org_Name) VALUES(?, ?);
+INSERT OR REPLACE INTO OrganizacionEntity(ID_Org, Org_Name, Is_Deleted) VALUES(?, ?, ?);
 
 updateOrganizacion:
 UPDATE OrganizacionEntity SET Org_Name = ? WHERE ID_Org = ?;
 
 deleteOrganizacion:
-DELETE FROM OrganizacionEntity WHERE ID_Org = ?;
+UPDATE OrganizacionEntity SET Is_Deleted = 1 WHERE ID_Org = ?;
 
 -- ===== OTROS =====
 getOrganizacionById:
-SELECT * FROM OrganizacionEntity WHERE ID_Org = ?;
+SELECT * FROM OrganizacionEntity WHERE ID_Org = ? AND Is_Deleted = 0;
 
 getAjustesByUsuario:
 SELECT a.ID_Ajuste, a.Nombre_Ajuste, au.Valor_Ajuste
 FROM AjusteEntity a JOIN Ajuste_UserEntity au ON a.ID_Ajuste = au.ID_Ajuste
-WHERE au.ID_Usuario = ?;
+WHERE au.ID_Usuario = ? AND a.Is_Deleted = 0;
 
 getAjusteByIdYUsuario:
 SELECT a.ID_Ajuste, a.Nombre_Ajuste, au.Valor_Ajuste
 FROM AjusteEntity a JOIN Ajuste_UserEntity au ON a.ID_Ajuste = au.ID_Ajuste
-WHERE au.ID_Usuario = ? AND a.ID_Ajuste = ?;
+WHERE au.ID_Usuario = ? AND a.ID_Ajuste = ? AND a.Is_Deleted = 0;
 
 clearDB:
 DELETE FROM SubtareaEntity;

@@ -13,7 +13,8 @@ class PreguntaMapper {
                 idPregunta = entity.ID_Pregunta,
                 pregunta = entity.Pregunta,
                 idOrganizacion = entity.FK_ID_Org,
-                categoria = entity.Categoria
+                categoria = entity.Categoria,
+                isDeleted = entity.Is_Deleted != 0L
             )
         }
 

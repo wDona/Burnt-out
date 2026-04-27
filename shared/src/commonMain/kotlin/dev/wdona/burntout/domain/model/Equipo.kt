@@ -3,4 +3,11 @@ package dev.wdona.burntout.shared.domain
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class Equipo(val idEquipo: Long, val titulo: String, val puntuacion: Long?, val idOrganizacion: Long, val idMiembros: List<Long>) // Puntuacion anadida
+data class Equipo(
+    val idEquipo: Long,
+    val titulo: String,
+    val puntuacion: Long?,
+    val idOrganizacion: Long,
+    val idMiembros: List<Long>,
+    val isDeleted: Boolean = false
+) // Puntuacion anadida

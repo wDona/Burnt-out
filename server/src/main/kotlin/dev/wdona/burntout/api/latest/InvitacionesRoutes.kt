@@ -22,7 +22,7 @@ fun Route.invitacionesRoutes() {
 
             val result = dbQuery {
                 val adminRow = UsuariosTable.selectAll()
-                    .where { UsuariosTable.id eq request.idUsuarioAdmin }
+                    .where { (UsuariosTable.id eq request.idUsuarioAdmin) and (UsuariosTable.isDeleted eq false) }
                     .singleOrNull()
                     ?: return@dbQuery null to "Usuario no encontrado"
 
@@ -32,7 +32,7 @@ fun Route.invitacionesRoutes() {
 
                 val idOrg = adminRow[UsuariosTable.idOrganizacion]
                 val orgNombre = OrganizacionesTable.selectAll()
-                    .where { OrganizacionesTable.id eq idOrg }
+                    .where { (OrganizacionesTable.id eq idOrg) and (OrganizacionesTable.isDeleted eq false) }
                     .single()[OrganizacionesTable.nombre]
 
                 val code = generarCodigo(orgNombre)
@@ -74,7 +74,7 @@ fun Route.invitacionesRoutes() {
 
             val result = dbQuery {
                 val adminRow = UsuariosTable.selectAll()
-                    .where { (UsuariosTable.id eq idAdmin) and (UsuariosTable.idOrganizacion eq idOrg) }
+                    .where { (UsuariosTable.id eq idAdmin) and (UsuariosTable.idOrganizacion eq idOrg) and (UsuariosTable.isDeleted eq false) }
                     .singleOrNull()
                     ?: return@dbQuery null
 

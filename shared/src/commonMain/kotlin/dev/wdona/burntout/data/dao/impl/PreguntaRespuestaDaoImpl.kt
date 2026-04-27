@@ -34,7 +34,8 @@ class PreguntaRespuestaDaoImpl(appDatabase: AppDatabase) : PreguntaRespuestaDao 
             ID_Pregunta = pregunta.idPregunta,
             Pregunta = pregunta.pregunta,
             Categoria = pregunta.categoria,
-            FK_ID_Org = pregunta.idOrganizacion
+            FK_ID_Org = pregunta.idOrganizacion,
+            Is_Deleted = if (pregunta.isDeleted) 1L else 0L
         )
     }
 

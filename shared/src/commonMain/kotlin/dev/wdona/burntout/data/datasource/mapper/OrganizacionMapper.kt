@@ -9,7 +9,8 @@ object OrganizacionMapper {
     fun toDomain(entity: OrganizacionEntity): Organizacion {
         return Organizacion(
             idOrganizacion = entity.ID_Org,
-            nombre = entity.Org_Name
+            nombre = entity.Org_Name,
+            isDeleted = entity.Is_Deleted != 0L
         )
     }
 
