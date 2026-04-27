@@ -35,6 +35,8 @@ import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.unit.dp
@@ -68,6 +70,10 @@ fun LoginContent(
     viewModel: LoginViewModel,
     settingsViewModel: AjustesViewModel
 ) {
+    LaunchedEffect(Unit) {
+        viewModel.clearSuccess()
+    }
+
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     var textStateUsuario by remember { mutableStateOf("") }
@@ -148,8 +154,9 @@ fun LoginContent(
                 )
                 OutlinedTextField(
                     value = textStatePassword,
-                    onValueChange = { textStatePassword = it.trim() }, // FIXME ASTERISCOS
+                    onValueChange = { textStatePassword = it.trim() },
                     label = { Text("Password") },
+                    visualTransformation = PasswordVisualTransformation(),
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
                     keyboardActions = KeyboardActions(onDone = { enviarAccion() }),
                     modifier = Modifier.onKeyEvent {

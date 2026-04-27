@@ -20,17 +20,17 @@ class TableroRepositoryImpl(
     private val pendiente: OperacionPendienteLocalDataSource
 ) : TableroRepository {
 
-    override suspend fun getTablerosByOrg(idOrg: Long): List<Tablero> = withContext(NonCancellable + Dispatchers.IO) {
+    override suspend fun getTablerosByEquipo(idOrg: Long, idEquipo: Long): List<Tablero> = withContext(NonCancellable + Dispatchers.IO) {
         if (!SettingsManager.isUsuarioInvitado()) {
             try {
-                val tableros = remote.getTablerosByOrg(idOrg)
+                val tableros = remote.getTablerosByOrg(idOrg, idEquipo)
                 local.eliminarTablerosPorOrg(idOrg)
                 tableros.forEach { local.insertOrUpdateTablero(it) }
             } catch (e: Exception) {
                 println("Servidor invitado (getTablerosByOrg): ${e.message}")
             }
         }
-        local.getTablerosByOrg(idOrg)
+        local.getTablerosByOrg(idOrg).filter { it.idEquipo == null || it.idEquipo == idEquipo }
     }
 
     override suspend fun getTableroById(idTablero: Long): Tablero? = withContext(NonCancellable + Dispatchers.IO) {

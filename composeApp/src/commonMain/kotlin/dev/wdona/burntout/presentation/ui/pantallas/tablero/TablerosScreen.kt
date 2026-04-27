@@ -39,8 +39,9 @@ class TablerosScreen(
         val tablerosViewModel: TablerosViewModel = rememberScreenModel { tableroFactory.create() }
         val idOrg = SettingsManager.getIdOrganizacionActual()
 
-        LaunchedEffect(idOrg) {
-            tablerosViewModel.cargarTableros(idOrg)
+        val idEquipo = SettingsManager.getIdEquipoActual()
+        LaunchedEffect(idOrg, idEquipo) {
+            tablerosViewModel.cargarTableros(idOrg, idEquipo)
         }
 
         MenuTableros(

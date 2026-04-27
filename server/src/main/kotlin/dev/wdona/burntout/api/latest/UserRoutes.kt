@@ -4,6 +4,7 @@ import dev.wdona.burntout.db.tables.UsuariosTable
 import dev.wdona.burntout.db.tables.EquiposTable
 import dev.wdona.burntout.db.tables.EquipoMiembrosTable
 import dev.wdona.burntout.db.tables.RespuestasTable
+import dev.wdona.burntout.db.tables.PreguntasTable
 import dev.wdona.burntout.shared.domain.Usuario
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.plugins.origin
@@ -85,13 +86,16 @@ fun Route.usuariosRoutes() {
                     it[this.idMiembro] = nuevoUserId
                 }
 
-                val preguntas = RespuestasTable.selectAll().map { it[RespuestasTable.idPregunta] }.toSet()
+                val preguntas = PreguntasTable.selectAll()
+                    .where { PreguntasTable.idOrganizacion eq usuario.idOrganizacion }
+                    .map { it[PreguntasTable.id] }
 
                 preguntas.forEach { preguntaId ->
                     RespuestasTable.insert {
                         it[this.idPregunta] = preguntaId
                         it[this.idUsuario] = nuevoUserId
                         it[this.respuesta] = -1
+                        it[this.anonimo] = false
                     }
                 }
 

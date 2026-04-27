@@ -9,8 +9,8 @@ class TableroRemoteDataSourceImpl(private val tableroApi: TableroApi) : TableroR
         return tableroApi.getTableroById(idTablero)
     }
 
-    override suspend fun getTablerosByOrg(idOrg: Long): List<Tablero> {
-        return tableroApi.getTablerosByOrg(idOrg)
+    override suspend fun getTablerosByOrg(idOrg: Long, idEquipo: Long): List<Tablero> {
+        return tableroApi.getTablerosByOrg(idOrg, idEquipo)
     }
 
     override suspend fun crearTablero(tablero: Tablero): Boolean {

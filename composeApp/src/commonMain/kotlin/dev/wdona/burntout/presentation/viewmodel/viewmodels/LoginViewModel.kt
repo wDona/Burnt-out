@@ -22,6 +22,10 @@ class LoginViewModel(private val usuarioRepository: UsuarioRepository) : ScreenM
     private val _uiState = MutableStateFlow(LoginUiState())
     val uiState = _uiState.asStateFlow()
 
+    fun clearSuccess() {
+        _uiState.update { it.copy(success = false, error = null) }
+    }
+
     fun toggleMode() {
         _uiState.update { it.copy(isLogin = !it.isLogin) }
     }

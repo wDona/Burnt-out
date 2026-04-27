@@ -3,7 +3,10 @@ package dev.wdona.burntout.presentation.ui.pantallas.tarea
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.DropdownMenuItem
@@ -102,7 +105,8 @@ fun TareaDetalleContent(viewModel: TareasViewModel, onVolver: () -> Unit) {
     ) {
         Column(
             modifier = Modifier
-                .padding(horizontal = 16.dp),
+                .padding(horizontal = 16.dp)
+                .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             OutlinedTextField(
@@ -154,7 +158,7 @@ fun TareaDetalleContent(viewModel: TareasViewModel, onVolver: () -> Unit) {
                 label = { Text("Descripcion") },
                 placeholder = { Text("Detalles de la tarea...") },
                 modifier = Modifier
-                    .fillMaxHeight(0.4f)
+                    .heightIn(min = 150.dp)
                     .fillMaxWidth()
                     .padding(vertical = 8.dp),
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
