@@ -1,7 +1,6 @@
 package dev.wdona.burntout.presentation.viewmodel.viewmodelfactories
 
 import dev.wdona.burntout.data.api.impl.TareaApiImpl
-import dev.wdona.burntout.data.dao.TareaRepository
 import dev.wdona.burntout.data.dao.impl.OperacionPendienteDaoImpl
 import dev.wdona.burntout.data.dao.impl.TareaDaoImpl
 import dev.wdona.burntout.data.datasource.local.impl.OperacionPendienteLocalDataSourceImpl
@@ -25,16 +24,6 @@ actual class TareasViewModelFactory {
 
         val repository = TareaRepositoryImpl(localDataSource, remoteDataSource, pendienteDataSource)
 
-        return getInstance(repository)
-    }
-
-    companion object {
-        private var instance: TareasViewModel? = null
-        fun getInstance(repository: TareaRepository): TareasViewModel {
-            if (instance == null) {
-                instance = TareasViewModel(repository)
-            }
-            return instance!!
-        }
+        return TareasViewModel(repository)
     }
 }

@@ -27,9 +27,13 @@ class TareaRepositoryImpl(
         if (!SettingsManager.isUsuarioInvitado()) {
             repositoryScope.launch {
                 try {
-                    val tareas = remote.getTareasByTablero(tableroId)
-                    local.eliminarTareasPorTablero(tableroId)
-                    tareas.forEach { local.insertOrUpdateTarea(it) }
+                    val serverTareas = remote.getTareasByTablero(tableroId)
+                    val serverIds = serverTareas.map { it.idTarea }.toSet()
+                    val localTareas = local.getTareasByTablero(tableroId)
+                    localTareas
+                        .filter { it.idTarea > 0 && it.idTarea !in serverIds }
+                        .forEach { local.eliminarTarea(it.idTarea) }
+                    serverTareas.forEach { local.insertOrUpdateTarea(it) }
                 } catch (e: Exception) {
                     println("Servidor offline (getTareas): ${e.message}")
                 }
