@@ -28,10 +28,19 @@ fun Route.organizacionesRoutes() {
             val organizacion = call.receive<Organizacion>()
             println("[${call.request.origin.remoteHost}] POST /organizaciones nombre=${organizacion.nombre}")
             val nuevaId = dbQuery {
-                OrganizacionesTable.insert {
+                val id = OrganizacionesTable.insert {
                     it[nombre] = organizacion.nombre
                     it[isDeleted] = organizacion.isDeleted
                 }[OrganizacionesTable.id]
+
+                dev.wdona.burntout.db.DatabaseFactory.PREGUNTAS_MBI.forEach { (texto, cat, _) ->
+                    dev.wdona.burntout.db.tables.PreguntasTable.insert {
+                        it[pregunta] = texto
+                        it[idOrganizacion] = id
+                        it[categoria] = cat
+                    }
+                }
+                id
             }
             call.respond(HttpStatusCode.Created, organizacion.copy(idOrganizacion = nuevaId))
         }

@@ -25,4 +25,8 @@ class OrganizacionLocalDataSourceImpl(private val dao: OrganizacionDao) : Organi
 
     override suspend fun eliminarOrganizacion(idOrg: Long): Boolean =
         dao.eliminarOrganizacion(idOrg)
+
+    override suspend fun insertPreguntasMBI(idOrg: Long) {
+        dao.insertPreguntasMBI(idOrg)
+    }
 }

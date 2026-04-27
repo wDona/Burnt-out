@@ -63,6 +63,7 @@ class OrganizacionRepositoryImpl(
         withContext(NonCancellable + Dispatchers.IO) {
             try {
                 local.crearOrganizacion(organizacion)
+                local.insertPreguntasMBI(organizacion.idOrganizacion)
             } catch (e: Exception) {
                 println("Error local al crear organización: ${e.message}")
             }

@@ -38,6 +38,11 @@ class LeaderboardViewModel(private val repository: EquipoRepository) : ScreenMod
         screenModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
             try {
+                val idEquipoActual = SettingsManager.getIdEquipoActual()
+                if (idEquipoActual != 0L) {
+                    repository.removeUsuarioDelEquipo(idUsuario, idEquipoActual)
+                }
+
                 val nuevoEquipo = Equipo(
                     idEquipo = 0L,
                     titulo = nombre,

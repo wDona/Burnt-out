@@ -8,4 +8,5 @@ interface OrganizacionDao {
     suspend fun insertOrUpdateOrganizacion(organizacion: Organizacion): Boolean
     suspend fun actualizarOrganizacion(organizacion: Organizacion): Boolean
     suspend fun eliminarOrganizacion(idOrg: Long): Boolean
+    suspend fun insertPreguntasMBI(idOrg: Long)
 }

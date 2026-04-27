@@ -5,4 +5,5 @@ import dev.wdona.burntout.shared.domain.Organizacion
 
 interface OrganizacionLocalDataSource : OrganizacionDataSource {
     suspend fun insertOrUpdateOrganizacion(organizacion: Organizacion): Boolean
+    suspend fun insertPreguntasMBI(idOrg: Long)
 }

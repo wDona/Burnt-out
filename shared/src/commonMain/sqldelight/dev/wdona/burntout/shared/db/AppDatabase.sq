@@ -333,6 +333,32 @@ UPDATE PreguntaEntity SET Pregunta = ?, Categoria = ? WHERE ID_Pregunta = ?;
 deletePregunta:
 UPDATE PreguntaEntity SET Is_Deleted = 1 WHERE ID_Pregunta = ?;
 
+insertPreguntasMBI:
+INSERT OR IGNORE INTO PreguntaEntity(Pregunta, Categoria, FK_ID_Org)
+VALUES
+('Debido a mi trabajo me siento emocionalmente agotado', 'CE', :idOrg),
+('Al final de la jornada me siento agotado.', 'CE', :idOrg),
+('Me encuentro cansado cuando me levanto por las mañanas y tengo que enfrentarme a otro día de trabajo.', 'CE', :idOrg),
+('Puedo comprender fácilmente cómo se sienten las personas que tengo que atender.', 'RP', :idOrg),
+('Creo que trato a algunas personas con indiferencia, como si fueran objetos impersonales.', 'D', :idOrg),
+('Trabajar con personas todos los días es estresante/tenso para mí.', 'CE', :idOrg),
+('Me enfrento bien a los problemas que me presentan las personas que tengo que atender.', 'RP', :idOrg),
+('Siento que mi trabajo me está desgastando.', 'CE', :idOrg),
+('Siento que mediante mi trabajo estoy influyendo positivamente en la vida de otros.', 'RP', :idOrg),
+('Creo que me comporto de manera más insensible con la gente desde que hago este trabajo.', 'D', :idOrg),
+('Me preocupa que este trabajo me esté endureciendo emocionalmente.', 'D', :idOrg),
+('Me encuentro con mucha vitalidad/energético.', 'RP', :idOrg),
+('Me siento frustrado por mi trabajo.', 'CE', :idOrg),
+('Siento que estoy haciendo un trabajo demasiado duro/trabajando demasiado.', 'CE', :idOrg),
+('Realmente no me importa lo que les ocurre a algunas personas a las que doy servicio.', 'D', :idOrg),
+('Trabajar en contacto directo con personas me produce estrés.', 'CE', :idOrg),
+('Tengo facilidad para crear un clima agradable en mi trabajo.', 'RP', :idOrg),
+('Me siento estimulado después de trabajar junto con personas.', 'RP', :idOrg),
+('He realizado muchas cosas valiosas en este trabajo.', 'RP', :idOrg),
+('Siento que he llegado al límite de mis posibilidades.', 'CE', :idOrg),
+('Siento que sé tratar con calma los conflictos emocionales en el trabajo.', 'RP', :idOrg),
+('Siento que las personas que atiendo me culpan de sus problemas.', 'D', :idOrg);
+
 -- ====== RESPUESTAS ======
 insertRespuesta:
 INSERT OR REPLACE INTO ResponderEntity(ID_Usuario, ID_Pregunta, Anonimo, Respuesta, Fecha)

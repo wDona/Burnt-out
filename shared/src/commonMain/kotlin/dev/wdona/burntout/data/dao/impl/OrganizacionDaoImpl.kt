@@ -63,4 +63,13 @@ class OrganizacionDaoImpl(appDatabase: AppDatabase) : OrganizacionDao {
             false
         }
     }
+
+    override suspend fun insertPreguntasMBI(idOrg: Long) {
+        Logger.d(TAG, "insertPreguntasMBI: $idOrg")
+        try {
+            queries.insertPreguntasMBI(idOrg)
+        } catch (e: Exception) {
+            Logger.d(TAG, "Error insertPreguntasMBI: ${e.message}")
+        }
+    }
 }
