@@ -1,4 +1,5 @@
 package dev.wdona.burntout.api.latest
+import dev.wdona.burntout.db.DatabaseFactory
 import dev.wdona.burntout.db.DatabaseFactory.dbQuery
 import dev.wdona.burntout.db.tables.UsuariosTable
 import dev.wdona.burntout.db.tables.EquiposTable
@@ -165,16 +166,23 @@ fun Route.usuariosRoutes() {
 }
 
 private suspend fun crearUsuarioConOrg(request: RegistroRequest, nombreOrg: String): Usuario = dbQuery {
+    println("[SERVER] Creando organización: $nombreOrg")
     val idOrg = OrganizacionesTable.insert {
         it[OrganizacionesTable.nombre] = nombreOrg
     }[OrganizacionesTable.id]
+    println("[SERVER] Organización creada con ID: $idOrg")
 
+    DatabaseFactory.insertPreguntasMBI(idOrg)
+
+    println("[SERVER] Creando equipo para el usuario: ${request.nombre}")
     val idEquipo = EquiposTable.insert {
         it[EquiposTable.titulo] = "Equipo de ${request.nombre}"
         it[EquiposTable.puntuacion] = 0L
         it[EquiposTable.idOrganizacion] = idOrg
     }[EquiposTable.id]
+    println("[SERVER] Equipo creado con ID: $idEquipo")
 
+    println("[SERVER] Creando usuario ADMIN: ${request.username}")
     val idUsuario = UsuariosTable.insert {
         it[UsuariosTable.username] = request.username
         it[UsuariosTable.password] = request.password
@@ -185,11 +193,28 @@ private suspend fun crearUsuarioConOrg(request: RegistroRequest, nombreOrg: Stri
         it[UsuariosTable.idEquipo] = idEquipo
         it[UsuariosTable.rol] = "ADMIN"
     }[UsuariosTable.id]
+    println("[SERVER] Usuario creado con ID: $idUsuario")
 
     EquipoMiembrosTable.insert {
         it[EquipoMiembrosTable.idEquipo] = idEquipo
         it[EquipoMiembrosTable.idMiembro] = idUsuario
     }
+
+    println("[SERVER] Inicializando respuestas placeholder para el usuario $idUsuario en org $idOrg")
+    val preguntas = PreguntasTable.selectAll()
+        .where { (PreguntasTable.idOrganizacion eq idOrg) and (PreguntasTable.isDeleted eq false) }
+        .map { it[PreguntasTable.id] }
+
+    println("[SERVER] Se encontraron ${preguntas.size} preguntas para inicializar respuestas")
+    preguntas.forEach { preguntaId ->
+        RespuestasTable.insert {
+            it[RespuestasTable.idPregunta] = preguntaId
+            it[RespuestasTable.idUsuario] = idUsuario
+            it[RespuestasTable.respuesta] = -1
+            it[RespuestasTable.anonimo] = false
+        }
+    }
+    println("[SERVER] Respuestas placeholder insertadas")
 
     Usuario(
         idUsuario = idUsuario,

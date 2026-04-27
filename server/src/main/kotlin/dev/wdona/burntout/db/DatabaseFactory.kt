@@ -90,4 +90,18 @@ object DatabaseFactory {
             insertDatosBase()
         }
     }
+
+    fun insertPreguntasMBI(idOrg: Long) {
+        println("Insertando preguntas MBI para organización $idOrg...")
+        var count = 0
+        PREGUNTAS_MBI.forEach { (texto, cat, _) ->
+            PreguntasTable.insert {
+                it[pregunta] = texto
+                it[idOrganizacion] = idOrg
+                it[categoria] = cat
+            }
+            count++
+        }
+        println("Se han insertado $count preguntas para la organización $idOrg.")
+    }
 }

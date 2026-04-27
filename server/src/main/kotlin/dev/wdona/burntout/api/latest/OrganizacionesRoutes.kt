@@ -1,4 +1,5 @@
 package dev.wdona.burntout.api.latest
+import dev.wdona.burntout.db.DatabaseFactory
 import dev.wdona.burntout.db.DatabaseFactory.dbQuery
 import dev.wdona.burntout.db.tables.OrganizacionesTable
 import dev.wdona.burntout.shared.domain.Organizacion
@@ -33,13 +34,7 @@ fun Route.organizacionesRoutes() {
                     it[isDeleted] = organizacion.isDeleted
                 }[OrganizacionesTable.id]
 
-                dev.wdona.burntout.db.DatabaseFactory.PREGUNTAS_MBI.forEach { (texto, cat, _) ->
-                    dev.wdona.burntout.db.tables.PreguntasTable.insert {
-                        it[pregunta] = texto
-                        it[idOrganizacion] = id
-                        it[categoria] = cat
-                    }
-                }
+                DatabaseFactory.insertPreguntasMBI(id)
                 id
             }
             call.respond(HttpStatusCode.Created, organizacion.copy(idOrganizacion = nuevaId))

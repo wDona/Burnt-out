@@ -32,6 +32,7 @@ fun Route.preguntasRespuestasRoutes() {
                     )
                 }
             }
+            println("[SERVER] Retornando ${resultado.size} preguntas para idOrg=$idOrg")
             call.respond(resultado)
         }
         post {
