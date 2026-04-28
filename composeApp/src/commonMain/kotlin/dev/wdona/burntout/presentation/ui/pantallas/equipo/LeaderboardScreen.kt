@@ -5,10 +5,12 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.model.rememberScreenModel
@@ -18,12 +20,15 @@ import cafe.adriel.voyager.core.screen.uniqueScreenKey
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import dev.wdona.burntout.presentation.ui.components.common.FilaTextoPlaceholder
+import dev.wdona.burntout.presentation.ui.components.equipo.CrearEquipoDialog
 import dev.wdona.burntout.presentation.ui.components.equipo.EquipoCard
+import dev.wdona.burntout.presentation.ui.components.equipo.InvitarOrgDialog
 import dev.wdona.burntout.presentation.ui.components.template.ScaffoldBase
 import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.AjustesViewModelFactory
 import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.LeaderboardViewModelFactory
 import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.EquipoViewModelFactory
 import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.MiPerfilViewModelFactory
+import dev.wdona.burntout.presentation.viewmodel.viewmodels.LeaderboardUiState
 import dev.wdona.burntout.presentation.viewmodel.viewmodels.LeaderboardViewModel
 import dev.wdona.burntout.shared.utils.SettingsManager
 
@@ -47,6 +52,7 @@ class LeaderboardScreen(
         val nombreUsuario = SettingsManager.getNombreUsuario()
 
         var mostrarCrearEquipoDialog by remember { mutableStateOf(false) }
+        var mostrarInvitarDialog by remember { mutableStateOf(false) }
 
         LaunchedEffect(idOrg) {
             viewModel.cargarLeaderboard(idOrg)
@@ -70,52 +76,29 @@ class LeaderboardScreen(
             )
         }
 
+        if (mostrarInvitarDialog) {
+            InvitarOrgDialog(
+                uiState = uiState,
+                onDismiss = {
+                    mostrarInvitarDialog = false
+                    viewModel.clearInvitacion()
+                }
+            )
+        }
+
         LeaderboardContent(
             leaderboardViewModel = viewModel,
             onEquipoClick = { idEquipo ->
                 navigator.push(EquipoScreen(equipoFactory, perfilFactory, ajustesFactory, onVolver = { navigator.pop() }, idEquipo = idEquipo))
             },
-            onCrearEquipoClick = {
-                mostrarCrearEquipoDialog = true
+            onCrearEquipoClick = { mostrarCrearEquipoDialog = true },
+            onInvitarClick = {
+                mostrarInvitarDialog = true
+                viewModel.generarInvitacion(idUsuarioActual)
             },
             onVolver = onVolver
         )
     }
-}
-
-@Composable
-fun CrearEquipoDialog(defaultNombre: String, onDismiss: () -> Unit, onConfirm: (String) -> Unit) {
-    var nombre by remember { mutableStateOf(defaultNombre) }
-    
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("Crear nuevo equipo") },
-        text = {
-            Column {
-                Text("Introduce el nombre para tu nuevo equipo:")
-                Spacer(modifier = Modifier.height(8.dp))
-                OutlinedTextField(
-                    value = nombre,
-                    onValueChange = { nombre = it },
-                    label = { Text("Nombre del equipo") },
-                    singleLine = true
-                )
-            }
-        },
-        confirmButton = {
-            TextButton(
-                onClick = { onConfirm(nombre) },
-                enabled = nombre.isNotBlank()
-            ) {
-                Text("Crear")
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Cancelar")
-            }
-        }
-    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -124,6 +107,7 @@ fun LeaderboardContent(
     leaderboardViewModel: LeaderboardViewModel,
     onEquipoClick: (Long) -> Unit,
     onCrearEquipoClick: () -> Unit,
+    onInvitarClick: () -> Unit,
     onVolver: (() -> Unit)? = null
 ) {
     val uiState by leaderboardViewModel.uiState.collectAsStateWithLifecycle()
@@ -135,9 +119,10 @@ fun LeaderboardContent(
     ScaffoldBase(
         titulo = titulo,
         onVolver = onVolver,
-        onFAB = { onCrearEquipoClick() },
-        textoFAB = "Crear equipo",
-        iconFAB = { Icon(Icons.Default.Add, contentDescription = "Crear equipo") }
+        onCrear = { onCrearEquipoClick() },
+        onFAB = { onInvitarClick() },
+        textoFAB = "Invitar",
+        iconFAB = { Icon(Icons.Default.Share, contentDescription = "Invitar") }
     ) {
         if (isLoading) {
             BoxWithConstraints(modifier = Modifier.fillMaxSize()) {

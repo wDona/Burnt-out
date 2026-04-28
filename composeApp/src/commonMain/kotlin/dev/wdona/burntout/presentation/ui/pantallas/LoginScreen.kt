@@ -3,6 +3,7 @@ package dev.wdona.burntout.presentation.ui.pantallas
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -91,6 +92,8 @@ fun LoginContent(
     var textStateCodigo by remember { mutableStateOf("") }
     var modificado by remember { mutableStateOf(false) }
     var isLogin by remember { mutableStateOf(true) }
+
+
     uiState.isLogin = isLogin
 
     val isError = uiState.error != null
@@ -152,79 +155,21 @@ fun LoginContent(
                 }
 
                 AnimatedVisibility(!isLogin) {
-                    Column {
-                        OutlinedTextField(
-                            value = textStateNombre,
-                            onValueChange = { textStateNombre = it },
-                            label = { Text("Nombre*") },
-                            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
-                            keyboardActions = KeyboardActions(onNext = { focusManager.moveFocus(FocusDirection.Down) }),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .onKeyEvent {
-                                    if (it.type == KeyEventType.KeyUp && (it.key == Key.Enter || it.key == Key.NumPadEnter)) {
-                                        focusManager.moveFocus(FocusDirection.Down); true
-                                    } else false
-                                },
-                            singleLine = true
-                        )
-
-                        SingleChoiceSegmentedButtonRow(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 8.dp)
-                        ) {
-                            SegmentedButton(
-                                selected = modoRegistro == "CREAR_ORG",
-                                onClick = { modoRegistro = "CREAR_ORG"; textStateCodigo = "" },
-                                shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2),
-                                label = { Text("Crear org") }
-                            )
-                            SegmentedButton(
-                                selected = modoRegistro == "UNIRSE",
-                                onClick = { modoRegistro = "UNIRSE"; textStateNombreOrg = "" },
-                                shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2),
-                                label = { Text("Unirme a org") }
-                            )
-                        }
-
-                        AnimatedVisibility(modoRegistro == "CREAR_ORG") {
-                            OutlinedTextField(
-                                value = if (modificado) {
-                                    textStateNombreOrg
-                                } else {
-                                    "Mi Organizacion"
-                                },
-                                onValueChange = {
-                                        textStateNombreOrg = it
-                                        modificado = true
-                                                },
-                                label = { Text("Nombre de la organización*") },
-                                placeholder = { Text("Org de ${textStateNombre.ifBlank { "Mi Organizacion" }}") },
-                                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
-                                keyboardActions = KeyboardActions(onNext = { focusManager.moveFocus(FocusDirection.Down) }),
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(bottom = 4.dp),
-                                singleLine = true
-                            )
-                        }
-
-                        AnimatedVisibility(modoRegistro == "UNIRSE") {
-                            OutlinedTextField(
-                                value = textStateCodigo,
-                                onValueChange = { textStateCodigo = it.uppercase().trim() },
-                                label = { Text("Código de invitación*") },
-                                placeholder = { Text("ACME-X7K2PQ") },
-                                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
-                                keyboardActions = KeyboardActions(onNext = { focusManager.moveFocus(FocusDirection.Down) }),
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(bottom = 4.dp),
-                                singleLine = true
-                            )
-                        }
-                    }
+                    OutlinedTextField(
+                        value = textStateNombre,
+                        onValueChange = { textStateNombre = it },
+                        label = { Text("Nombre*") },
+                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                        keyboardActions = KeyboardActions(onNext = { focusManager.moveFocus(FocusDirection.Down) }),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .onKeyEvent {
+                                if (it.type == KeyEventType.KeyUp && (it.key == Key.Enter || it.key == Key.NumPadEnter)) {
+                                    focusManager.moveFocus(FocusDirection.Down); true
+                                } else false
+                            },
+                        singleLine = true
+                    )
                 }
 
                 OutlinedTextField(
@@ -285,25 +230,91 @@ fun LoginContent(
                     )
                 }
 
+                AnimatedVisibility(!isLogin) {
+                    Column {
+                        SingleChoiceSegmentedButtonRow(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 8.dp)
+                        ) {
+                            SegmentedButton(
+                                selected = modoRegistro == "CREAR_ORG",
+                                onClick = { modoRegistro = "CREAR_ORG"; textStateCodigo = "" },
+                                shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2),
+                                label = { Text("Crear org") }
+                            )
+                            SegmentedButton(
+                                selected = modoRegistro == "UNIRSE",
+                                onClick = { modoRegistro = "UNIRSE"; textStateNombreOrg = "" },
+                                shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2),
+                                label = { Text("Unirme a org") }
+                            )
+                        }
+
+                        AnimatedVisibility(modoRegistro == "CREAR_ORG") {
+                            OutlinedTextField(
+                                value = if (modificado) {
+                                    textStateNombreOrg
+                                } else if (textStateNombre.isNotBlank()) {
+                                    "Organizacion de $textStateNombre"
+                                } else {
+                                    "Mi Organizacion"
+                                },
+                                onValueChange = {
+                                    textStateNombreOrg = it
+                                    modificado = true
+                                },
+                                label = { Text("Nombre de la organización*") },
+                                placeholder = { Text("Org de ${textStateNombre.ifBlank { "Mi Organizacion" }}") },
+                                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                                keyboardActions = KeyboardActions(onNext = { focusManager.moveFocus(FocusDirection.Down) }),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(bottom = 4.dp),
+                                singleLine = true
+                            )
+                        }
+
+                        AnimatedVisibility(modoRegistro == "UNIRSE") {
+                            OutlinedTextField(
+                                value = textStateCodigo,
+                                onValueChange = { textStateCodigo = it.uppercase().trim() },
+                                label = { Text("Código de invitación*") },
+                                placeholder = { Text("ACME-X7K2PQ") },
+                                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                                keyboardActions = KeyboardActions(onNext = { focusManager.moveFocus(FocusDirection.Down) }),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(bottom = 4.dp),
+                                singleLine = true
+                            )
+                        }
+                    }
+                }
+
                 TextButton(onClick = { isLogin = !isLogin }) {
-                    Text(if (isLogin) "¿No tienes cuenta? Regístrate" else "¿Ya tienes cuenta? Login")
-                }
-
-                Button(
-                    onClick = enviarAccion,
-                    enabled = !uiState.isLoading
-                            && textStateUsuario.isNotBlank()
-                            && textStatePassword.isNotBlank()
-                            && (isLogin || registroValido)
-                ) {
-                    Text(if (isLogin) "Login" else "Registrate")
-                }
-
-                TextButton(onClick = { SettingsManager.setUsuarioInvitado() }) {
                     Text(
-                        text = "Entrar como invitado",
-                        style = MaterialTheme.typography.bodySmall
+                        text = if (isLogin) "¿No tienes cuenta? Regístrate" else "¿Ya tienes cuenta? Login",
+                        style = MaterialTheme.typography.bodyMedium
                     )
+                }
+                Row {
+                    Button(
+                        onClick = enviarAccion,
+                        enabled = !uiState.isLoading
+                                && textStateUsuario.isNotBlank()
+                                && textStatePassword.isNotBlank()
+                                && (isLogin || registroValido),
+                        modifier = Modifier.padding(end = 8.dp)
+                    ) {
+                        Text(if (isLogin) "Login" else "Registrate")
+                    }
+
+                    TextButton(onClick = { SettingsManager.setUsuarioInvitado() }) {
+                        Text(
+                            text = "Entrar como invitado",
+                        )
+                    }
                 }
             }
         }

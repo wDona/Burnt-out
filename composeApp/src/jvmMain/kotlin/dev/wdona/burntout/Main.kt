@@ -17,6 +17,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
+import androidx.compose.ui.window.WindowPlacement
+import androidx.compose.ui.window.WindowState
 import androidx.compose.ui.window.application
 import dev.wdona.burntout.presentation.ui.theme.BurntOutMaterialTheme
 import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.*
@@ -50,7 +52,11 @@ fun main() = application {
     Window(
         onCloseRequest = ::exitApplication,
         title = "Burn't out",
-        icon = painterResource("logoBurntOutIcon.png")
+        icon = painterResource("logoBurntOutIcon.png"),
+        state = WindowState(placement = WindowPlacement.Floating,
+        width = 800.dp,
+        height = 720.dp
+        )
     ) {
         BurntOutMaterialTheme {
             Surface (
@@ -95,12 +101,13 @@ fun main() = application {
                         loginViewModelFactory = LoginViewModelFactory()
                     )
                 } else {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator()
-                    }
+//                    Box(
+//                        modifier = Modifier.fillMaxSize(),
+//                        contentAlignment = Alignment.Center
+//                    )
+//                    {
+//                        CircularProgressIndicator()
+//                    }
                 }
             }
         }
