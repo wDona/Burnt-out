@@ -172,7 +172,7 @@ private suspend fun crearUsuarioConOrg(request: RegistroRequest, nombreOrg: Stri
     }[OrganizacionesTable.id]
     println("[SERVER] Organización creada con ID: $idOrg")
 
-//    DatabaseFactory.insertPreguntasMBI(idOrg)
+    DatabaseFactory.insertPreguntasMBI(idOrg)
 
     println("[SERVER] Creando equipo para el usuario: ${request.nombre}")
     val idEquipo = EquiposTable.insert {
