@@ -40,7 +40,7 @@ fun BateriaBurnout(riesgo: Double, mostrarTexto: Boolean = true, size: Int = 24,
         if (mostrarTexto) {
             val riesgoVisual = (riesgo * 100).toInt()
             Text(
-                text = "$text ($riesgoVisual/100)",
+                text = "$text" + if (riesgoVisual >= 0) " ($riesgoVisual%)" else "",
                 style = MaterialTheme.typography.bodyMedium,
                 color = color,
                 modifier = Modifier.padding(start = 8.dp)
@@ -55,7 +55,7 @@ fun getEstadoBateria(riesgo: Double): Triple<ImageVector, Color, String> {
         riesgo < 0 -> Triple(
             Icons.Default.BatteryFull,
             BurntOutMaterialTheme.getColorScheme().onSurface.copy(alpha=0.5f),
-            "Sin datos"
+            "Datos insuficientes"
         )
         riesgo <= 0.10 -> Triple(
             Icons.Default.BatteryFull,
