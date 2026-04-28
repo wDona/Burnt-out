@@ -53,6 +53,7 @@ class EquipoViewModel(
     }
 
     fun cargarMiembrosEquipo(idEquipo: Long) {
+        if (idEquipo == Long.MIN_VALUE) return
         screenModelScope.launch {
              _uiState.update { it.copy(isLoading = true) }
             try {

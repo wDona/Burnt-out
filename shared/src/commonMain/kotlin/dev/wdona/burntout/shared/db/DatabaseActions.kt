@@ -15,14 +15,18 @@ object DatabaseActions {
             this.driver = driver
 
             try {
-                // FIXME posiblemente crashee?
-                database?.appDatabaseQueries?.getOrganizacionById(SettingsManager.getIdOrganizacionActual())?.executeAsOneOrNull()
+                val queries = database!!.appDatabaseQueries
+                queries.insertOrgbase()
+                queries.insertEquipoBase()
+                queries.insertPreguntasBase()
+                queries.insertUsuarioBase()
+                queries.insertUserTeam(Long.MIN_VALUE, Long.MIN_VALUE)
 
                 val ayer = getCurrentTimestampSeconds() - 86400
-                database?.appDatabaseQueries?.insertRespuestasBase(
-                    idUsuario = Long.MIN_VALUE,
-                    fecha = ayer
-                )
+                queries.insertRespuestasBase(idUsuario = Long.MIN_VALUE, fecha = ayer)
+
+                // FIXME posiblemente crashee?
+                queries.getOrganizacionById(SettingsManager.getIdOrganizacionActual()).executeAsOneOrNull()
             } catch (e: Exception) {
                 println("Error al inicializar la base de datos: ${e.message}")
             }

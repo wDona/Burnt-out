@@ -113,14 +113,15 @@ fun LeaderboardContent(
     val uiState by leaderboardViewModel.uiState.collectAsStateWithLifecycle()
     val listaEquipos = uiState.leaderboard
     val isLoading = uiState.isLoading
+    val esInvitado = SettingsManager.isUsuarioInvitado()
 
     val titulo = if (isLoading) "" else "Leaderboard"
 
     ScaffoldBase(
         titulo = titulo,
         onVolver = onVolver,
-        onCrear = { onCrearEquipoClick() },
-        onFAB = { onInvitarClick() },
+        onCrear = if (!esInvitado) { { onCrearEquipoClick() } } else null,
+        onFAB = if (!esInvitado) { { onInvitarClick() } } else null,
         textoFAB = "Invitar",
         iconFAB = { Icon(Icons.Default.Share, contentDescription = "Invitar") }
     ) {

@@ -51,7 +51,7 @@ class EquipoScreen(val factory: EquipoViewModelFactory, val perfilFactory: MiPer
         val idEquipoActual by SettingsManager.idEquipoActualFlow.collectAsState()
         val targetIdEquipo = idEquipo ?: idEquipoActual
 
-        val esMiEquipo = targetIdEquipo == idEquipoActual
+        val esMiEquipo = targetIdEquipo == idEquipoActual && !SettingsManager.isUsuarioInvitado()
 
         var mostrarAnadirUsuarioDialog by remember { mutableStateOf(false) }
 
