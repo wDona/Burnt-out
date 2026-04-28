@@ -187,7 +187,7 @@ private suspend fun crearUsuarioConOrg(request: RegistroRequest, nombreOrg: Stri
         it[UsuariosTable.username] = request.username
         it[UsuariosTable.password] = request.password
         it[UsuariosTable.nombre] = request.nombre
-        it[UsuariosTable.riesgoBurnout] = -100.0
+        it[UsuariosTable.riesgoBurnout] = -1.0
         it[UsuariosTable.descripcion] = ""
         it[UsuariosTable.idOrganizacion] = idOrg
         it[UsuariosTable.idEquipo] = idEquipo
