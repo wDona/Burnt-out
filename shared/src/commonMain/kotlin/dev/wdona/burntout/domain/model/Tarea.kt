@@ -11,5 +11,6 @@ data class Tarea(
     val idTableroPerteneciente: Long,
     val idUsuarioAsignado: Long,
     val idSubtareas: List<Long>?,
+    val fechaVencimiento: Long? = null,
     val isDeleted: Boolean = false
 )

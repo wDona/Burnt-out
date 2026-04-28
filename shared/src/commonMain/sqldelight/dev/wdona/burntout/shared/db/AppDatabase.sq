@@ -57,6 +57,7 @@ CREATE TABLE TareaEntity (
     Estado TEXT NOT NULL,
     FK_ID_Tabl INTEGER NOT NULL,
     FK_ID_Usuario INTEGER NOT NULL,
+    Fecha_Vencimiento INTEGER,
     Is_Deleted INTEGER NOT NULL DEFAULT 0,
     FOREIGN KEY(FK_ID_Tabl) REFERENCES TableroEntity(ID_Tabl),
     FOREIGN KEY(FK_ID_Usuario) REFERENCES UsuarioEntity(ID_Usuario)
@@ -162,13 +163,13 @@ INSERT OR IGNORE INTO PreguntaEntity(ID_Pregunta, Pregunta, Categoria, FK_ID_Org
 
 -- Usar esta para crear tareas locales (ID autogenerado)
 insertTarea:
-INSERT INTO TareaEntity(Titulo, Descripcion, Estado, FK_ID_Tabl, FK_ID_Usuario)
-VALUES(?, ?, ?, ?, ?);
+INSERT INTO TareaEntity(Titulo, Descripcion, Estado, FK_ID_Tabl, FK_ID_Usuario, Fecha_Vencimiento)
+VALUES(?, ?, ?, ?, ?, ?);
 
 -- Usar esta para sincronizar (ID específico)
 upsertTarea:
-INSERT OR REPLACE INTO TareaEntity(ID_Tarea, Titulo, Descripcion, Estado, FK_ID_Tabl, FK_ID_Usuario, Is_Deleted)
-VALUES(?, ?, ?, ?, ?, ?, ?);
+INSERT OR REPLACE INTO TareaEntity(ID_Tarea, Titulo, Descripcion, Estado, FK_ID_Tabl, FK_ID_Usuario, Fecha_Vencimiento, Is_Deleted)
+VALUES(?, ?, ?, ?, ?, ?, ?, ?);
 
 getTareaById:
 SELECT * FROM TareaEntity WHERE ID_Tarea = ? AND Is_Deleted = 0;
@@ -177,7 +178,7 @@ getTareasByTablero:
 SELECT * FROM TareaEntity WHERE FK_ID_Tabl = ? AND Is_Deleted = 0;
 
 updateTareaById:
-UPDATE TareaEntity SET Titulo = ?, Descripcion = ?, Estado = ? WHERE ID_Tarea = ?;
+UPDATE TareaEntity SET Titulo = ?, Descripcion = ?, Estado = ?, Fecha_Vencimiento = ? WHERE ID_Tarea = ?;
 
 assignTareaToUsuario:
 UPDATE TareaEntity SET FK_ID_Usuario = ? WHERE ID_Tarea = ?;

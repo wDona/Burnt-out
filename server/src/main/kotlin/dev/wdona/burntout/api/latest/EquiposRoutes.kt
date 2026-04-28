@@ -3,6 +3,7 @@ package dev.wdona.burntout.api.latest
 import dev.wdona.burntout.db.DatabaseFactory.dbQuery
 import dev.wdona.burntout.db.tables.EquipoMiembrosTable
 import dev.wdona.burntout.db.tables.EquiposTable
+import dev.wdona.burntout.db.tables.TablerosTable
 import dev.wdona.burntout.db.tables.UsuariosTable
 import dev.wdona.burntout.shared.domain.Equipo
 import dev.wdona.burntout.shared.domain.Usuario
@@ -216,7 +217,12 @@ fun Route.equiposRoutes() {
                                     EquiposTable.update({ (EquiposTable.id eq idEquipoAnterior) and (EquiposTable.isDeleted eq false) }) {
                                         it[isDeleted] = true
                                     }
-                                    println("Equipo $idEquipoAnterior eliminado por quedarse sin miembros.")
+                                    val tablerosMovidos = TablerosTable.update({
+                                        (TablerosTable.idEquipo eq idEquipoAnterior) and (TablerosTable.isDeleted eq false)
+                                    }) {
+                                        it[TablerosTable.idEquipo] = idEquipoNuevo
+                                    }
+                                    println("Equipo $idEquipoAnterior eliminado por quedarse sin miembros. $tablerosMovidos tableros movidos al equipo $idEquipoNuevo.")
                                 }
                             }
                             true
@@ -272,7 +278,12 @@ fun Route.equiposRoutes() {
                                 EquiposTable.update({ (EquiposTable.id eq idEquipo) and (EquiposTable.isDeleted eq false) }) {
                                     it[isDeleted] = true
                                 }
-                                println("Equipo $idEquipo eliminado por quedarse sin miembros.")
+                                val tablerosMovidos = TablerosTable.update({
+                                    (TablerosTable.idEquipo eq idEquipo) and (TablerosTable.isDeleted eq false)
+                                }) {
+                                    it[TablerosTable.idEquipo] = nuevoIdEquipo
+                                }
+                                println("Equipo $idEquipo eliminado por quedarse sin miembros. $tablerosMovidos tableros movidos al equipo $nuevoIdEquipo.")
                             }
                             true
                         } else false

@@ -101,6 +101,9 @@ class TablerosScreen(
                             },
                             onDelete = {
                                 tablerosViewModel.eliminarTablero(tablero.idTablero, idOrg)
+                            },
+                            onRename = { nuevoNombre ->
+                                tablerosViewModel.actualizarTablero(tablero.copy(titulo = nuevoNombre))
                             }
                         )
                     }

@@ -10,10 +10,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.DriveFileRenameOutline
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -27,8 +31,38 @@ import dev.wdona.burntout.shared.domain.Tablero
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun CardTablero(tablero: Tablero, onClick: () -> Unit, onDelete: () -> Unit) {
+fun CardTablero(tablero: Tablero, onClick: () -> Unit, onDelete: () -> Unit, onRename: (String) -> Unit) {
     var showMenu by remember { mutableStateOf(false) }
+    var showRenameDialog by remember { mutableStateOf(false) }
+    var nuevoNombre by remember { mutableStateOf(tablero.titulo) }
+
+    if (showRenameDialog) {
+        AlertDialog(
+            onDismissRequest = { showRenameDialog = false },
+            title = { Text("Renombrar tablero") },
+            text = {
+                OutlinedTextField(
+                    value = nuevoNombre,
+                    onValueChange = { nuevoNombre = it },
+                    label = { Text("Nombre") },
+                    singleLine = true
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        if (nuevoNombre.isNotBlank()) {
+                            onRename(nuevoNombre.trim())
+                        }
+                        showRenameDialog = false
+                    }
+                ) { Text("Guardar") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showRenameDialog = false }) { Text("Cancelar") }
+            }
+        )
+    }
 
     Box {
         Row(
@@ -57,6 +91,17 @@ fun CardTablero(tablero: Tablero, onClick: () -> Unit, onDelete: () -> Unit) {
             expanded = showMenu,
             onDismissRequest = { showMenu = false }
         ) {
+            DropdownMenuItem(
+                text = { Text("Renombrar") },
+                onClick = {
+                    nuevoNombre = tablero.titulo
+                    showMenu = false
+                    showRenameDialog = true
+                },
+                leadingIcon = {
+                    Icon(Icons.Default.DriveFileRenameOutline, contentDescription = null)
+                }
+            )
             DropdownMenuItem(
                 text = { Text("Eliminar") },
                 onClick = {

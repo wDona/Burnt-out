@@ -35,6 +35,7 @@ fun Route.tareasRoutes() {
                         idTableroPerteneciente = row[TareasTable.idTablero],
                         idUsuarioAsignado = row[TareasTable.idUsuarioAsignado],
                         idSubtareas = subtareas.ifEmpty { null },
+                        fechaVencimiento = row[TareasTable.fechaVencimiento],
                         isDeleted = row[TareasTable.isDeleted]
                     )
                 }
@@ -51,6 +52,7 @@ fun Route.tareasRoutes() {
                     it[estado] = tarea.estado
                     it[idTablero] = tarea.idTableroPerteneciente
                     it[idUsuarioAsignado] = tarea.idUsuarioAsignado
+                    it[fechaVencimiento] = tarea.fechaVencimiento
                     it[isDeleted] = tarea.isDeleted
                 }[TareasTable.id]
             }
@@ -73,6 +75,7 @@ fun Route.tareasRoutes() {
                             idTableroPerteneciente = row[TareasTable.idTablero],
                             idUsuarioAsignado = row[TareasTable.idUsuarioAsignado],
                             idSubtareas = subtareas.ifEmpty { null },
+                            fechaVencimiento = row[TareasTable.fechaVencimiento],
                             isDeleted = row[TareasTable.isDeleted]
                         )
                     } else null
@@ -91,6 +94,7 @@ fun Route.tareasRoutes() {
                         it[estado] = tarea.estado
                         it[idTablero] = tarea.idTableroPerteneciente
                         it[idUsuarioAsignado] = tarea.idUsuarioAsignado
+                        it[fechaVencimiento] = tarea.fechaVencimiento
                         it[isDeleted] = tarea.isDeleted
                     }
                 }
@@ -129,6 +133,7 @@ fun Route.tareasRoutes() {
                             idTableroPerteneciente = row[TareasTable.idTablero],
                             idUsuarioAsignado = row[TareasTable.idUsuarioAsignado],
                             idSubtareas = subtareas.ifEmpty { null },
+                            fechaVencimiento = row[TareasTable.fechaVencimiento],
                             isDeleted = row[TareasTable.isDeleted]
                         )
                     } else null

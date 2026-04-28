@@ -30,7 +30,8 @@ class TareaDaoImpl(appDatabase: AppDatabase) : TareaDao {
             Descripcion = tarea.descripcion,
             Estado = tarea.estado,
             FK_ID_Tabl = tarea.idTableroPerteneciente,
-            FK_ID_Usuario = tarea.idUsuarioAsignado
+            FK_ID_Usuario = tarea.idUsuarioAsignado,
+            Fecha_Vencimiento = tarea.fechaVencimiento
         )
         return queries.lastInsertRowId().executeAsOne()
     }
@@ -42,7 +43,8 @@ class TareaDaoImpl(appDatabase: AppDatabase) : TareaDao {
                 ID_Tarea = tarea.idTarea,
                 Titulo = tarea.titulo,
                 Descripcion = tarea.descripcion,
-                Estado = tarea.estado
+                Estado = tarea.estado,
+                Fecha_Vencimiento = tarea.fechaVencimiento
             )
             queries.assignTareaToUsuario(
                 FK_ID_Usuario = tarea.idUsuarioAsignado,
@@ -77,6 +79,7 @@ class TareaDaoImpl(appDatabase: AppDatabase) : TareaDao {
                 Estado = tarea.estado,
                 FK_ID_Tabl = tarea.idTableroPerteneciente,
                 FK_ID_Usuario = tarea.idUsuarioAsignado,
+                Fecha_Vencimiento = tarea.fechaVencimiento,
                 Is_Deleted = if (tarea.isDeleted) 1L else 0L
             )
         } catch (e: Exception) {

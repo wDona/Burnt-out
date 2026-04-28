@@ -14,6 +14,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.CloudOff
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Person4
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -22,10 +23,15 @@ import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
@@ -49,7 +55,6 @@ import dev.wdona.burntout.presentation.ui.theme.BurntOutMaterialTheme
 import dev.wdona.burntout.presentation.viewmodel.viewmodels.AjustesViewModel
 import dev.wdona.burntout.shared.domain.Usuario
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.remember
 
 class PerfilScreen(val factory: MiPerfilViewModelFactory, val ajustesFactory: AjustesViewModelFactory, val onVolver: (() -> Unit)? = null, var idUsuario: Long? = null) : Screen {
 
@@ -61,7 +66,7 @@ class PerfilScreen(val factory: MiPerfilViewModelFactory, val ajustesFactory: Aj
 
         val viewmodel = rememberScreenModel { factory.create() }
         val settingsViewModel = rememberScreenModel { ajustesFactory.create() }
-        
+
         val idUsuarioActual by SettingsManager.idUsuarioActualFlow.collectAsState()
         val targetId = idUsuario ?: idUsuarioActual
 
@@ -73,9 +78,9 @@ class PerfilScreen(val factory: MiPerfilViewModelFactory, val ajustesFactory: Aj
             viewmodel,
             onAjustes = { navigator.push(SettingsScreen(ajustesFactory)) },
             onVolver = onVolver,
-            onLogout = { 
+            onLogout = {
                 SettingsManager.clearAll()
-                navigator.popUntilRoot() 
+                navigator.popUntilRoot()
             },
             settingsViewModel,
             idUsuarioActual = idUsuarioActual
@@ -87,14 +92,17 @@ class PerfilScreen(val factory: MiPerfilViewModelFactory, val ajustesFactory: Aj
 @Composable
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 fun PerfilContent(
-    viewModel: PerfilViewModel, 
-    onAjustes: () -> Unit, 
-    onVolver: (() -> Unit)? = null, 
-    onLogout: () -> Unit, 
+    viewModel: PerfilViewModel,
+    onAjustes: () -> Unit,
+    onVolver: (() -> Unit)? = null,
+    onLogout: () -> Unit,
     settingsViewModel: AjustesViewModel,
     idUsuarioActual: Long
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    var modoEdicion by remember { mutableStateOf(false) }
+    var nombreEdit by remember { mutableStateOf("") }
+    var descripcionEdit by remember { mutableStateOf("") }
 
     val titulo = if (uiState.isLoading) "" else (uiState.usuario?.nombre ?: "No se ha cargado el usuario")
 
@@ -120,6 +128,7 @@ fun PerfilContent(
 
     ScaffoldBase(
         titulo = titulo,
+        subtitle = if (uiState.isLoading) "" else if (uiState.usuario != null) "@" + uiState.usuario!!.username else "No se ha podido cargar el usuario",
         onAjustes = onAjustes,
         onVolver = onVolver,
         titleIcon = titleIcon
@@ -176,38 +185,98 @@ fun PerfilContent(
                 else {
                     val usuario = uiState.usuario!!
                     val riesgo = usuario.riesgoBurnout ?: -1.0
+                    val esPropioUsuario = usuario.idUsuario == idUsuarioActual
 
                     BateriaBurnout(riesgo = riesgo)
 
-                    Text(usuario.username, style = MaterialTheme.typography.titleMedium)
-                    Text(usuario.descripcion ?: "-", style = MaterialTheme.typography.titleMedium)
-
-                    // Comprobación reactiva usando el ID del flujo
-                    if (usuario.idUsuario == idUsuarioActual) {
-                        OutlinedButton(
-                            onClick = onLogout,
+                    if (modoEdicion && esPropioUsuario) {
+                        OutlinedTextField(
+                            value = nombreEdit,
+                            onValueChange = { nombreEdit = it },
+                            label = { Text("Nombre") },
+                            singleLine = true,
                             modifier = Modifier
-                                .padding(top = 32.dp)
                                 .fillMaxWidth()
-                                .padding(horizontal = 32.dp)
-                                .height(56.dp),
-                            shape = RoundedCornerShape(28.dp),
-                            border = BorderStroke(1.dp, BurntOutMaterialTheme.getColorScheme().error),
-                            colors = ButtonDefaults.outlinedButtonColors(
-                                contentColor = BurntOutMaterialTheme.getColorScheme().error
-                            )
+                                .padding(horizontal = 32.dp, vertical = 4.dp)
+                        )
+                        OutlinedTextField(
+                            value = descripcionEdit,
+                            onValueChange = { descripcionEdit = it },
+                            label = { Text("Descripción") },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 32.dp, vertical = 4.dp)
+                        )
+                        OutlinedButton(
+                            onClick = {
+                                if (nombreEdit.isNotBlank()) {
+                                    viewModel.actualizarPerfil(
+                                        usuario.copy(
+                                            nombre = nombreEdit.trim(),
+                                            descripcion = descripcionEdit.trim().ifBlank { null }
+                                        )
+                                    )
+                                }
+                                modoEdicion = false
+                            },
+                            modifier = Modifier
+                                .padding(top = 8.dp)
+                                .fillMaxWidth()
+                                .padding(horizontal = 32.dp),
+                            shape = RoundedCornerShape(24.dp)
                         ) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.ExitToApp,
-                                contentDescription = "Cerrar sesion",
-                                modifier = Modifier.padding(end = 8.dp)
-                            )
-                            Text("Cerrar sesion")
+                            Text("Guardar")
+                        }
+                        TextButton(onClick = { modoEdicion = false }) {
+                            Text("Cancelar")
                         }
                     } else {
-//                        println("Perfil usuario no actual")
-//                        println("uistate: ${uiState.usuario!!.idUsuario}")
-//                        println("settingsviewmodel usuario ${ajustesState.idUsuario}")
+//                        Text(usuario.username, style = MaterialTheme.typography.titleMedium)
+//                        Text(usuario.nombre, style = MaterialTheme.typography.bodyLarge)
+                        Text(usuario.descripcion ?: "-", style = MaterialTheme.typography.bodyMedium)
+
+                        if (esPropioUsuario) {
+                            OutlinedButton(
+                                onClick = {
+                                    nombreEdit = usuario.nombre
+                                    descripcionEdit = usuario.descripcion ?: ""
+                                    modoEdicion = true
+                                },
+                                modifier = Modifier
+                                    .padding(top = 16.dp)
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 32.dp),
+                                shape = RoundedCornerShape(24.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Edit,
+                                    contentDescription = "Editar perfil",
+                                    modifier = Modifier.padding(end = 8.dp)
+                                )
+                                Text("Editar perfil")
+                            }
+
+                            OutlinedButton(
+                                onClick = onLogout,
+                                modifier = Modifier
+                                    .padding(top = 8.dp)
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 32.dp)
+                                    .height(56.dp),
+                                shape = RoundedCornerShape(28.dp),
+                                border = BorderStroke(1.dp, BurntOutMaterialTheme.getColorScheme().error),
+                                colors = ButtonDefaults.outlinedButtonColors(
+                                    contentColor = BurntOutMaterialTheme.getColorScheme().error
+                                )
+                            ) {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.ExitToApp,
+                                    contentDescription = "Cerrar sesion",
+                                    modifier = Modifier.padding(end = 8.dp)
+                                )
+                                Text("Cerrar sesion")
+                            }
+                        }
                     }
                 }
             }
