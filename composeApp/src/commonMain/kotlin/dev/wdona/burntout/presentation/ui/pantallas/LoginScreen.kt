@@ -90,6 +90,8 @@ fun LoginContent(
     var textStateNombreOrg by remember { mutableStateOf("") }
     var textStateCodigo by remember { mutableStateOf("") }
     var modificado by remember { mutableStateOf(false) }
+    var isLogin by remember { mutableStateOf(true) }
+    uiState.isLogin = isLogin
 
     val isError = uiState.error != null
     val focusManager = LocalFocusManager.current
@@ -101,7 +103,7 @@ fun LoginContent(
     }
 
     val enviarAccion = {
-        if (uiState.isLogin) {
+        if (isLogin) {
             viewModel.login(textStateUsuario, textStatePassword, settingsViewModel)
         } else {
             viewModel.register(
@@ -137,11 +139,11 @@ fun LoginContent(
                     .verticalScroll(rememberScrollState()),
             ) {
                 Text(
-                    text = if (uiState.isLogin) "Login" else "Registrate",
+                    text = if (isLogin) "Login" else "Registrate",
                     style = MaterialTheme.typography.titleLarge,
                     modifier = Modifier.padding(bottom = 16.dp)
                 )
-                if (!uiState.isLogin) {
+                if (!isLogin) {
                     Text(
                         style = MaterialTheme.typography.bodySmall.copy(color = BurntOutMaterialTheme.getWarningColor()),
                         text = "No uses contrasenas privadas, \ncualquiera podra acceder a tu cuenta",
@@ -149,7 +151,7 @@ fun LoginContent(
                     )
                 }
 
-                AnimatedVisibility(!uiState.isLogin) {
+                AnimatedVisibility(!isLogin) {
                     Column {
                         OutlinedTextField(
                             value = textStateNombre,
@@ -283,8 +285,8 @@ fun LoginContent(
                     )
                 }
 
-                TextButton(onClick = { viewModel.toggleMode() }) {
-                    Text(if (uiState.isLogin) "¿No tienes cuenta? Regístrate" else "¿Ya tienes cuenta? Login")
+                TextButton(onClick = { isLogin = !isLogin }) {
+                    Text(if (isLogin) "¿No tienes cuenta? Regístrate" else "¿Ya tienes cuenta? Login")
                 }
 
                 Button(
@@ -292,9 +294,9 @@ fun LoginContent(
                     enabled = !uiState.isLoading
                             && textStateUsuario.isNotBlank()
                             && textStatePassword.isNotBlank()
-                            && (uiState.isLogin || registroValido)
+                            && (isLogin || registroValido)
                 ) {
-                    Text(if (uiState.isLogin) "Login" else "Registrate")
+                    Text(if (isLogin) "Login" else "Registrate")
                 }
 
                 TextButton(onClick = { SettingsManager.setUsuarioInvitado() }) {

@@ -31,14 +31,11 @@ import dev.wdona.burntout.presentation.ui.components.common.FilaTextoPlaceholder
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Icon
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import dev.wdona.burntout.presentation.ui.components.equipo.AnadirUsuarioDialog
 import dev.wdona.burntout.shared.utils.SettingsManager
 
 class EquipoScreen(val factory: EquipoViewModelFactory, val perfilFactory: MiPerfilViewModelFactory, val ajustesFactory: AjustesViewModelFactory, val onVolver: (() -> Unit)? = null, val idEquipo: Long? = null) : Screen {
@@ -63,20 +60,26 @@ class EquipoScreen(val factory: EquipoViewModelFactory, val perfilFactory: MiPer
             viewModel.cargarMiembrosEquipo(targetIdEquipo)
         }
         
+        val uiState by viewModel.uiState.collectAsState()
+
+        LaunchedEffect(uiState.userAddedSuccess) {
+            if (uiState.userAddedSuccess) {
+                mostrarAnadirUsuarioDialog = false
+                viewModel.resetUserAddedSuccess()
+            }
+        }
+
         if (mostrarAnadirUsuarioDialog) {
             AnadirUsuarioDialog(
-                onDismiss = { mostrarAnadirUsuarioDialog = false },
-                onAddUsuario = { input ->
-                    val idLong = input.toLongOrNull()
-                    if (idLong != null) {
-                        viewModel.addUsuarioAlEquipo(targetIdEquipo, idLong)
-                        println("Se ha añadido el usuario con id $idLong al equipo $targetIdEquipo")
-                    } else {
-                        viewModel.anadirUsuarioAlEquipoPorNombre(targetIdEquipo, input)
-                        println("No se ha podido añadir el usuario")
-                    }
+                onDismiss = {
                     mostrarAnadirUsuarioDialog = false
-                }
+                    viewModel.resetUserAddedSuccess()
+                },
+                onAddUsuario = { input ->
+                    viewModel.anadirUsuarioAlEquipoPorNombre(targetIdEquipo, input)
+                },
+                onClearError = { viewModel.resetError() },
+                uiState = uiState
             )
         }
 
@@ -93,41 +96,6 @@ class EquipoScreen(val factory: EquipoViewModelFactory, val perfilFactory: MiPer
             perfilViewModel
         )
     }
-}
-
-@Composable
-fun AnadirUsuarioDialog(onDismiss: () -> Unit, onAddUsuario: (String) -> Unit) {
-    var input by remember { mutableStateOf("") }
-    
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("Añadir usuario al equipo") },
-        text = {
-            Column {
-                Text("Introduce el ID o el nombre de usuario de la persona que quieres añadir:")
-                Spacer(modifier = Modifier.height(8.dp))
-                OutlinedTextField(
-                    value = input,
-                    onValueChange = { input = it },
-                    label = { Text("ID o Nombre de usuario") },
-                    singleLine = true
-                )
-            }
-        },
-        confirmButton = {
-            TextButton(
-                onClick = { onAddUsuario(input) },
-                enabled = input.isNotBlank()
-            ) {
-                Text("Añadir")
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Cancelar")
-            }
-        }
-    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

@@ -70,6 +70,7 @@ class EquipoViewModel(
             _uiState.update { it.copy(isLoading = true, userAddedSuccess = false, error = null) }
             try {
                 val success = addUsuarioAlEquipoUseCase(idEquipo, idUsuario)
+
                 if (success) {
                     cargarMiembrosEquipo(idEquipo)
                     _uiState.update { it.copy(userAddedSuccess = true, isLoading = false) }
@@ -86,18 +87,26 @@ class EquipoViewModel(
         screenModelScope.launch {
             _uiState.update { it.copy(isLoading = true, userAddedSuccess = false, error = null) }
             try {
-                val usuario = getUsuarioByUsernameUseCase(username)
-                if (usuario != null) {
-                    val success = addUsuarioAlEquipoUseCase(idEquipo, usuario.idUsuario)
+                val usuarioAIntroducir = getUsuarioByUsernameUseCase(username)
+                if (usuarioAIntroducir != null) {
+                    val idOrgEquipo = _uiState.value.equipo?.idOrganizacion
+
+                    if (idOrgEquipo != null && usuarioAIntroducir.idOrganizacion != idOrgEquipo) {
+                        throw Exception("El usuario no pertenece a la organización del equipo")
+                    }
+
+                    val success = addUsuarioAlEquipoUseCase(idEquipo, usuarioAIntroducir.idUsuario)
+
                     if (success) {
                         cargarMiembrosEquipo(idEquipo)
                         _uiState.update { it.copy(userAddedSuccess = true, isLoading = false) }
                     } else {
-                        _uiState.update { it.copy(isLoading = false, error = "Error al añadir usuario") }
+                        throw Exception("Error al añadir usuario")
                     }
                 } else {
-                    _uiState.update { it.copy(isLoading = false, error = "Usuario no encontrado") }
+                    throw Exception("Usuario no encontrado")
                 }
+
             } catch (e: Exception) {
                 _uiState.update { it.copy(isLoading = false, error = e.message) }
             }
@@ -106,6 +115,10 @@ class EquipoViewModel(
 
     fun resetUserAddedSuccess() {
         _uiState.update { it.copy(userAddedSuccess = false) }
+    }
+
+    fun resetError() {
+        _uiState.update { it.copy(error = null) }
     }
 
     fun salirDelEquipo(idEquipo: Long, idUsuario: Long) {
