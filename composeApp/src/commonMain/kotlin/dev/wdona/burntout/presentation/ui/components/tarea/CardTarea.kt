@@ -8,7 +8,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.MoreHoriz
+import androidx.compose.material.icons.filled.RadioButtonUnchecked
 import androidx.compose.material.icons.filled.Square
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -29,7 +32,7 @@ import dev.wdona.burntout.shared.domain.Tarea
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun CardTarea(tarea: Tarea, onClick: () -> Unit, onDelete: () -> Unit, onCompletar: () -> Unit) {
+fun CardTarea(tarea: Tarea, nombreAsignado: String, onClick: () -> Unit, onDelete: () -> Unit, onCompletar: () -> Unit) {
     var showMenu by remember { mutableStateOf(false) }
 
     val color = when (tarea.estado.lowercase()) {
@@ -37,6 +40,13 @@ fun CardTarea(tarea: Tarea, onClick: () -> Unit, onDelete: () -> Unit, onComplet
         TipoEstadoTarea.EN_PROCESO.string.lowercase() -> Color(TipoEstadoTarea.EN_PROCESO.color)
         TipoEstadoTarea.COMPLETADA.string.lowercase() -> Color(TipoEstadoTarea.COMPLETADA.color)
         else -> Color.DarkGray
+    }
+
+    val icon = when (tarea.estado.lowercase()) {
+        TipoEstadoTarea.PENDIENTE.string.lowercase() -> Icons.Default.RadioButtonUnchecked
+        TipoEstadoTarea.EN_PROCESO.string.lowercase() -> Icons.Default.MoreHoriz
+        TipoEstadoTarea.COMPLETADA.string.lowercase() -> Icons.Default.CheckCircle
+        else -> Icons.Default.Square
     }
 
     Box {
@@ -51,24 +61,24 @@ fun CardTarea(tarea: Tarea, onClick: () -> Unit, onDelete: () -> Unit, onComplet
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
-                imageVector = Icons.Default.Square,
-                contentDescription = "Icono de tarea: ${tarea.titulo}",
+                imageVector = icon,
+                contentDescription = "Estado de tarea: ${tarea.estado}",
                 modifier = Modifier
                     .padding(horizontal = 16.dp)
                     .height(24.dp),
                 tint = color
             )
-            Text(
-                text = tarea.idTarea.toString(),
-                textAlign = TextAlign.Start,
-            )
+//            Text(
+//                text = tarea.idTarea.toString(),
+//                textAlign = TextAlign.Start,
+//            )
             Text(
                 text = tarea.titulo,
                 textAlign = TextAlign.Start,
                 modifier = Modifier.weight(1f)
             )
             Text(
-                text = if (tarea.idUsuarioAsignado == Long.MIN_VALUE) "Usuario invitado" else "${tarea.idUsuarioAsignado}",
+                text = nombreAsignado,
                 textAlign = TextAlign.End,
                 modifier = Modifier.padding(end = 16.dp)
             )

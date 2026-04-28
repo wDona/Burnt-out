@@ -2,37 +2,49 @@ package dev.wdona.burntout.domain.usecase
 
 import dev.wdona.burntout.domain.model.ResultadoBurnout
 import dev.wdona.burntout.domain.model.Respuesta
+import dev.wdona.burntout.shared.domain.Pregunta
 
 class CalcularRiesgoBurnout {
-    operator fun invoke(respuestas: List<Respuesta>): ResultadoBurnout {
-        if (respuestas.isEmpty() || respuestas.all { it.respuesta < 0 }) {
-            return ResultadoBurnout(
-                scoreCE = -1.0,
-                scoreD  = -1.0,
-                scoreRP = -1.0,
-                riesgoTotal = -1.0
-            ) 
+    operator fun invoke(respuestas: List<Respuesta>, preguntas: List<Pregunta>): ResultadoBurnout {
+        val idsCE = preguntas.filter { it.categoria == "CE" }.map { it.idPregunta }.toSet()
+        val idsD  = preguntas.filter { it.categoria == "D"  }.map { it.idPregunta }.toSet()
+        val idsRP = preguntas.filter { it.categoria == "RP" }.map { it.idPregunta }.toSet()
+        val todasLasPreguntas = idsCE + idsD + idsRP
+
+        if (todasLasPreguntas.isEmpty()) {
+            return ResultadoBurnout(scoreCE = -1.0, scoreD = -1.0, scoreRP = -1.0, riesgoTotal = -1.0)
         }
 
-        val itemsCE = setOf(1L, 2L, 3L, 6L, 8L, 13L, 14L, 16L, 20L)
-        val itemsD = setOf(5L, 10L, 11L, 15L, 22L)
-        val itemsRP = setOf(4L, 7L, 9L, 12L, 17L, 18L, 19L, 21L)
+        // Most recent valid answer per question
+        val ultimasPorPregunta = respuestas
+            .filter { it.respuesta >= 0 }
+            .groupBy { it.idPregunta }
+            .mapValues { (_, lista) -> lista.maxByOrNull { it.fecha ?: Long.MIN_VALUE }!! }
 
-        val ce = respuestas.filter { it.idPregunta in itemsCE }.sumOf { it.respuesta.toInt() }
-        val d = respuestas.filter { it.idPregunta in itemsD }.sumOf { it.respuesta.toInt() }
-        val rp = respuestas.filter { it.idPregunta in itemsRP }.sumOf { it.respuesta.toInt() }
+        if (!todasLasPreguntas.all { it in ultimasPorPregunta }) {
+            return ResultadoBurnout(scoreCE = -1.0, scoreD = -1.0, scoreRP = -1.0, riesgoTotal = -1.0)
+        }
 
-        val scoreCE = ce / 54.0                  // max 9×6
-        val scoreD  = d  / 30.0                  // max 5×6
-        val scoreRP = 1.0 - (rp / 48.0)          // max 8×6 - invertido
+        val calc = ultimasPorPregunta.values.toList()
+        val ce = calc.filter { it.idPregunta in idsCE }.sumOf { it.respuesta.toInt() }
+        val d  = calc.filter { it.idPregunta in idsD  }.sumOf { it.respuesta.toInt() }
+        val rp = calc.filter { it.idPregunta in idsRP }.sumOf { it.respuesta.toInt() }
+
+        val maxCE = idsCE.size * 6
+        val maxD  = idsD.size  * 6
+        val maxRP = idsRP.size * 6
+        val maxTotal = maxCE + maxD + maxRP
+
+        val scoreCE = if (maxCE > 0) ce / maxCE.toDouble() else 0.0
+        val scoreD  = if (maxD  > 0) d  / maxD.toDouble()  else 0.0
+        val scoreRP = if (maxRP > 0) rp / maxRP.toDouble()  else 0.0
+        val riesgoTotal = (ce + d + (maxRP - rp)) / maxTotal.toDouble()
 
         return ResultadoBurnout(
             scoreCE = scoreCE,
             scoreD  = scoreD,
             scoreRP = scoreRP,
-//            nivelCE  = when { ce >= 27 -> 2; ce >= 19 -> 1; else -> 0 },
-//            nivelD   = when { d  >= 10 -> 2; d  >=  6 -> 1; else -> 0 },
-//            nivelRP  = when { rp <= 33 -> 2; rp <= 39 -> 1; else -> 0 },
+            riesgoTotal = riesgoTotal
         )
     }
 }

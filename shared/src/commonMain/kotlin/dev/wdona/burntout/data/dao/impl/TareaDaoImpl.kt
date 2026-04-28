@@ -44,6 +44,10 @@ class TareaDaoImpl(appDatabase: AppDatabase) : TareaDao {
                 Descripcion = tarea.descripcion,
                 Estado = tarea.estado
             )
+            queries.assignTareaToUsuario(
+                FK_ID_Usuario = tarea.idUsuarioAsignado,
+                ID_Tarea = tarea.idTarea
+            )
         } catch (e: Exception) {
             Logger.d(TAG, "Error actualizarTarea: ${e.message}")
             return false

@@ -130,7 +130,7 @@ class PreguntasInicialesViewModel(
             _uiState.update { it.copy(respuestas = nuevasRespuestas) }
 
             try {
-                val resultado = calcularRiesgoBurnout(nuevasRespuestas)
+                val resultado = calcularRiesgoBurnout(nuevasRespuestas, currentState.preguntas)
                 usuarioRepository.updateRiesgoBurnout(respuesta.idUsuario, resultado.riesgoTotal)
             } catch (e: Exception) {
                 println("Error calculando riesgo: ${e.message}")

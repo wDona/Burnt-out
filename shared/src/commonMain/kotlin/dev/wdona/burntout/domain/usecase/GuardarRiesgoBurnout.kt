@@ -10,7 +10,8 @@ class GuardarRiesgoBurnout(
 ) {
     suspend operator fun invoke(idUsuario: Long) {
         val respuestas = preguntaRespuestaRepository.getRespuestasByIdUsuario(idUsuario)
-        val riesgoBurnout = CalcularRiesgoBurnout().invoke(respuestas)
+        val preguntas = preguntaRespuestaRepository.getPreguntasByOrg(SettingsManager.getIdOrganizacionActual())
+        val riesgoBurnout = CalcularRiesgoBurnout().invoke(respuestas, preguntas)
         usuarioRepository.updateRiesgoBurnout(idUsuario, riesgoBurnout.riesgoTotal)
 
         SettingsManager.setRiesgoCEUsuarioActual(riesgoBurnout.scoreCE)

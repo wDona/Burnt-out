@@ -13,6 +13,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.unit.dp
 import dev.wdona.burntout.presentation.ui.components.common.BateriaBurnout
 import dev.wdona.burntout.presentation.ui.theme.BurntOutMaterialTheme
@@ -48,9 +49,16 @@ fun MiembroCard(miembro: Usuario, onClick: () -> Unit) {
             tint = BurntOutMaterialTheme.getColorScheme().onSurface
         )
         Text(
-            text = "$id ${miembro.nombre}",
+            text = miembro.nombre,
             style = MaterialTheme.typography.titleMedium,
             color = BurntOutMaterialTheme.getColorScheme().onSurface,
+        )
+
+        Text(
+            text = miembro.username,
+            style = MaterialTheme.typography.bodyMedium,
+            color = BurntOutMaterialTheme.getColorScheme().onSurface,
+            modifier = Modifier.padding(start = 8.dp).alpha(0.7f)
         )
 
     }

@@ -3,18 +3,26 @@ package dev.wdona.burntout.presentation.viewmodel.viewmodels
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
 import dev.wdona.burntout.data.dao.TareaRepository
+import dev.wdona.burntout.domain.repository.UsuarioRepository
 import dev.wdona.burntout.shared.domain.Tarea
+import dev.wdona.burntout.shared.domain.Usuario
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class TareasViewModel(private val repository: TareaRepository) : ScreenModel {
+class TareasViewModel(
+    private val repository: TareaRepository,
+    private val usuarioRepository: UsuarioRepository
+) : ScreenModel {
     private val _uiState = MutableStateFlow<Tarea?>(null)
     val uiState: StateFlow<Tarea?> = _uiState.asStateFlow()
 
     private val _listaTareas = MutableStateFlow<List<Tarea>>(emptyList())
     val listaTareas: StateFlow<List<Tarea>> = _listaTareas
+
+    private val _miembros = MutableStateFlow<List<Usuario>>(emptyList())
+    val miembros: StateFlow<List<Usuario>> = _miembros.asStateFlow()
 
     fun cargarTareas(tableroId: Long) {
         screenModelScope.launch {
@@ -46,6 +54,17 @@ class TareasViewModel(private val repository: TareaRepository) : ScreenModel {
         screenModelScope.launch {
             repository.eliminarTarea(idTarea)
             cargarTareas(tableroId)
+        }
+    }
+
+    fun cargarMiembrosEquipo(idEquipo: Long) {
+        screenModelScope.launch {
+            try {
+                val usuarios = usuarioRepository.getUsuariosByEquipo(idEquipo)
+                _miembros.value = usuarios.sortedBy { it.riesgoBurnout ?: -1.0 }
+            } catch (e: Exception) {
+                println("Error cargando miembros para tarea: ${e.message}")
+            }
         }
     }
 }

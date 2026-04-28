@@ -47,10 +47,10 @@ class LeaderboardViewModel(
         screenModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
             try {
-                val idEquipoActual = SettingsManager.getIdEquipoActual()
-                if (idEquipoActual > 0L) {
-                    repository.removeUsuarioDelEquipo(idUsuario, idEquipoActual)
-                }
+                val equiposActuales = repository.getEquiposByOrg(idOrg)
+                equiposActuales
+                    .filter { idUsuario in it.idMiembros }
+                    .forEach { repository.removeUsuarioDelEquipo(it.idEquipo, idUsuario) }
 
                 val nuevoEquipo = Equipo(
                     idEquipo = 0L,

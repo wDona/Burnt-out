@@ -12,6 +12,7 @@ import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -29,6 +30,7 @@ import dev.wdona.burntout.presentation.ui.pantallas.tarea.MenuCrearTareaScreen
 import dev.wdona.burntout.presentation.ui.pantallas.tarea.TareaDetalleScreen
 import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.TareasViewModelFactory
 import dev.wdona.burntout.presentation.viewmodel.viewmodels.TareasViewModel
+import dev.wdona.burntout.shared.utils.SettingsManager
 
 class DetalleTableroScreen(val idTablero: Long, val nombreTablero: String, val tareasViewModelFactory: TareasViewModelFactory) : Screen {
     override val key: ScreenKey = uniqueScreenKey
@@ -38,9 +40,9 @@ class DetalleTableroScreen(val idTablero: Long, val nombreTablero: String, val t
         val navigator = LocalNavigator.currentOrThrow
         val tareaViewModel = rememberScreenModel { tareasViewModelFactory.create() }
 
-        // Cargar tareas cuando se abre la pantalla
-        LaunchedEffect(idTablero) {
+        LaunchedEffect(Unit) {
             tareaViewModel.cargarTareas(idTablero)
+            tareaViewModel.cargarMiembrosEquipo(SettingsManager.getIdEquipoActual())
         }
 
         DetalleTableroContent(
@@ -74,6 +76,7 @@ fun DetalleTableroContent(
     onIrATarea: (Long, Long) -> Unit
 ) {
     val listaTareas by tareasViewModel.listaTareas.collectAsStateWithLifecycle()
+    val miembros by tareasViewModel.miembros.collectAsState()
 
     ScaffoldBase(
         titulo = nombreTablero,
@@ -81,10 +84,7 @@ fun DetalleTableroContent(
         onFAB = { onIrACrearTarea(idTablero) },
         textoFAB = "Crear tarea"
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-        ) {
+        Column(modifier = Modifier.fillMaxSize()) {
             if (listaTareas.isEmpty()) {
                 Text(
                     text = "No hay tareas en este tablero",
@@ -93,17 +93,22 @@ fun DetalleTableroContent(
                         .padding(16.dp)
                 )
             } else {
-                Text( "IdTarea, Estado, Titulo, Asignado" )
                 LazyColumn(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                     modifier = Modifier
                         .fillMaxWidth()
-                        .weight(1f) // Ocupa el espacio restante
+                        .weight(1f)
                 ) {
                     items(listaTareas) { tarea ->
+                        val nombreAsignado = when {
+                            tarea.idUsuarioAsignado == Long.MIN_VALUE -> "Invitado"
+                            else -> miembros.firstOrNull { it.idUsuario == tarea.idUsuarioAsignado }?.nombre
+                                ?: tarea.idUsuarioAsignado.toString()
+                        }
                         CardTarea(
                             tarea = tarea,
+                            nombreAsignado = nombreAsignado,
                             onClick = { onIrATarea(tarea.idTarea, idTablero) },
                             onDelete = { tareasViewModel.eliminarTarea(tarea.idTarea, idTablero) },
                             onCompletar = {}
