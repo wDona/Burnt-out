@@ -254,7 +254,7 @@ private suspend fun unirseConCodigo(request: RegistroRequest, codigo: String): U
             it[UsuariosTable.username] = request.username
             it[UsuariosTable.password] = request.password
             it[UsuariosTable.nombre] = request.nombre
-            it[UsuariosTable.riesgoBurnout] = 0.0
+            it[UsuariosTable.riesgoBurnout] = -1.0
             it[UsuariosTable.descripcion] = ""
             it[UsuariosTable.idOrganizacion] = idOrg
             it[UsuariosTable.idEquipo] = idEquipo
@@ -289,7 +289,7 @@ private suspend fun unirseConCodigo(request: RegistroRequest, codigo: String): U
             username = request.username,
             password = request.password,
             nombre = request.nombre,
-            riesgoBurnout = 0.0,
+            riesgoBurnout = -1.0,
             descripcion = "",
             idOrganizacion = idOrg,
             idEquipo = idEquipo,
