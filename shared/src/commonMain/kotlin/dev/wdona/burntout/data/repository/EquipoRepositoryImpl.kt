@@ -86,20 +86,30 @@ class EquipoRepositoryImpl(
             println("Servidor offline al crear equipo: ${e.message}")
         }
 
+        val finalId = if (idServidor != -1L) idServidor else localId
+
+        equipo.idMiembros.forEach { idMiembro ->
+            try {
+                local.addUsuarioAlEquipo(finalId, idMiembro)
+            } catch (e: Exception) {
+                println("Error al vincular miembro al equipo local: ${e.message}")
+            }
+        }
+
         try {
             pendiente.insertOperacionPendiente(
                 TipoAccion.CREACION.getNombreAccion(),
                 Entity.EQUIPO.getNombreEntity(),
-                if (idServidor != -1L) idServidor else localId,
-                EquipoMapper.toJson(equipo.copy(idEquipo = if (idServidor != -1L) idServidor else localId)),
+                finalId,
+                EquipoMapper.toJson(equipo.copy(idEquipo = finalId)),
                 System.currentTimeMillis(),
                 if (idServidor != -1L) 1L else 0L
             )
         } catch (e: Exception) {
             println("Error al registrar operación pendiente: ${e.message}")
         }
-        
-        if (idServidor != -1L) idServidor else localId
+
+        finalId
     }
 
     override suspend fun actualizarEquipo(equipo: Equipo) {

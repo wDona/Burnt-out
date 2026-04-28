@@ -47,11 +47,6 @@ class LeaderboardViewModel(
         screenModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
             try {
-                val equiposActuales = repository.getEquiposByOrg(idOrg)
-                equiposActuales
-                    .filter { idUsuario in it.idMiembros }
-                    .forEach { repository.removeUsuarioDelEquipo(it.idEquipo, idUsuario) }
-
                 val nuevoEquipo = Equipo(
                     idEquipo = 0L,
                     titulo = nombre,
@@ -60,9 +55,7 @@ class LeaderboardViewModel(
                     idMiembros = listOf(idUsuario)
                 )
                 val idCreado = repository.crearEquipo(nuevoEquipo)
-                
                 SettingsManager.setIdEquipoActual(idCreado)
-                
                 _uiState.update { it.copy(isLoading = false, createdEquipoId = idCreado) }
             } catch (e: Exception) {
                 _uiState.update { it.copy(isLoading = false, error = e.message) }
@@ -74,11 +67,11 @@ class LeaderboardViewModel(
         _uiState.update { it.copy(createdEquipoId = null) }
     }
 
-    fun generarInvitacion(idUsuario: Long) {
+    fun generarInvitacion(idUsuario: Long, rol: String) {
         screenModelScope.launch {
             _uiState.update { it.copy(isGenerandoInvitacion = true, invitacionError = null, invitacionCode = null) }
             try {
-                val result = invitacionApi.generarCodigo(GenerarInvitacionRequest(idUsuarioAdmin = idUsuario))
+                val result = invitacionApi.generarCodigo(GenerarInvitacionRequest(idUsuarioAdmin = idUsuario, rol = rol))
                 _uiState.update { it.copy(isGenerandoInvitacion = false, invitacionCode = result.code) }
             } catch (e: Exception) {
                 _uiState.update { it.copy(isGenerandoInvitacion = false, invitacionError = e.message) }

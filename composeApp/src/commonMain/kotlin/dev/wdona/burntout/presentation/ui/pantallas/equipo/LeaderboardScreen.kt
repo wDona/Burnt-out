@@ -9,8 +9,6 @@ import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalClipboardManager
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.model.rememberScreenModel
@@ -28,7 +26,6 @@ import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.AjustesViewM
 import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.LeaderboardViewModelFactory
 import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.EquipoViewModelFactory
 import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.MiPerfilViewModelFactory
-import dev.wdona.burntout.presentation.viewmodel.viewmodels.LeaderboardUiState
 import dev.wdona.burntout.presentation.viewmodel.viewmodels.LeaderboardViewModel
 import dev.wdona.burntout.shared.utils.SettingsManager
 
@@ -79,6 +76,9 @@ class LeaderboardScreen(
         if (mostrarInvitarDialog) {
             InvitarOrgDialog(
                 uiState = uiState,
+                onGenerar = { rol ->
+                    viewModel.generarInvitacion(idUsuarioActual, rol)
+                },
                 onDismiss = {
                     mostrarInvitarDialog = false
                     viewModel.clearInvitacion()
@@ -92,10 +92,7 @@ class LeaderboardScreen(
                 navigator.push(EquipoScreen(equipoFactory, perfilFactory, ajustesFactory, onVolver = { navigator.pop() }, idEquipo = idEquipo))
             },
             onCrearEquipoClick = { mostrarCrearEquipoDialog = true },
-            onInvitarClick = {
-                mostrarInvitarDialog = true
-                viewModel.generarInvitacion(idUsuarioActual)
-            },
+            onInvitarClick = { mostrarInvitarDialog = true },
             onVolver = onVolver
         )
     }
@@ -114,6 +111,7 @@ fun LeaderboardContent(
     val listaEquipos = uiState.leaderboard
     val isLoading = uiState.isLoading
     val esInvitado = SettingsManager.isUsuarioInvitado()
+    val esAdmin = SettingsManager.getRolActual() == 1L
 
     val titulo = if (isLoading) "" else "Leaderboard"
 
@@ -121,7 +119,7 @@ fun LeaderboardContent(
         titulo = titulo,
         onVolver = onVolver,
         onCrear = if (!esInvitado) { { onCrearEquipoClick() } } else null,
-        onFAB = if (!esInvitado) { { onInvitarClick() } } else null,
+        onFAB = if (!esInvitado && esAdmin) { { onInvitarClick() } } else null,
         textoFAB = "Invitar",
         iconFAB = { Icon(Icons.Default.Share, contentDescription = "Invitar") }
     ) {
