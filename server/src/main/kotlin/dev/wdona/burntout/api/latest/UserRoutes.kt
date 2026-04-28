@@ -221,7 +221,7 @@ private suspend fun crearUsuarioConOrg(request: RegistroRequest, nombreOrg: Stri
         username = request.username,
         password = request.password,
         nombre = request.nombre,
-        riesgoBurnout = 0.0,
+        riesgoBurnout = -1.0,
         descripcion = "",
         idOrganizacion = idOrg,
         idEquipo = idEquipo,
