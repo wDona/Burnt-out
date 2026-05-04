@@ -215,7 +215,7 @@ jobs:
           force_push: true
 
       - name: Deploy server to AUR
-        uses: KSXGitHub/github-actions-deploy-aur@v4
+        uses: KSXGitHub/github-actions-deploy-aur@master
         with:
           pkgname: burnt-out-server
           pkgbuild: ./burnt-out-server/PKGBUILD
