@@ -204,7 +204,7 @@ jobs:
              su builder -c 'cd /pkg && makepkg --printsrcinfo > .SRCINFO'"
 
       - name: Deploy desktop app to AUR
-        uses: KSXGitHub/github-actions-deploy-aur@v2.7.2
+        uses: KSXGitHub/github-actions-deploy-aur@v3
         with:
           pkgname: burnt-out
           pkgbuild: ./PKGBUILD
@@ -213,10 +213,9 @@ jobs:
           ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
           commit_message: "Update to ${{ steps.vars.outputs.version }}"
           force_push: true
-          ssh_keyscan_types: rsa,ecdsa,ed25519
 
       - name: Deploy server to AUR
-        uses: KSXGitHub/github-actions-deploy-aur@v2.7.2
+        uses: KSXGitHub/github-actions-deploy-aur@v3
         with:
           pkgname: burnt-out-server
           pkgbuild: ./burnt-out-server/PKGBUILD
@@ -225,4 +224,3 @@ jobs:
           ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
           commit_message: "Update to ${{ steps.vars.outputs.version }}"
           force_push: true
-          ssh_keyscan_types: rsa,ecdsa,ed25519
