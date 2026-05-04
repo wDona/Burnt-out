@@ -204,7 +204,7 @@ jobs:
              su builder -c 'cd /pkg && makepkg --printsrcinfo > .SRCINFO'"
 
       - name: Deploy desktop app to AUR
-        uses: KSXGitHub/github-actions-deploy-aur@v3
+        uses: KSXGitHub/github-actions-deploy-aur@master
         with:
           pkgname: burnt-out
           pkgbuild: ./PKGBUILD
