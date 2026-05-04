@@ -64,4 +64,9 @@ class EquipoApiImpl(private val client: HttpClient = ApiClient.client) : EquipoA
         Logger.d(TAG, "removeUsuarioDelEquipo: equipo=$idEquipo, user=$idUsuario")
         return client.delete("equipos/$idEquipo/miembros/$idUsuario").status.isSuccess()
     }
+
+    override suspend fun updatePuntuacion(idEquipo: Long, puntos: Long): Boolean {
+        Logger.d(TAG, "updatePuntuacion: equipo=$idEquipo, puntos=$puntos")
+        return client.put("equipos/$idEquipo/puntuacion/$puntos").status.isSuccess()
+    }
 }

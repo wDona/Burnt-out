@@ -12,4 +12,5 @@ interface EquipoRemoteDataSource {
     suspend fun getMiembrosEquipo(idEquipo: Long): List<Usuario>
     suspend fun addUsuarioAlEquipo(idEquipo: Long, idUsuario: Long): Boolean
     suspend fun removeUsuarioDelEquipo(idEquipo: Long, idUsuario: Long): Boolean
+    suspend fun updatePuntuacion(idEquipo: Long, puntos: Long): Boolean
 }

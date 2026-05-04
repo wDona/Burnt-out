@@ -158,7 +158,11 @@ fun TareaDetalleContent(viewModel: TareasViewModel, onVolver: () -> Unit) {
                 idSubtareas = emptyList(),
                 fechaVencimiento = fechaVencimiento
             )
-            viewModel.actualizarTarea(tareaActualizada)
+            if (estadoSelected == TipoEstadoTarea.COMPLETADA) {
+                viewModel.completarTarea(tareaActualizada, SettingsManager.getIdEquipoActual())
+            } else {
+                viewModel.actualizarTarea(tareaActualizada)
+            }
             onVolver()
         }
     }

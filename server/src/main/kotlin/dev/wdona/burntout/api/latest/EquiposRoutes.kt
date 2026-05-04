@@ -151,6 +151,24 @@ fun Route.equiposRoutes() {
                 if (deletedCount == 0) return@delete call.respond(HttpStatusCode.NotFound)
                 call.respond(HttpStatusCode.NoContent)
             }
+            put("/puntuacion/{puntos}") {
+                val id = call.parameters["id"]?.toLongOrNull()
+                    ?: return@put call.respond(HttpStatusCode.BadRequest)
+                val puntos = call.parameters["puntos"]?.toLongOrNull()
+                    ?: return@put call.respond(HttpStatusCode.BadRequest)
+                println("[${call.request.origin.remoteHost}] PUT /equipos/$id/puntuacion/$puntos")
+                val updated = dbQuery {
+                    val row = EquiposTable.selectAll()
+                        .where { (EquiposTable.id eq id) and (EquiposTable.isDeleted eq false) }
+                        .singleOrNull() ?: return@dbQuery 0
+                    val nuevaPuntuacion = (row[EquiposTable.puntuacion] ?: 0L) + puntos
+                    EquiposTable.update({ (EquiposTable.id eq id) and (EquiposTable.isDeleted eq false) }) {
+                        it[EquiposTable.puntuacion] = nuevaPuntuacion
+                    }
+                }
+                if (updated == 0) return@put call.respond(HttpStatusCode.NotFound)
+                call.respond(HttpStatusCode.OK)
+            }
             route("/miembros") {
                 get {
                     val id = call.parameters["id"]?.toLongOrNull()

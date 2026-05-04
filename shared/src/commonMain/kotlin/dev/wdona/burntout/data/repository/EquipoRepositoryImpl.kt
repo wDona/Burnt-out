@@ -182,6 +182,31 @@ class EquipoRepositoryImpl(
         withContext(NonCancellable + Dispatchers.IO) {
             local.updatePuntuacion(idEquipo, puntos)
         }
+
+        if (SettingsManager.isUsuarioInvitado()) return
+
+        withContext(NonCancellable + Dispatchers.IO) {
+            var exito = false
+            try {
+                exito = remote.updatePuntuacion(idEquipo, puntos)
+            } catch (e: Exception) {
+                println("Servidor offline al actualizar puntuacion: ${e.message}")
+            }
+            if (!exito) {
+                try {
+                    pendiente.insertOperacionPendiente(
+                        TipoAccion.ACTUALIZACION.getNombreAccion(),
+                        Entity.EQUIPO.getNombreEntity(),
+                        idEquipo,
+                        "{\"puntos\":$puntos}",
+                        System.currentTimeMillis(),
+                        0L
+                    )
+                } catch (e: Exception) {
+                    println("Error al registrar operación pendiente: ${e.message}")
+                }
+            }
+        }
     }
 
     override suspend fun addUsuarioAlEquipo(idEquipo: Long, idUsuario: Long): Boolean = withContext(NonCancellable + Dispatchers.IO) {

@@ -41,4 +41,8 @@ class EquipoRemoteDataSourceImpl(private val equipoApi: EquipoApi) : EquipoRemot
     override suspend fun removeUsuarioDelEquipo(idEquipo: Long, idUsuario: Long): Boolean {
         return equipoApi.removeUsuarioDelEquipo(idEquipo, idUsuario)
     }
+
+    override suspend fun updatePuntuacion(idEquipo: Long, puntos: Long): Boolean {
+        return equipoApi.updatePuntuacion(idEquipo, puntos)
+    }
 }

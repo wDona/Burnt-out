@@ -4,7 +4,9 @@ import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
 import dev.wdona.burntout.data.dao.SubtareaRepository
 import dev.wdona.burntout.data.dao.TareaRepository
+import dev.wdona.burntout.domain.model.TipoEstadoTarea
 import dev.wdona.burntout.domain.repository.UsuarioRepository
+import dev.wdona.burntout.domain.usecase.CompletarTareaUseCase
 import dev.wdona.burntout.notification.NotificacionProgramador
 import dev.wdona.burntout.shared.domain.Subtarea
 import dev.wdona.burntout.shared.domain.Tarea
@@ -18,7 +20,8 @@ class TareasViewModel(
     private val repository: TareaRepository,
     private val usuarioRepository: UsuarioRepository,
     private val subtareaRepository: SubtareaRepository,
-    private val notificacionProgramador: NotificacionProgramador
+    private val notificacionProgramador: NotificacionProgramador,
+    private val completarTareaUseCase: CompletarTareaUseCase
 ) : ScreenModel {
     private val _uiState = MutableStateFlow<Tarea?>(null)
     val uiState: StateFlow<Tarea?> = _uiState.asStateFlow()
@@ -35,6 +38,15 @@ class TareasViewModel(
     fun cargarTareas(tableroId: Long) {
         screenModelScope.launch {
             _listaTareas.value = repository.getTareasByTableroId(tableroId)
+                .filter { it.estado != TipoEstadoTarea.COMPLETADA.string }
+        }
+    }
+
+    fun completarTarea(tarea: Tarea, idEquipo: Long) {
+        screenModelScope.launch {
+            completarTareaUseCase(tarea, idEquipo)
+            notificacionProgramador.cancelarNotificaciones(tarea.idTarea)
+            cargarTareas(tarea.idTableroPerteneciente)
         }
     }
 
