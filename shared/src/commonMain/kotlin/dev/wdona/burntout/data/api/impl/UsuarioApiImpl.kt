@@ -78,4 +78,8 @@ class UsuarioApiImpl(private val client: HttpClient = ApiClient.client) : Usuari
 
     override suspend fun getMiembrosEquipo(idEquipo: Long): List<Usuario> =
         client.get("equipos/$idEquipo/miembros").body<List<Usuario>>().also { Logger.d(TAG, "getMiembrosEquipo: $it") }
+
+    override suspend fun updateRol(idAdmin: Long, idUsuario: Long, nuevoRol: String): Boolean =
+        client.put("usuarios/$idUsuario/rol/$nuevoRol?idAdmin=$idAdmin").status.isSuccess()
+            .also { Logger.d(TAG, "updateRol: user=$idUsuario rol=$nuevoRol success=$it") }
 }

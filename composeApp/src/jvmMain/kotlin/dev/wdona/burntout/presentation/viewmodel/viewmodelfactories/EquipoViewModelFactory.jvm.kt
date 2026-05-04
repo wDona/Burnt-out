@@ -62,7 +62,8 @@ actual class EquipoViewModelFactory {
                     repository,
                     CargarMiembrosEquipo(usuarioRepository),
                     AddUsuarioAlEquipoUseCase(repository),
-                    GetUsuarioByUsernameUseCase(usuarioRepository)
+                    GetUsuarioByUsernameUseCase(usuarioRepository),
+                    usuarioRepository
                 )
             }
             return instance!!

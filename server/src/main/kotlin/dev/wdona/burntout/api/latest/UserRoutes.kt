@@ -153,6 +153,47 @@ fun Route.usuariosRoutes() {
                 call.respond(HttpStatusCode.NoContent)
             }
         }
+        put("/{id}/rol/{nuevoRol}") {
+            val id = call.parameters["id"]?.toLongOrNull()
+                ?: return@put call.respond(HttpStatusCode.BadRequest)
+            val nuevoRol = call.parameters["nuevoRol"]
+                ?: return@put call.respond(HttpStatusCode.BadRequest)
+            val idAdmin = call.request.queryParameters["idAdmin"]?.toLongOrNull()
+                ?: return@put call.respond(HttpStatusCode.BadRequest)
+
+            if (nuevoRol !in listOf("MEMBER", "ADMIN")) {
+                return@put call.respond(HttpStatusCode.BadRequest, "Rol no válido")
+            }
+
+            println("[${call.request.origin.remoteHost}] PUT /usuarios/$id/rol/$nuevoRol idAdmin=$idAdmin")
+
+            val result = dbQuery {
+                val adminRow = UsuariosTable.selectAll()
+                    .where { (UsuariosTable.id eq idAdmin) and (UsuariosTable.isDeleted eq false) }
+                    .singleOrNull()
+                    ?: return@dbQuery HttpStatusCode.Forbidden to "Admin no encontrado"
+
+                val adminRol = adminRow[UsuariosTable.rol]
+                if (adminRol != "ADMIN" && adminRol != "OWNER") {
+                    return@dbQuery HttpStatusCode.Forbidden to "Sin permisos para cambiar roles"
+                }
+
+                val targetRow = UsuariosTable.selectAll()
+                    .where { (UsuariosTable.id eq id) and (UsuariosTable.isDeleted eq false) }
+                    .singleOrNull()
+                    ?: return@dbQuery HttpStatusCode.NotFound to "Usuario no encontrado"
+
+                if (targetRow[UsuariosTable.rol] == "OWNER") {
+                    return@dbQuery HttpStatusCode.Forbidden to "No se puede cambiar el rol de un OWNER"
+                }
+
+                UsuariosTable.update({ UsuariosTable.id eq id }) {
+                    it[rol] = nuevoRol
+                }
+                HttpStatusCode.OK to "Rol actualizado"
+            }
+            call.respond(result.first, result.second)
+        }
         get("/username/{username}") {
             val username = call.parameters["username"] ?: return@get call.respond(HttpStatusCode.BadRequest)
             println("[${call.request.origin.remoteHost}] GET /usuarios/username/$username")
@@ -182,7 +223,7 @@ private suspend fun crearUsuarioConOrg(request: RegistroRequest, nombreOrg: Stri
     }[EquiposTable.id]
     println("[SERVER] Equipo creado con ID: $idEquipo")
 
-    println("[SERVER] Creando usuario ADMIN: ${request.username}")
+    println("[SERVER] Creando usuario OWNER: ${request.username}")
     val idUsuario = UsuariosTable.insert {
         it[UsuariosTable.username] = request.username
         it[UsuariosTable.password] = request.password
@@ -191,7 +232,7 @@ private suspend fun crearUsuarioConOrg(request: RegistroRequest, nombreOrg: Stri
         it[UsuariosTable.descripcion] = ""
         it[UsuariosTable.idOrganizacion] = idOrg
         it[UsuariosTable.idEquipo] = idEquipo
-        it[UsuariosTable.rol] = "ADMIN"
+        it[UsuariosTable.rol] = "OWNER"
     }[UsuariosTable.id]
     println("[SERVER] Usuario creado con ID: $idUsuario")
 
@@ -225,7 +266,7 @@ private suspend fun crearUsuarioConOrg(request: RegistroRequest, nombreOrg: Stri
         descripcion = "",
         idOrganizacion = idOrg,
         idEquipo = idEquipo,
-        rol = "ADMIN"
+        rol = "OWNER"
     )
 }
 

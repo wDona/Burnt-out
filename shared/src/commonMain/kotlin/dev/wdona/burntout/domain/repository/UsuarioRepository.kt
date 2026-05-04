@@ -15,4 +15,5 @@ interface UsuarioRepository {
     suspend fun existeUsuario(username: String): Boolean
     suspend fun getUsuarioByUsername(username: String): Usuario?
     suspend fun login(username: String, contrasena: String): Usuario
+    suspend fun updateRol(idAdmin: Long, idUsuario: Long, nuevoRol: String): Boolean
 }

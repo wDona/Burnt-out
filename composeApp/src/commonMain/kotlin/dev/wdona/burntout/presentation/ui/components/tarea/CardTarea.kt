@@ -12,11 +12,13 @@ import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.MoreHoriz
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.RadioButtonUnchecked
 import androidx.compose.material.icons.filled.Square
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -95,8 +97,11 @@ fun CardTarea(tarea: Tarea, nombreAsignado: String, onClick: () -> Unit, onDelet
             Text(
                 text = nombreAsignado,
                 textAlign = TextAlign.End,
-                modifier = Modifier.padding(end = 16.dp)
+                modifier = Modifier.padding(end = 8.dp)
             )
+            IconButton(onClick = { showMenu = true }) {
+                Icon(Icons.Default.MoreVert, contentDescription = "Opciones de tarea")
+            }
         }
 
         DropdownMenu(

@@ -26,7 +26,8 @@ fun Route.invitacionesRoutes() {
                     .singleOrNull()
                     ?: return@dbQuery null to "Usuario no encontrado"
 
-                if (adminRow[UsuariosTable.rol] != "ADMIN") {
+                val adminRol = adminRow[UsuariosTable.rol]
+                if (adminRol != "ADMIN" && adminRol != "OWNER") {
                     return@dbQuery null to "Solo los admins pueden generar códigos"
                 }
 

@@ -67,7 +67,8 @@ actual class EquipoViewModelFactory(@Transient private val context: Context) : S
                     repository,
                     CargarMiembrosEquipo(usuarioRepository),
                     AddUsuarioAlEquipoUseCase(repository),
-                    GetUsuarioByUsernameUseCase(usuarioRepository)
+                    GetUsuarioByUsernameUseCase(usuarioRepository),
+                    usuarioRepository
                 )
             }
             return instance!!

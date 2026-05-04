@@ -3,9 +3,11 @@ package dev.wdona.burntout.presentation.viewmodel.viewmodels
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
 import dev.wdona.burntout.domain.repository.EquipoRepository
+import dev.wdona.burntout.domain.repository.UsuarioRepository
 import dev.wdona.burntout.domain.usecase.AddUsuarioAlEquipoUseCase
 import dev.wdona.burntout.domain.usecase.CargarMiembrosEquipo
 import dev.wdona.burntout.domain.usecase.GetUsuarioByUsernameUseCase
+import dev.wdona.burntout.shared.utils.SettingsManager
 import dev.wdona.burntout.shared.domain.Equipo
 import dev.wdona.burntout.shared.domain.Usuario
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -26,7 +28,8 @@ class EquipoViewModel(
     private val repository: EquipoRepository,
     private val cargarMiembrosEquipoUseCase: CargarMiembrosEquipo,
     private val addUsuarioAlEquipoUseCase: AddUsuarioAlEquipoUseCase,
-    private val getUsuarioByUsernameUseCase: GetUsuarioByUsernameUseCase
+    private val getUsuarioByUsernameUseCase: GetUsuarioByUsernameUseCase,
+    private val usuarioRepository: UsuarioRepository
 ) : ScreenModel {
     private val _uiState = MutableStateFlow(EquipoUiState(isLoading = true))
     val uiState: StateFlow<EquipoUiState> = _uiState.asStateFlow()
@@ -120,6 +123,19 @@ class EquipoViewModel(
 
     fun resetError() {
         _uiState.update { it.copy(error = null) }
+    }
+
+    fun cambiarRol(idUsuario: Long, nuevoRol: String) {
+        screenModelScope.launch {
+            val idAdmin = SettingsManager.getIdUsuarioActual()
+            val success = usuarioRepository.updateRol(idAdmin, idUsuario, nuevoRol)
+            if (success) {
+                val idEquipo = _uiState.value.equipo?.idEquipo ?: return@launch
+                cargarMiembrosEquipo(idEquipo)
+            } else {
+                _uiState.update { it.copy(error = "Error al cambiar el rol") }
+            }
+        }
     }
 
     fun salirDelEquipo(idEquipo: Long, idUsuario: Long) {

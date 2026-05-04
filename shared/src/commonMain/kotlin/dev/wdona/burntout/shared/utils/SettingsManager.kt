@@ -91,6 +91,7 @@ object SettingsManager {
     }
     fun getSincronizadoEnEstaApertura(): Boolean = _sincronizadoEnEstaAperturaFlow.value
     fun isRespuestasAnonimas(): Boolean = _respuestasAnonimasFlow.value
+    fun isAdminOrOwner(): Boolean = _rolActualFlow.value >= 1L
     fun setRespuestasAnonimas(anonimas: Boolean) {
         settings.putBoolean(KEY_RESPUESTAS_ANONIMAS, anonimas)
         _respuestasAnonimasFlow.value = anonimas
@@ -144,7 +145,7 @@ object SettingsManager {
         setIdEquipoActual(usuario.idEquipo)
         setIdOrganizacionActual(usuario.idOrganizacion)
         setTokenUsuario("token_${usuario.idUsuario}")
-        setRolActual(if (usuario.rol == "ADMIN") 1L else 0L)
+        setRolActual(when (usuario.rol) { "OWNER" -> 2L; "ADMIN" -> 1L; else -> 0L })
         
         settings.putLong(KEY_ID_USUARIO_ACTUAL, usuario.idUsuario)
         _idUsuarioActualFlow.value = usuario.idUsuario

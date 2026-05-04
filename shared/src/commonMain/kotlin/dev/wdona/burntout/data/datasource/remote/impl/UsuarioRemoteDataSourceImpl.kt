@@ -42,6 +42,10 @@ class UsuarioRemoteDataSourceImpl(private val usuarioApi: UsuarioApi) : UsuarioR
         return usuarioApi.getMiembrosEquipo(idEquipo)
     }
 
+    override suspend fun updateRol(idAdmin: Long, idUsuario: Long, nuevoRol: String): Boolean {
+        return usuarioApi.updateRol(idAdmin, idUsuario, nuevoRol)
+    }
+
     override suspend fun getUsuarioByUsername(username: String): Usuario? {
         return usuarioApi.getUsuarioByUsername(username)
     }

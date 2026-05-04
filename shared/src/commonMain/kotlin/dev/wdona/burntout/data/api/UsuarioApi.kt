@@ -14,4 +14,5 @@ interface UsuarioApi {
     suspend fun getUsuarioByUsername(username: String): Usuario?
     suspend fun login(username: String, contrasena: String): Usuario
     suspend fun getMiembrosEquipo(idEquipo: Long): List<Usuario>
+    suspend fun updateRol(idAdmin: Long, idUsuario: Long, nuevoRol: String): Boolean
 }

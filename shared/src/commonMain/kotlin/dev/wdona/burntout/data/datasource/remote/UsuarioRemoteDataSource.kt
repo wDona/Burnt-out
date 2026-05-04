@@ -14,4 +14,5 @@ interface UsuarioRemoteDataSource {
     suspend fun existeUsuario(username: String): Boolean
     suspend fun login(username: String, contrasena: String): Usuario
     suspend fun getMiembrosEquipo(idEquipo: Long): List<Usuario>
+    suspend fun updateRol(idAdmin: Long, idUsuario: Long, nuevoRol: String): Boolean
 }

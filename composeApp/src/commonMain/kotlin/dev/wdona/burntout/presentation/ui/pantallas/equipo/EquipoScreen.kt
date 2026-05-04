@@ -83,9 +83,12 @@ class EquipoScreen(val factory: EquipoViewModelFactory, val perfilFactory: MiPer
             )
         }
 
+        val esAdminOrOwner = SettingsManager.isAdminOrOwner()
+
         EquipoContent(
             viewModel,
             esMiEquipo = esMiEquipo,
+            esAdminOrOwner = esAdminOrOwner,
             onVolver = onVolver,
             onClickAddUsuario = {
                 mostrarAnadirUsuarioDialog = true
@@ -100,7 +103,7 @@ class EquipoScreen(val factory: EquipoViewModelFactory, val perfilFactory: MiPer
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EquipoContent(viewModel: EquipoViewModel, esMiEquipo: Boolean, onVolver: (() -> Unit)? = null, onClickAddUsuario: () -> Unit, onClickUsuario: (Long) -> Unit, perfilViewModel: PerfilViewModel) {
+fun EquipoContent(viewModel: EquipoViewModel, esMiEquipo: Boolean, esAdminOrOwner: Boolean = false, onVolver: (() -> Unit)? = null, onClickAddUsuario: () -> Unit, onClickUsuario: (Long) -> Unit, perfilViewModel: PerfilViewModel) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     val titulo = if (uiState.isLoading) "" else (uiState.equipo?.titulo ?: "Mi equipo (off)")
@@ -152,7 +155,11 @@ fun EquipoContent(viewModel: EquipoViewModel, esMiEquipo: Boolean, onVolver: (()
                             onClick = {
                                 perfilViewModel.cargarUsuario(miembro.idUsuario)
                                 onClickUsuario(miembro.idUsuario)
-                            }
+                            },
+                            esAdminOrOwner = esAdminOrOwner,
+                            onCambiarRol = if (esAdminOrOwner) { nuevoRol ->
+                                viewModel.cambiarRol(miembro.idUsuario, nuevoRol)
+                            } else null
                         )
                     }
                 }

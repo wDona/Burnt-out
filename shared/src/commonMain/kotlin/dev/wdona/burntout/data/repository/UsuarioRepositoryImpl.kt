@@ -240,4 +240,14 @@ class UsuarioRepositoryImpl(
             }
         }
     }
+
+    override suspend fun updateRol(idAdmin: Long, idUsuario: Long, nuevoRol: String): Boolean =
+        withContext(NonCancellable + Dispatchers.IO) {
+            try {
+                remote.updateRol(idAdmin, idUsuario, nuevoRol)
+            } catch (e: Exception) {
+                println("Error al actualizar rol: ${e.message}")
+                false
+            }
+        }
 }
