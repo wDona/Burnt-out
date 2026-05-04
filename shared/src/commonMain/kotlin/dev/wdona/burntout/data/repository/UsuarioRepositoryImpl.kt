@@ -65,13 +65,12 @@ class UsuarioRepositoryImpl(
         if (!SettingsManager.isUsuarioInvitado()) {
             try {
                 val usuarios = remote.getMiembrosEquipo(idEquipo)
-
                 usuarios.forEach { local.eliminarUsuario(it.idUsuario) }
-                usuarios.forEach { 
-                    local.insertOrUpdateUsuario(it) 
+                usuarios.forEach {
+                    local.insertOrUpdateUsuario(it)
                     local.vincularUsuarioEquipo(it.idUsuario, idEquipo)
                 }
-
+                return@withContext usuarios
             } catch (e: Exception) {
                 println("Error (getUsuariosByEquipo): ${e.message}")
             }

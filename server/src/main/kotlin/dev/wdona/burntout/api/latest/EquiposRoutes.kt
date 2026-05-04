@@ -189,6 +189,7 @@ fun Route.equiposRoutes() {
                                 descripcion = it[UsuariosTable.descripcion],
                                 idOrganizacion = it[UsuariosTable.idOrganizacion],
                                 idEquipo = it[UsuariosTable.idEquipo],
+                                rol = it[UsuariosTable.rol],
                                 isDeleted = it[UsuariosTable.isDeleted]
                             )
                         }.filter { !it.isDeleted }

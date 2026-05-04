@@ -1,9 +1,7 @@
 package dev.wdona.burntout.presentation.ui.components.equipo
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -64,34 +62,34 @@ fun MiembroCard(
             modifier = Modifier.padding(end = 8.dp),
             tint = BurntOutMaterialTheme.getColorScheme().onSurface
         )
-        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.Center) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    text = "${miembro.nombre}",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = BurntOutMaterialTheme.getColorScheme().onSurface,
-                )
-                Text(
-                    text = "@${miembro.username}",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = BurntOutMaterialTheme.getColorScheme().onSurface,
-                    modifier = Modifier.padding(start = 8.dp).alpha(0.7f)
-                )
-            }
-        }
-
-        if (esOwner || esAdmin) {
-            Surface(
-                shape = RoundedCornerShape(4.dp),
-                color = if (esOwner) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary,
-                modifier = Modifier.padding(end = 4.dp)
-            ) {
-                Text(
-                    text = if (esOwner) "Owner" else "Admin",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = if (esOwner) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSecondary,
-                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 3.dp)
-                )
+        Row(
+            modifier = Modifier.weight(1f),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = miembro.nombre,
+                style = MaterialTheme.typography.titleMedium,
+                color = BurntOutMaterialTheme.getColorScheme().onSurface,
+            )
+            Text(
+                text = "@${miembro.username}",
+                style = MaterialTheme.typography.bodyMedium,
+                color = BurntOutMaterialTheme.getColorScheme().onSurface,
+                modifier = Modifier.padding(start = 8.dp).alpha(0.7f)
+            )
+            if (esOwner || esAdmin) {
+                Surface(
+                    shape = RoundedCornerShape(4.dp),
+                    color = if (esOwner) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary,
+                    modifier = Modifier.padding(start = 8.dp)
+                ) {
+                    Text(
+                        text = if (esOwner) "Owner" else "Admin",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = if (esOwner) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSecondary,
+                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 3.dp)
+                    )
+                }
             }
         }
 
@@ -106,7 +104,7 @@ fun MiembroCard(
                             text = { Text("Quitar admin") },
                             onClick = {
                                 menuExpanded = false
-                                onCambiarRol?.invoke("MEMBER")
+                                onCambiarRol("MEMBER")
                             }
                         )
                     } else {
@@ -114,7 +112,7 @@ fun MiembroCard(
                             text = { Text("Hacer admin") },
                             onClick = {
                                 menuExpanded = false
-                                onCambiarRol?.invoke("ADMIN")
+                                onCambiarRol("ADMIN")
                             }
                         )
                     }
