@@ -11,10 +11,13 @@ class RespuestaMapper {
     companion object {
         fun toDomain(entity: ResponderEntity): Respuesta {
             return Respuesta(
+                idRespuesta = entity.ID_Respuesta,
                 idUsuario = entity.ID_Usuario,
                 idPregunta = entity.ID_Pregunta,
                 anonimo = entity.Anonimo == 1L,
-                respuesta = entity.Respuesta
+                respuesta = entity.Respuesta,
+                updatedAt = entity.Updated_At,
+                isDeleted = entity.Is_Deleted == 1L
             )
         }
 
@@ -31,6 +34,8 @@ class RespuestaMapper {
                 if (respuesta.nombreUsuario != null) {
                     put(RespuestaJsonFields.NOMBRE_USUARIO.nombreCampo, JsonPrimitive(respuesta.nombreUsuario))
                 }
+                put("updated_at", JsonPrimitive(respuesta.updatedAt))
+                put("is_deleted", JsonPrimitive(if (respuesta.isDeleted) 1 else 0))
             }.toString()
         }
     }

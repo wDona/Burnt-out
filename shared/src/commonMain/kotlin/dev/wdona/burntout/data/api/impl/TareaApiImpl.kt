@@ -18,12 +18,12 @@ import io.ktor.client.statement.HttpResponse
 class TareaApiImpl(private val client: HttpClient = ApiClient.client) : TareaApi {
     private val TAG = "TareaApiImpl"
 
-    override suspend fun getTareasByTablero(idTablero: Long): List<Tarea> {
+    override suspend fun getTareasByTablero(idTablero: String): List<Tarea> {
         Logger.d(TAG, "getTareasByTablero: $idTablero")
         return client.get("tareas?idTablero=$idTablero").body()
     }
 
-    override suspend fun getTareaById(idTarea: Long, idTablero: Long): Tarea {
+    override suspend fun getTareaById(idTarea: String, idTablero: String): Tarea {
         Logger.d(TAG, "getTareaById: $idTarea")
         return client.get("tareas/$idTarea").body()
     }
@@ -44,7 +44,7 @@ class TareaApiImpl(private val client: HttpClient = ApiClient.client) : TareaApi
         }
     }
 
-    override suspend fun eliminarTarea(idTarea: Long): HttpResponse {
+    override suspend fun eliminarTarea(idTarea: String): HttpResponse {
         Logger.d(TAG, "eliminarTarea: $idTarea")
         return client.delete("tareas/$idTarea")
     }

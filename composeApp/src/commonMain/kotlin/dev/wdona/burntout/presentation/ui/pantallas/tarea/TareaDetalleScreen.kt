@@ -67,7 +67,7 @@ import dev.wdona.burntout.shared.domain.Tarea
 import dev.wdona.burntout.shared.domain.Usuario
 import dev.wdona.burntout.shared.utils.SettingsManager
 
-class TareaDetalleScreen(private val idTarea: Long, private val idTablero: Long, private val factory: TareasViewModelFactory) : Screen {
+class TareaDetalleScreen(private val idTarea: String, private val idTablero: String, private val factory: TareasViewModelFactory) : Screen {
     override val key: ScreenKey = uniqueScreenKey
 
     @Composable
@@ -149,11 +149,11 @@ fun TareaDetalleContent(viewModel: TareasViewModel, onVolver: () -> Unit) {
     fun guardarTarea() {
         if (textStateNombreTarea.isNotBlank()) {
             val tareaActualizada = Tarea(
-                idTarea = tarea?.idTarea ?: Long.MIN_VALUE,
+                idTarea = tarea?.idTarea ?: "",
                 titulo = textStateNombreTarea,
                 descripcion = textStateDescripcion,
                 estado = estadoSelected.string,
-                idTableroPerteneciente = tarea?.idTableroPerteneciente ?: Long.MIN_VALUE,
+                idTableroPerteneciente = tarea?.idTableroPerteneciente ?: "",
                 idUsuarioAsignado = usuarioSeleccionado?.idUsuario ?: SettingsManager.getIdUsuarioActual(),
                 idSubtareas = emptyList(),
                 fechaVencimiento = fechaVencimiento
@@ -325,7 +325,7 @@ fun TareaDetalleContent(viewModel: TareasViewModel, onVolver: () -> Unit) {
                         if (nuevaSubtareaTitulo.isNotBlank() && tarea != null) {
                             viewModel.crearSubtarea(
                                 Subtarea(
-                                    idSubtarea = 0,
+                                    idSubtarea = "",
                                     titulo = nuevaSubtareaTitulo.trim(),
                                     descripcion = null,
                                     completado = false,
@@ -341,7 +341,7 @@ fun TareaDetalleContent(viewModel: TareasViewModel, onVolver: () -> Unit) {
                         if (nuevaSubtareaTitulo.isNotBlank() && tarea != null) {
                             viewModel.crearSubtarea(
                                 Subtarea(
-                                    idSubtarea = 0,
+                                    idSubtarea = "",
                                     titulo = nuevaSubtareaTitulo.trim(),
                                     descripcion = null,
                                     completado = false,

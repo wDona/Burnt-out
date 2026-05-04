@@ -7,5 +7,6 @@ interface AjusteDao {
     fun modificarAjuste(idUsuario: Long, ajuste: Ajuste)
     fun eliminarAjuste(idAjuste: Long)
     fun getAjustesByUsuario(idUsuario: Long): List<Ajuste>
-    fun getAjusteByIdYUsuario(idAjuste: Long, idUsuario: Long): Ajuste
+    fun getAjusteByIdYUsuario(idAjuste: Long, idUsuario: Long): Ajuste?
+    fun insertOrUpdateAjuste(ajuste: Ajuste)
 }

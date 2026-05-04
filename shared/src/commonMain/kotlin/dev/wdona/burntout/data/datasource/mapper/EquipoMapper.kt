@@ -13,7 +13,8 @@ object EquipoMapper {
             puntuacion = entity.Puntuacion ?: 0,
             idOrganizacion = entity.FK_ID_Org,
             idMiembros = emptyList(), // Miembros se cargan aparte o por relacion
-            isDeleted = entity.Is_Deleted != 0L
+            isDeleted = entity.Is_Deleted != 0L,
+            updatedAt = entity.Updated_At
         )
     }
 
@@ -23,7 +24,8 @@ object EquipoMapper {
             Titulo = domain.titulo,
             Puntuacion = domain.puntuacion,
             FK_ID_Org = domain.idOrganizacion,
-            Is_Deleted = if (domain.isDeleted) 1L else 0L
+            Is_Deleted = if (domain.isDeleted) 1L else 0L,
+            Updated_At = domain.updatedAt
         )
     }
 

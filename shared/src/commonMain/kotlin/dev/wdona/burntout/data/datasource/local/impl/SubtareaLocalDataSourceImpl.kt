@@ -6,10 +6,10 @@ import dev.wdona.burntout.shared.domain.Subtarea
 
 class SubtareaLocalDataSourceImpl(private val dao: SubtareaDao) : SubtareaLocalDataSource {
 
-    override suspend fun getSubtareasByTarea(idTarea: Long): List<Subtarea> =
+    override suspend fun getSubtareasByTarea(idTarea: String): List<Subtarea> =
         dao.getSubtareasByTarea(idTarea)
 
-    override suspend fun crearSubtarea(subtarea: Subtarea): Long =
+    override suspend fun crearSubtarea(subtarea: Subtarea): String =
         dao.crearSubtarea(subtarea)
 
     override suspend fun insertOrUpdateSubtarea(subtarea: Subtarea): Boolean =
@@ -18,6 +18,6 @@ class SubtareaLocalDataSourceImpl(private val dao: SubtareaDao) : SubtareaLocalD
     override suspend fun actualizarSubtarea(subtarea: Subtarea): Boolean =
         dao.actualizarSubtarea(subtarea)
 
-    override suspend fun eliminarSubtarea(idSubtarea: Long): Boolean =
+    override suspend fun eliminarSubtarea(idSubtarea: String): Boolean =
         dao.eliminarSubtarea(idSubtarea)
 }

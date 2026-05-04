@@ -38,19 +38,20 @@ fun Route.tablerosRoutes() {
         post {
             val tablero = call.receive<Tablero>()
             println("[${call.request.origin.remoteHost}] POST /tableros titulo=${tablero.titulo}")
-            val nuevoId = dbQuery {
+            dbQuery {
                 TablerosTable.insert {
+                    it[id] = tablero.idTablero
                     it[titulo] = tablero.titulo
                     it[idOrganizacion] = tablero.idOrganizacion
                     it[idEquipo] = tablero.idEquipo
                     it[isDeleted] = tablero.isDeleted
-                }[TablerosTable.id]
+                }
             }
-            call.respond(HttpStatusCode.Created, tablero.copy(idTablero = nuevoId))
+            call.respond(HttpStatusCode.Created, tablero)
         }
         route("/{id}") {
             get {
-                val id = call.parameters["id"]?.toLongOrNull()
+                val id = call.parameters["id"]
                     ?: return@get call.respond(HttpStatusCode.BadRequest)
                 println("[${call.request.origin.remoteHost}] GET /tableros/$id")
                 val tablero = dbQuery {
@@ -67,7 +68,7 @@ fun Route.tablerosRoutes() {
                 call.respond(tablero)
             }
             put {
-                val id = call.parameters["id"]?.toLongOrNull()
+                val id = call.parameters["id"]
                     ?: return@put call.respond(HttpStatusCode.BadRequest)
                 val tablero = call.receive<Tablero>()
                 println("[${call.request.origin.remoteHost}] PUT /tableros/$id titulo=${tablero.titulo}")
@@ -83,7 +84,7 @@ fun Route.tablerosRoutes() {
                 call.respond(tablero.copy(idTablero = id))
             }
             delete {
-                val id = call.parameters["id"]?.toLongOrNull()
+                val id = call.parameters["id"]
                     ?: return@delete call.respond(HttpStatusCode.BadRequest)
                 println("[${call.request.origin.remoteHost}] DELETE /tableros/$id")
                 val deletedCount = dbQuery {

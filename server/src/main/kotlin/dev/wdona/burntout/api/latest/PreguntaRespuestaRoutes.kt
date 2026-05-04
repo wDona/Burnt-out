@@ -116,6 +116,7 @@ fun Route.preguntasRespuestasRoutes() {
                 }
                 var results = query.map {
                     Respuesta(
+                        idRespuesta = it[RespuestasTable.id],
                         idUsuario = it[RespuestasTable.idUsuario],
                         idPregunta = it[RespuestasTable.idPregunta],
                         anonimo = it[RespuestasTable.anonimo],
@@ -151,6 +152,7 @@ fun Route.preguntasRespuestasRoutes() {
                     }
                 } else {
                     RespuestasTable.insert {
+                        it[id] = respuesta.idRespuesta
                         it[idUsuario] = respuesta.idUsuario
                         it[idPregunta] = respuesta.idPregunta
                         it[anonimo] = respuesta.anonimo

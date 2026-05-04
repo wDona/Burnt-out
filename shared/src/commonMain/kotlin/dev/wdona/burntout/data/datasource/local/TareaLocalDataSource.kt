@@ -4,6 +4,6 @@ import dev.wdona.burntout.data.datasource.common.TareaDataSource
 import dev.wdona.burntout.shared.domain.Tarea
 
 interface TareaLocalDataSource : TareaDataSource {
-    suspend fun eliminarTareasPorTablero(idTablero: Long)
+    suspend fun eliminarTareasPorTablero(idTablero: String)
     override suspend fun insertOrUpdateTarea(tarea: Tarea): Boolean
 }

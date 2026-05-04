@@ -27,7 +27,7 @@ class TablerosViewModel(private val repository: TableroRepository) : ScreenModel
         }
     }
 
-    fun cargarTableroPorId(idTablero: Long) {
+    fun cargarTableroPorId(idTablero: String) {
         screenModelScope.launch {
             _uiState.value = repository.getTableroById(idTablero)
         }
@@ -48,7 +48,7 @@ class TablerosViewModel(private val repository: TableroRepository) : ScreenModel
         }
     }
 
-    fun eliminarTablero(idTablero: Long, idOrg: Long) {
+    fun eliminarTablero(idTablero: String, idOrg: Long) {
         screenModelScope.launch {
             repository.eliminarTablero(idTablero)
             recargarTableros(idOrg, SettingsManager.getIdEquipoActual())

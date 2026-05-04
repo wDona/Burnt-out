@@ -4,9 +4,9 @@ import dev.wdona.burntout.shared.domain.Tarea
 import io.ktor.client.statement.HttpResponse
 
 interface TareaApi {
-    suspend fun getTareasByTablero(idTablero: Long): List<Tarea>
-    suspend fun getTareaById(idTarea: Long, idTablero: Long): Tarea
+    suspend fun getTareasByTablero(idTablero: String): List<Tarea>
+    suspend fun getTareaById(idTarea: String, idTablero: String): Tarea
     suspend fun crearTarea(tarea: Tarea): HttpResponse
     suspend fun actualizarTarea(tarea: Tarea) : HttpResponse
-    suspend fun eliminarTarea(idTarea: Long) : HttpResponse
+    suspend fun eliminarTarea(idTarea: String) : HttpResponse
 }

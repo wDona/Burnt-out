@@ -15,7 +15,7 @@ class OperacionesPendientesRepositoryImpl(
     override suspend fun insertOperacionPendiente(
         tipoAccion: String,
         tablaAfectada: String,
-        idAfectado: Long,
+        idAfectado: String,
         datosJson: String,
         timestampCreacion: Long
     ) {

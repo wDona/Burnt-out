@@ -5,7 +5,7 @@ import dev.wdona.burntout.data.datasource.local.TableroLocalDataSource
 import dev.wdona.burntout.shared.domain.Tablero
 
 class TableroLocalDataSourceImpl(private val tableroDao: TableroDao) : TableroLocalDataSource {
-    override suspend fun getTableroById(idTablero: Long): Tablero {
+    override suspend fun getTableroById(idTablero: String): Tablero {
         return tableroDao.getTableroById(idTablero)
     }
 
@@ -13,7 +13,7 @@ class TableroLocalDataSourceImpl(private val tableroDao: TableroDao) : TableroLo
         return tableroDao.getTablerosByOrg(idOrg)
     }
 
-    override suspend fun crearTablero(tablero: Tablero): Long {
+    override suspend fun crearTablero(tablero: Tablero): String {
         return tableroDao.crearTablero(tablero)
     }
 
@@ -21,7 +21,7 @@ class TableroLocalDataSourceImpl(private val tableroDao: TableroDao) : TableroLo
         return tableroDao.actualizarTablero(tablero)
     }
 
-    override suspend fun eliminarTablero(idTablero: Long): Boolean {
+    override suspend fun eliminarTablero(idTablero: String): Boolean {
         return tableroDao.eliminarTablero(idTablero)
     }
 

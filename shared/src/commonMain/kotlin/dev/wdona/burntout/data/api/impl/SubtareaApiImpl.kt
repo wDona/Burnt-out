@@ -22,7 +22,7 @@ private data class CompletadoRequest(val completado: Boolean)
 class SubtareaApiImpl(private val client: HttpClient = ApiClient.client) : SubtareaApi {
     private val TAG = "SubtareaApiImpl"
 
-    override suspend fun getSubtareasByTarea(idTarea: Long): List<Subtarea> {
+    override suspend fun getSubtareasByTarea(idTarea: String): List<Subtarea> {
         Logger.d(TAG, "getSubtareasByTarea: $idTarea")
         return client.get("subtareas?idTarea=$idTarea").body()
     }
@@ -43,7 +43,7 @@ class SubtareaApiImpl(private val client: HttpClient = ApiClient.client) : Subta
         }
     }
 
-    override suspend fun eliminarSubtarea(idSubtarea: Long): HttpResponse {
+    override suspend fun eliminarSubtarea(idSubtarea: String): HttpResponse {
         Logger.d(TAG, "eliminarSubtarea: $idSubtarea")
         return client.delete("subtareas/$idSubtarea")
     }

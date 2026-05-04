@@ -3,10 +3,11 @@ package dev.wdona.burntout.domain.model
 import kotlinx.serialization.Serializable
 
 @Serializable
-class Ajuste(
-    val idAjuste: Long,
+data class Ajuste(
+    val idAjuste: Long? = null,
+    val idUsuario: Long,
     val nombre: String,
     val valorAjuste: String,
-    val isDeleted: Boolean = false
-) {
-}
+    val isDeleted: Boolean = false,
+    val updatedAt: Long = 0L
+)

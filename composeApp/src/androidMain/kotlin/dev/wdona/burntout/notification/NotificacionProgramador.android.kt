@@ -10,7 +10,7 @@ actual class NotificacionProgramador(private val context: Context) {
 
     private val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
-    actual fun programarNotificaciones(idTarea: Long, titulo: String, fechaVencimiento: Long) {
+    actual fun programarNotificaciones(idTarea: String, titulo: String, fechaVencimiento: Long) {
         val ahora = System.currentTimeMillis()
         val ms24h = 24 * 60 * 60 * 1000L
 
@@ -22,18 +22,18 @@ actual class NotificacionProgramador(private val context: Context) {
         }
     }
 
-    actual fun cancelarNotificaciones(idTarea: Long) {
+    actual fun cancelarNotificaciones(idTarea: String) {
         cancelarAlarma(idTarea, TareaVencimientoReceiver.TIPO_24H)
         cancelarAlarma(idTarea, TareaVencimientoReceiver.TIPO_ENTREGA)
     }
 
-    private fun programarAlarma(idTarea: Long, titulo: String, triggerMs: Long, tipo: String) {
+    private fun programarAlarma(idTarea: String, titulo: String, triggerMs: Long, tipo: String) {
         val intent = Intent(context, TareaVencimientoReceiver::class.java).apply {
             putExtra(TareaVencimientoReceiver.EXTRA_TITULO, titulo)
             putExtra(TareaVencimientoReceiver.EXTRA_TIPO, tipo)
             putExtra(TareaVencimientoReceiver.EXTRA_ID_TAREA, idTarea)
         }
-        val requestCode = (idTarea * 10 + if (tipo == TareaVencimientoReceiver.TIPO_24H) 0 else 1).toInt()
+        val requestCode = (idTarea.hashCode() * 10 + if (tipo == TareaVencimientoReceiver.TIPO_24H) 0 else 1)
         val pendingIntent = PendingIntent.getBroadcast(
             context, requestCode, intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
@@ -49,9 +49,9 @@ actual class NotificacionProgramador(private val context: Context) {
         }
     }
 
-    private fun cancelarAlarma(idTarea: Long, tipo: String) {
+    private fun cancelarAlarma(idTarea: String, tipo: String) {
         val intent = Intent(context, TareaVencimientoReceiver::class.java)
-        val requestCode = (idTarea * 10 + if (tipo == TareaVencimientoReceiver.TIPO_24H) 0 else 1).toInt()
+        val requestCode = (idTarea.hashCode() * 10 + if (tipo == TareaVencimientoReceiver.TIPO_24H) 0 else 1)
         val pendingIntent = PendingIntent.getBroadcast(
             context, requestCode, intent,
             PendingIntent.FLAG_NO_CREATE or PendingIntent.FLAG_IMMUTABLE

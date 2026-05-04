@@ -16,7 +16,7 @@ internal data class EstadoRequest(val estado: String)
 fun Route.tareasRoutes() {
     route("/tareas") {
         get {
-            val idTablero = call.request.queryParameters["idTablero"]?.toLongOrNull()
+            val idTablero = call.request.queryParameters["idTablero"]
             println("[${call.request.origin.remoteHost}] GET /tareas idTablero=$idTablero")
             val resultado = dbQuery {
                 val query = if (idTablero != null) {
@@ -45,8 +45,9 @@ fun Route.tareasRoutes() {
         post {
             val tarea = call.receive<Tarea>()
             println("[${call.request.origin.remoteHost}] POST /tareas titulo=${tarea.titulo}")
-            val nuevoId = dbQuery {
+            dbQuery {
                 TareasTable.insert {
+                    it[id] = tarea.idTarea
                     it[titulo] = tarea.titulo
                     it[descripcion] = tarea.descripcion
                     it[estado] = tarea.estado
@@ -54,13 +55,13 @@ fun Route.tareasRoutes() {
                     it[idUsuarioAsignado] = tarea.idUsuarioAsignado
                     it[fechaVencimiento] = tarea.fechaVencimiento
                     it[isDeleted] = tarea.isDeleted
-                }[TareasTable.id]
+                }
             }
-            call.respond(HttpStatusCode.Created, tarea.copy(idTarea = nuevoId))
+            call.respond(HttpStatusCode.Created, tarea)
         }
         route("/{id}") {
             get {
-                val id = call.parameters["id"]?.toLongOrNull()
+                val id = call.parameters["id"]
                     ?: return@get call.respond(HttpStatusCode.BadRequest)
                 println("[${call.request.origin.remoteHost}] GET /tareas/$id")
                 val tarea = dbQuery {
@@ -83,7 +84,7 @@ fun Route.tareasRoutes() {
                 call.respond(tarea)
             }
             put {
-                val id = call.parameters["id"]?.toLongOrNull()
+                val id = call.parameters["id"]
                     ?: return@put call.respond(HttpStatusCode.BadRequest)
                 val tarea = call.receive<Tarea>()
                 println("[${call.request.origin.remoteHost}] PUT /tareas/$id titulo=${tarea.titulo}")
@@ -102,7 +103,7 @@ fun Route.tareasRoutes() {
                 call.respond(tarea.copy(idTarea = id))
             }
             delete {
-                val id = call.parameters["id"]?.toLongOrNull()
+                val id = call.parameters["id"]
                     ?: return@delete call.respond(HttpStatusCode.BadRequest)
                 println("[${call.request.origin.remoteHost}] DELETE /tareas/$id")
                 val deletedCount = dbQuery {
@@ -114,7 +115,7 @@ fun Route.tareasRoutes() {
                 call.respond(HttpStatusCode.NoContent)
             }
             patch("/estado") {
-                val id = call.parameters["id"]?.toLongOrNull()
+                val id = call.parameters["id"]
                     ?: return@patch call.respond(HttpStatusCode.BadRequest)
                 val request = call.receive<EstadoRequest>()
                 println("[${call.request.origin.remoteHost}] PATCH /tareas/$id/estado estado=${request.estado}")

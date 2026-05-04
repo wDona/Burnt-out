@@ -55,7 +55,7 @@ import dev.wdona.burntout.shared.domain.Tarea
 import dev.wdona.burntout.shared.domain.Usuario
 import dev.wdona.burntout.shared.utils.SettingsManager
 
-class MenuCrearTareaScreen(val factory: TareasViewModelFactory, val idTablero: Long) : Screen {
+class MenuCrearTareaScreen(val factory: TareasViewModelFactory, val idTablero: String) : Screen {
     override val key: ScreenKey = uniqueScreenKey
 
     @Composable
@@ -73,7 +73,7 @@ class MenuCrearTareaScreen(val factory: TareasViewModelFactory, val idTablero: L
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MenuCrearTareaContent(idTablero: Long, tareasViewModel: TareasViewModel, onVolver: () -> Unit) {
+fun MenuCrearTareaContent(idTablero: String, tareasViewModel: TareasViewModel, onVolver: () -> Unit) {
     var textStateNombreTarea by remember { mutableStateOf("") }
     var textStateDescripcion by remember { mutableStateOf("") }
 
@@ -119,7 +119,7 @@ fun MenuCrearTareaContent(idTablero: Long, tareasViewModel: TareasViewModel, onV
     fun guardarTarea() {
         if (textStateNombreTarea.isNotBlank()) {
             val nuevaTarea = Tarea(
-                idTarea = 0,
+                idTarea = "",
                 titulo = textStateNombreTarea,
                 descripcion = textStateDescripcion,
                 estado = estadoSelected.string,

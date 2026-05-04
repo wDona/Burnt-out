@@ -20,10 +20,10 @@ object DatabaseActions {
                 queries.insertEquipoBase()
                 queries.insertPreguntasBase()
                 queries.insertUsuarioBase()
-                queries.insertUserTeam(Long.MIN_VALUE, Long.MIN_VALUE)
+                queries.insertUserTeam(Long.MIN_VALUE, Long.MIN_VALUE, getCurrentTimestampSeconds())
 
                 val ayer = getCurrentTimestampSeconds() - 86400
-                queries.insertRespuestasBase(idUsuario = Long.MIN_VALUE, fecha = ayer)
+                queries.insertRespuestasBase(idRespuesta = java.util.UUID.randomUUID().toString(), idUsuario = Long.MIN_VALUE, fecha = ayer)
 
                 // FIXME posiblemente crashee?
                 queries.getOrganizacionById(SettingsManager.getIdOrganizacionActual()).executeAsOneOrNull()

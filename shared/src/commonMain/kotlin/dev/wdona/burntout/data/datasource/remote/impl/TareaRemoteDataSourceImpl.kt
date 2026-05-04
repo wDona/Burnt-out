@@ -5,22 +5,22 @@ import dev.wdona.burntout.data.datasource.remote.TareaRemoteDataSource
 import dev.wdona.burntout.shared.domain.Tarea
 
 class TareaRemoteDataSourceImpl(private val api: TareaApi) : TareaRemoteDataSource {
-    override suspend fun getTareasByTablero(idTablero: Long): List<Tarea> =
+    override suspend fun getTareasByTablero(idTablero: String): List<Tarea> =
         api.getTareasByTablero(idTablero)
 
     override suspend fun getTareaById(
-        idTarea: Long,
-        idTablero: Long
+        idTarea: String,
+        idTablero: String
     ): Tarea = api.getTareaById(idTarea, idTablero)
 
     override suspend fun insertOrUpdateTarea(tarea: Tarea): Boolean {
-        return false //fixme todo
+        return false //FIXME todo
     }
 
-    override suspend fun crearTarea(tarea: Tarea): Long {
+    override suspend fun crearTarea(tarea: Tarea): String {
         val response = api.crearTarea(tarea)
 
-        return if (response.status.value in 200..299) tarea.idTarea else -1L
+        return if (response.status.value in 200..299) tarea.idTarea else ""
         // FIXME al crear la tarea no se sabe el id
     }
 
@@ -29,7 +29,7 @@ class TareaRemoteDataSourceImpl(private val api: TareaApi) : TareaRemoteDataSour
         return response.status.value in 200..299
     }
 
-    override suspend fun eliminarTarea(tareaId: Long): Boolean {
+    override suspend fun eliminarTarea(tareaId: String): Boolean {
         val response = api.eliminarTarea(tareaId)
         return response.status.value in 200..299
     }

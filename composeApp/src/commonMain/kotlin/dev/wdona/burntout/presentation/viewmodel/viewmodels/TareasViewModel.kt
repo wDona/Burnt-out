@@ -35,7 +35,7 @@ class TareasViewModel(
     private val _subtareas = MutableStateFlow<List<Subtarea>>(emptyList())
     val subtareas: StateFlow<List<Subtarea>> = _subtareas.asStateFlow()
 
-    fun cargarTareas(tableroId: Long) {
+    fun cargarTareas(tableroId: String) {
         screenModelScope.launch {
             _listaTareas.value = repository.getTareasByTableroId(tableroId)
                 .filter { it.estado != TipoEstadoTarea.COMPLETADA.string }
@@ -50,7 +50,7 @@ class TareasViewModel(
         }
     }
 
-    fun cargarTareaPorId(idTarea: Long, idTablero: Long) {
+    fun cargarTareaPorId(idTarea: String, idTablero: String) {
         screenModelScope.launch {
             _uiState.value = repository.getTareaById(idTarea, idTablero)
         }
@@ -77,7 +77,7 @@ class TareasViewModel(
         }
     }
 
-    fun eliminarTarea(idTarea: Long, tableroId: Long) {
+    fun eliminarTarea(idTarea: String, tableroId: String) {
         screenModelScope.launch {
             repository.eliminarTarea(idTarea)
             notificacionProgramador.cancelarNotificaciones(idTarea)
@@ -96,7 +96,7 @@ class TareasViewModel(
         }
     }
 
-    fun cargarSubtareas(idTarea: Long) {
+    fun cargarSubtareas(idTarea: String) {
         screenModelScope.launch {
             _subtareas.value = subtareaRepository.getSubtareasByTarea(idTarea)
         }
@@ -116,7 +116,7 @@ class TareasViewModel(
         }
     }
 
-    fun eliminarSubtarea(idSubtarea: Long, idTarea: Long) {
+    fun eliminarSubtarea(idSubtarea: String, idTarea: String) {
         screenModelScope.launch {
             subtareaRepository.eliminarSubtarea(idSubtarea)
             cargarSubtareas(idTarea)

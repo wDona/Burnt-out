@@ -1,7 +1,8 @@
 CREATE TABLE OrganizacionEntity (
     ID_Org INTEGER NOT NULL PRIMARY KEY,
     Org_Name TEXT NOT NULL,
-    Is_Deleted INTEGER NOT NULL DEFAULT 0
+    Is_Deleted INTEGER NOT NULL DEFAULT 0,
+    Updated_At INTEGER NOT NULL DEFAULT 0
 );
 
 CREATE TABLE UsuarioEntity (
@@ -13,22 +14,29 @@ CREATE TABLE UsuarioEntity (
     Descripcion TEXT,
     FK_ID_Organizacion INTEGER NOT NULL,
     FK_ID_Equipo INTEGER NOT NULL DEFAULT 0,
+    Rol TEXT NOT NULL DEFAULT 'MEMBER',
     Is_Deleted INTEGER NOT NULL DEFAULT 0,
+    Updated_At INTEGER NOT NULL DEFAULT 0,
     FOREIGN KEY(FK_ID_Organizacion) REFERENCES OrganizacionEntity(ID_Org)
 );
 
 CREATE TABLE AjusteEntity (
     ID_Ajuste INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    FK_ID_Usuario INTEGER NOT NULL,
     Nombre_Ajuste TEXT NOT NULL,
-    Is_Deleted INTEGER NOT NULL DEFAULT 0
+    Valor_Ajuste TEXT NOT NULL,
+    Is_Deleted INTEGER NOT NULL DEFAULT 0,
+    Updated_At INTEGER NOT NULL DEFAULT 0,
+    FOREIGN KEY(FK_ID_Usuario) REFERENCES UsuarioEntity(ID_Usuario)
 );
 
 CREATE TABLE TableroEntity (
-    ID_Tabl INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    ID_Tabl TEXT NOT NULL PRIMARY KEY,
     Titulo TEXT NOT NULL,
     FK_ID_Org INTEGER NOT NULL,
     FK_ID_Equipo INTEGER,
     Is_Deleted INTEGER NOT NULL DEFAULT 0,
+    Updated_At INTEGER NOT NULL DEFAULT 0,
     FOREIGN KEY(FK_ID_Org) REFERENCES OrganizacionEntity(ID_Org)
 );
 
@@ -38,6 +46,7 @@ CREATE TABLE EquipoEntity (
     Puntuacion INTEGER DEFAULT 0,
     FK_ID_Org INTEGER NOT NULL,
     Is_Deleted INTEGER NOT NULL DEFAULT 0,
+    Updated_At INTEGER NOT NULL DEFAULT 0,
     FOREIGN KEY(FK_ID_Org) REFERENCES OrganizacionEntity(ID_Org)
 );
 
@@ -47,55 +56,53 @@ CREATE TABLE PreguntaEntity (
     Categoria TEXT NOT NULL DEFAULT 'CE',
     FK_ID_Org INTEGER NOT NULL,
     Is_Deleted INTEGER NOT NULL DEFAULT 0,
+    Updated_At INTEGER NOT NULL DEFAULT 0,
     FOREIGN KEY(FK_ID_Org) REFERENCES OrganizacionEntity(ID_Org)
 );
 
 CREATE TABLE TareaEntity (
-    ID_Tarea INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    ID_Tarea TEXT NOT NULL PRIMARY KEY,
     Titulo TEXT NOT NULL,
     Descripcion TEXT,
     Estado TEXT NOT NULL,
-    FK_ID_Tabl INTEGER NOT NULL,
+    FK_ID_Tabl TEXT NOT NULL,
     FK_ID_Usuario INTEGER NOT NULL,
     Fecha_Vencimiento INTEGER,
     Is_Deleted INTEGER NOT NULL DEFAULT 0,
+    Updated_At INTEGER NOT NULL DEFAULT 0,
     FOREIGN KEY(FK_ID_Tabl) REFERENCES TableroEntity(ID_Tabl),
     FOREIGN KEY(FK_ID_Usuario) REFERENCES UsuarioEntity(ID_Usuario)
 );
 
 CREATE TABLE SubtareaEntity (
-    ID_Subtarea INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    ID_Subtarea TEXT NOT NULL PRIMARY KEY,
     Titulo TEXT NOT NULL,
     Completado INTEGER NOT NULL,
-    FK_ID_Tarea INTEGER NOT NULL,
+    FK_ID_Tarea TEXT NOT NULL,
     Is_Deleted INTEGER NOT NULL DEFAULT 0,
+    Updated_At INTEGER NOT NULL DEFAULT 0,
     FOREIGN KEY(FK_ID_Tarea) REFERENCES TareaEntity(ID_Tarea)
 );
 
 CREATE TABLE User_TeamEntity (
     ID_Usuario INTEGER NOT NULL,
     ID_Equipo INTEGER NOT NULL,
+    Is_Deleted INTEGER NOT NULL DEFAULT 0,
+    Updated_At INTEGER NOT NULL DEFAULT 0,
     PRIMARY KEY (ID_Usuario, ID_Equipo),
     FOREIGN KEY(ID_Usuario) REFERENCES UsuarioEntity(ID_Usuario),
     FOREIGN KEY(ID_Equipo) REFERENCES EquipoEntity(ID_Equipo)
 );
 
-CREATE TABLE Ajuste_UserEntity (
-    ID_Usuario INTEGER NOT NULL,
-    ID_Ajuste INTEGER NOT NULL,
-    Valor_Ajuste TEXT,
-    PRIMARY KEY (ID_Usuario, ID_Ajuste),
-    FOREIGN KEY(ID_Usuario) REFERENCES UsuarioEntity(ID_Usuario),
-    FOREIGN KEY(ID_Ajuste) REFERENCES AjusteEntity(ID_Ajuste)
-);
-
 CREATE TABLE ResponderEntity (
+    ID_Respuesta TEXT NOT NULL PRIMARY KEY,
     ID_Usuario INTEGER NOT NULL,
     ID_Pregunta INTEGER NOT NULL,
     Fecha INTEGER NOT NULL DEFAULT (strftime('%s', 'now')),
     Anonimo INTEGER NOT NULL,
     Respuesta INTEGER NOT NULL,
-    PRIMARY KEY (ID_Usuario, ID_Pregunta, Fecha),
+    Is_Deleted INTEGER NOT NULL DEFAULT 0,
+    Updated_At INTEGER NOT NULL DEFAULT 0,
     FOREIGN KEY(ID_Usuario) REFERENCES UsuarioEntity(ID_Usuario),
     FOREIGN KEY(ID_Pregunta) REFERENCES PreguntaEntity(ID_Pregunta)
 );
@@ -104,7 +111,7 @@ CREATE TABLE OperacionPendienteEntity (
     ID_Operacion INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
     tipo_accion TEXT NOT NULL,
     tabla_afectada TEXT NOT NULL,
-    id_afectado INTEGER NOT NULL,
+    id_afectado TEXT NOT NULL,
     datos_json TEXT NOT NULL,
     timestamp_creacion INTEGER NOT NULL,
     sincronizado INTEGER DEFAULT 0
@@ -115,61 +122,54 @@ CREATE INDEX idx_sync_log_tabla ON OperacionPendienteEntity(tabla_afectada);
 CREATE INDEX idx_sync_log_timestamp ON OperacionPendienteEntity(timestamp_creacion);
 
 -- ======= QUERIES =======
--- TODO: QUITAR HARDCODEO DE ID -9223372036854775808 (MIN LONG) AL DE CREAR LOS REGISTROS
--- TODO         PREDETERMINADOS EN LA BASE DE DATOS VACÍA, SOLO SE USA PARA ASEGURAR QUE EXISTAN
--- TODO         LOS REGISTROS PREDETERMINADOS PARA FUNCIONAMIENTO OFFLINE, PERO NO DEBERÍA USARSE EN
--- TODO         CONDICIONES NORMALES DE OPERACIÓN
--- ======= BASE =======
+
 lastInsertRowId:
 SELECT last_insert_rowid();
 
 insertOrgbase:
-INSERT OR IGNORE INTO OrganizacionEntity(ID_Org, Org_Name) VALUES(-9223372036854775808, 'Organizacion predeterminada');
+INSERT OR IGNORE INTO OrganizacionEntity(ID_Org, Org_Name, Updated_At) VALUES(-9223372036854775808, 'Organizacion predeterminada', 0);
 
 insertEquipoBase:
-INSERT OR IGNORE INTO EquipoEntity(ID_Equipo, Titulo, FK_ID_Org) VALUES(-9223372036854775808, 'Equipo predeterminado', -9223372036854775808);
+INSERT OR IGNORE INTO EquipoEntity(ID_Equipo, Titulo, FK_ID_Org, Updated_At) VALUES(-9223372036854775808, 'Equipo predeterminado', -9223372036854775808, 0);
 
 insertUsuarioBase:
-INSERT OR IGNORE INTO UsuarioEntity(ID_Usuario, Username, Contrasena, Nombre, FK_ID_Organizacion, FK_ID_Equipo) VALUES(-9223372036854775808, 'Invitado', '********', 'Usuario invitado', -9223372036854775808, -9223372036854775808);
-INSERT OR IGNORE INTO User_TeamEntity(ID_Usuario, ID_Equipo) VALUES(-9223372036854775808, -9223372036854775808);
+INSERT OR IGNORE INTO UsuarioEntity(ID_Usuario, Username, Contrasena, Nombre, FK_ID_Organizacion, FK_ID_Equipo, Updated_At) VALUES(-9223372036854775808, 'Invitado', '********', 'Usuario invitado', -9223372036854775808, -9223372036854775808, 0);
+INSERT OR IGNORE INTO User_TeamEntity(ID_Usuario, ID_Equipo, Updated_At) VALUES(-9223372036854775808, -9223372036854775808, 0);
 
--- BASADAS EN EL MBI (Maslach Burnout Inventory)
 insertPreguntasBase:
-INSERT OR IGNORE INTO PreguntaEntity(ID_Pregunta, Pregunta, Categoria, FK_ID_Org) VALUES
-(1, 'Debido a mi trabajo me siento emocionalmente agotado', 'CE', -9223372036854775808),
-(2, 'Al final de la jornada me siento agotado.', 'CE', -9223372036854775808),
-(3, 'Me encuentro cansado cuando me levanto por las mañanas y tengo que enfrentarme a otro día de trabajo.', 'CE', -9223372036854775808),
-(4, 'Puedo comprender fácilmente cómo se sienten las personas que tengo que atender.', 'RP', -9223372036854775808),
-(5, 'Creo que trato a algunas personas con indiferencia, como si fueran objetos impersonales.', 'D', -9223372036854775808),
-(6, 'Trabajar con personas todos los días es estresante/tenso para mí.', 'CE', -9223372036854775808),
-(7, 'Me enfrento bien a los problemas que me presentan las personas que tengo que atender.', 'RP', -9223372036854775808),
-(8, 'Siento que mi trabajo me está desgastando.', 'CE', -9223372036854775808),
-(9, 'Siento que mediante mi trabajo estoy influyendo positivamente en la vida de otros.', 'RP', -9223372036854775808),
-(10, 'Creo que me comporto de manera más insensible con la gente desde que hago este trabajo.', 'D', -9223372036854775808),
-(11, 'Me preocupa que este trabajo me esté endureciendo emocionalmente.', 'D', -9223372036854775808),
-(12, 'Me encuentro con mucha vitalidad/energético.', 'RP', -9223372036854775808),
-(13, 'Me siento frustrado por mi trabajo.', 'CE', -9223372036854775808),
-(14, 'Siento que estoy haciendo un trabajo demasiado duro/trabajando demasiado.', 'CE', -9223372036854775808),
-(15, 'Realmente no me importa lo que les ocurre a algunas personas a las que doy servicio.', 'D', -9223372036854775808),
-(16, 'Trabajar en contacto directo con personas me produce estrés.', 'CE', -9223372036854775808),
-(17, 'Tengo facilidad para crear un clima agradable en mi trabajo.', 'RP', -9223372036854775808),
-(18, 'Me siento estimulado después de trabajar junto con personas.', 'RP', -9223372036854775808),
-(19, 'He realizado muchas cosas valiosas en este trabajo.', 'RP', -9223372036854775808),
-(20, 'Siento que he llegado al límite de mis posibilidades.', 'CE', -9223372036854775808),
-(21, 'Siento que sé tratar con calma los conflictos emocionales en el trabajo.', 'RP', -9223372036854775808),
-(22, 'Siento que las personas que atiendo me culpan de sus problemas.', 'D', -9223372036854775808);
+INSERT OR IGNORE INTO PreguntaEntity(ID_Pregunta, Pregunta, Categoria, FK_ID_Org, Updated_At) VALUES
+(1, 'Debido a mi trabajo me siento emocionalmente agotado', 'CE', -9223372036854775808, 0),
+(2, 'Al final de la jornada me siento agotado.', 'CE', -9223372036854775808, 0),
+(3, 'Me encuentro cansado cuando me levanto por las mañanas y tengo que enfrentarme a otro día de trabajo.', 'CE', -9223372036854775808, 0),
+(4, 'Puedo comprender fácilmente cómo se sienten las personas que tengo que atender.', 'RP', -9223372036854775808, 0),
+(5, 'Creo que trato a algunas personas con indiferencia, como si fueran objetos impersonales.', 'D', -9223372036854775808, 0),
+(6, 'Trabajar con personas todos los días es estresante/tenso para mí.', 'CE', -9223372036854775808, 0),
+(7, 'Me enfrento bien a los problemas que me presentan las personas que tengo que atender.', 'RP', -9223372036854775808, 0),
+(8, 'Siento que mi trabajo me está desgastando.', 'CE', -9223372036854775808, 0),
+(9, 'Siento que mediante mi trabajo estoy influyendo positivamente en la vida de otros.', 'RP', -9223372036854775808, 0),
+(10, 'Creo que me comporto de manera más insensible con la gente desde que hago este trabajo.', 'D', -9223372036854775808, 0),
+(11, 'Me preocupa que este trabajo me esté endureciendo emocionalmente.', 'D', -9223372036854775808, 0),
+(12, 'Me encuentro con mucha vitalidad/energético.', 'RP', -9223372036854775808, 0),
+(13, 'Me siento frustrado por mi trabajo.', 'CE', -9223372036854775808, 0),
+(14, 'Siento que estoy haciendo un trabajo demasiado duro/trabajando demasiado.', 'CE', -9223372036854775808, 0),
+(15, 'Realmente no me importa lo que les ocurre a algunas personas a las que doy servicio.', 'D', -9223372036854775808, 0),
+(16, 'Trabajar en contacto directo con personas me produce estrés.', 'CE', -9223372036854775808, 0),
+(17, 'Tengo facilidad para crear un clima agradable en mi trabajo.', 'RP', -9223372036854775808, 0),
+(18, 'Me siento estimulado después de trabajar junto con personas.', 'RP', -9223372036854775808, 0),
+(19, 'He realizado muchas cosas valiosas en este trabajo.', 'RP', -9223372036854775808, 0),
+(20, 'Siento que he llegado al límite de mis posibilidades.', 'CE', -9223372036854775808, 0),
+(21, 'Siento que sé tratar con calma los conflictos emocionales en el trabajo.', 'RP', -9223372036854775808, 0),
+(22, 'Siento que las personas que atiendo me culpan de sus problemas.', 'D', -9223372036854775808, 0);
 
 -- ====== TAREAS ======
 
--- Usar esta para crear tareas locales (ID autogenerado)
 insertTarea:
-INSERT INTO TareaEntity(Titulo, Descripcion, Estado, FK_ID_Tabl, FK_ID_Usuario, Fecha_Vencimiento)
-VALUES(?, ?, ?, ?, ?, ?);
-
--- Usar esta para sincronizar (ID específico)
-upsertTarea:
-INSERT OR REPLACE INTO TareaEntity(ID_Tarea, Titulo, Descripcion, Estado, FK_ID_Tabl, FK_ID_Usuario, Fecha_Vencimiento, Is_Deleted)
+INSERT INTO TareaEntity(ID_Tarea, Titulo, Descripcion, Estado, FK_ID_Tabl, FK_ID_Usuario, Fecha_Vencimiento, Updated_At)
 VALUES(?, ?, ?, ?, ?, ?, ?, ?);
+
+upsertTarea:
+INSERT OR REPLACE INTO TareaEntity(ID_Tarea, Titulo, Descripcion, Estado, FK_ID_Tabl, FK_ID_Usuario, Fecha_Vencimiento, Is_Deleted, Updated_At)
+VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 getTareaById:
 SELECT * FROM TareaEntity WHERE ID_Tarea = ? AND Is_Deleted = 0;
@@ -178,16 +178,16 @@ getTareasByTablero:
 SELECT * FROM TareaEntity WHERE FK_ID_Tabl = ? AND Is_Deleted = 0;
 
 updateTareaById:
-UPDATE TareaEntity SET Titulo = ?, Descripcion = ?, Estado = ?, Fecha_Vencimiento = ? WHERE ID_Tarea = ?;
+UPDATE TareaEntity SET Titulo = ?, Descripcion = ?, Estado = ?, Fecha_Vencimiento = ?, Updated_At = ? WHERE ID_Tarea = ?;
 
 assignTareaToUsuario:
-UPDATE TareaEntity SET FK_ID_Usuario = ? WHERE ID_Tarea = ?;
+UPDATE TareaEntity SET FK_ID_Usuario = ?, Updated_At = ? WHERE ID_Tarea = ?;
 
 deleteTareaById:
-UPDATE TareaEntity SET Is_Deleted = 1 WHERE ID_Tarea = ?;
+UPDATE TareaEntity SET Is_Deleted = 1, Updated_At = ? WHERE ID_Tarea = ?;
 
 deleteTareasByTablero:
-UPDATE TareaEntity SET Is_Deleted = 1 WHERE FK_ID_Tabl = ?;
+UPDATE TareaEntity SET Is_Deleted = 1, Updated_At = ? WHERE FK_ID_Tabl = ?;
 
 -- ===== Operaciones Pendientes =====
 insertOperacionPendiente:
@@ -209,12 +209,12 @@ DELETE FROM OperacionPendienteEntity WHERE sincronizado = ?;
 
 -- ==== Tableros ====
 insertTablero:
-INSERT INTO TableroEntity(Titulo, FK_ID_Equipo, FK_ID_Org)
-VALUES(?, ?, ?);
+INSERT INTO TableroEntity(ID_Tabl, Titulo, FK_ID_Equipo, FK_ID_Org, Updated_At)
+VALUES(?, ?, ?, ?, ?);
 
 upsertTablero:
-INSERT OR REPLACE INTO TableroEntity(ID_Tabl, Titulo, FK_ID_Equipo, FK_ID_Org, Is_Deleted)
-VALUES(?, ?, ?, ?, ?);
+INSERT OR REPLACE INTO TableroEntity(ID_Tabl, Titulo, FK_ID_Equipo, FK_ID_Org, Is_Deleted, Updated_At)
+VALUES(?, ?, ?, ?, ?, ?);
 
 getTableroById:
 SELECT * FROM TableroEntity WHERE ID_Tabl = ? AND Is_Deleted = 0;
@@ -223,22 +223,22 @@ getTablerosByOrg:
 SELECT * FROM TableroEntity WHERE FK_ID_Org = ? AND Is_Deleted = 0;
 
 updateTablero:
-UPDATE TableroEntity SET Titulo = ?, FK_ID_Equipo = ? WHERE ID_Tabl = ?;
+UPDATE TableroEntity SET Titulo = ?, FK_ID_Equipo = ?, Updated_At = ? WHERE ID_Tabl = ?;
 
 deleteTablero:
-UPDATE TableroEntity SET Is_Deleted = 1 WHERE ID_Tabl = ?;
+UPDATE TableroEntity SET Is_Deleted = 1, Updated_At = ? WHERE ID_Tabl = ?;
 
 deleteTablerosByOrg:
-UPDATE TableroEntity SET Is_Deleted = 1 WHERE FK_ID_Org = ?;
+UPDATE TableroEntity SET Is_Deleted = 1, Updated_At = ? WHERE FK_ID_Org = ?;
 
 -- ===== Equipos =====
 insertEquipo:
-INSERT INTO EquipoEntity(Titulo, FK_ID_Org)
-VALUES(?, ?);
+INSERT INTO EquipoEntity(Titulo, FK_ID_Org, Updated_At)
+VALUES(?, ?, ?);
 
 upsertEquipo:
-INSERT OR REPLACE INTO EquipoEntity(ID_Equipo, Titulo, Puntuacion, FK_ID_Org, Is_Deleted)
-VALUES(?, ?, ?, ?, ?);
+INSERT OR REPLACE INTO EquipoEntity(ID_Equipo, Titulo, Puntuacion, FK_ID_Org, Is_Deleted, Updated_At)
+VALUES(?, ?, ?, ?, ?, ?);
 
 getEquipoById:
 SELECT * FROM EquipoEntity WHERE ID_Equipo = ? AND Is_Deleted = 0;
@@ -247,28 +247,28 @@ getEquiposByOrg:
 SELECT * FROM EquipoEntity WHERE FK_ID_Org = ? AND Is_Deleted = 0;
 
 updateEquipo:
-UPDATE EquipoEntity SET Titulo = ? WHERE ID_Equipo = ?;
+UPDATE EquipoEntity SET Titulo = ?, Updated_At = ? WHERE ID_Equipo = ?;
 
 deleteEquipo:
-UPDATE EquipoEntity SET Is_Deleted = 1 WHERE ID_Equipo = ?;
+UPDATE EquipoEntity SET Is_Deleted = 1, Updated_At = ? WHERE ID_Equipo = ?;
 
 deleteEquiposByOrg:
-UPDATE EquipoEntity SET Is_Deleted = 1 WHERE FK_ID_Org = ?;
+UPDATE EquipoEntity SET Is_Deleted = 1, Updated_At = ? WHERE FK_ID_Org = ?;
 
 updatePuntuacionEquipo:
-UPDATE EquipoEntity SET Puntuacion = Puntuacion + ? WHERE ID_Equipo = ?;
+UPDATE EquipoEntity SET Puntuacion = Puntuacion + ?, Updated_At = ? WHERE ID_Equipo = ?;
 
 getLeaderboard:
 SELECT * FROM EquipoEntity WHERE Is_Deleted = 0 ORDER BY Puntuacion DESC;
 
 -- ==== Usuarios ====
 insertUsuario:
-INSERT INTO UsuarioEntity(Username, Contrasena, Nombre, Riesgo_Burnout, Descripcion, FK_ID_Organizacion, FK_ID_Equipo)
-VALUES(?, ?, ?, ?, ?, ?, ?);
+INSERT INTO UsuarioEntity(Username, Contrasena, Nombre, Riesgo_Burnout, Descripcion, FK_ID_Organizacion, FK_ID_Equipo, Rol, Updated_At)
+VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 upsertUsuario:
-INSERT OR REPLACE INTO UsuarioEntity(ID_Usuario, Username, Contrasena, Nombre, Riesgo_Burnout, Descripcion, FK_ID_Organizacion, FK_ID_Equipo, Is_Deleted)
-VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?);
+INSERT OR REPLACE INTO UsuarioEntity(ID_Usuario, Username, Contrasena, Nombre, Riesgo_Burnout, Descripcion, FK_ID_Organizacion, FK_ID_Equipo, Rol, Is_Deleted, Updated_At)
+VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 getUserById:
 SELECT * FROM UsuarioEntity WHERE ID_Usuario = ? AND Is_Deleted = 0;
@@ -285,88 +285,88 @@ FROM UsuarioEntity u JOIN User_TeamEntity ut ON u.ID_Usuario = ut.ID_Usuario
 WHERE ut.ID_Equipo = ? AND u.Is_Deleted = 0;
 
 updateUsuario:
-UPDATE UsuarioEntity SET Username = ?, Contrasena = ?, Nombre = ?, Riesgo_Burnout = ?, Descripcion = ?, FK_ID_Equipo = ? WHERE ID_Usuario = ?;
+UPDATE UsuarioEntity SET Username = ?, Contrasena = ?, Nombre = ?, Riesgo_Burnout = ?, Descripcion = ?, FK_ID_Equipo = ?, Rol = ?, Updated_At = ? WHERE ID_Usuario = ?;
 
 updateUsuarioTeamId:
-UPDATE UsuarioEntity SET FK_ID_Equipo = ? WHERE ID_Usuario = ?;
+UPDATE UsuarioEntity SET FK_ID_Equipo = ?, Updated_At = ? WHERE ID_Usuario = ?;
 
 deleteUsuario:
-UPDATE UsuarioEntity SET Is_Deleted = 1 WHERE ID_Usuario = ?;
+UPDATE UsuarioEntity SET Is_Deleted = 1, Updated_At = ? WHERE ID_Usuario = ?;
 
 deleteUsuariosByOrg:
-UPDATE UsuarioEntity SET Is_Deleted = 1 WHERE FK_ID_Organizacion = ?;
+UPDATE UsuarioEntity SET Is_Deleted = 1, Updated_At = ? WHERE FK_ID_Organizacion = ?;
 
 updateRiesgoBurnout:
-UPDATE UsuarioEntity SET Riesgo_Burnout = ? WHERE ID_Usuario = ?;
+UPDATE UsuarioEntity SET Riesgo_Burnout = ?, Updated_At = ? WHERE ID_Usuario = ?;
 
 getUsuariosConRiesgoAlto:
 SELECT * FROM UsuarioEntity WHERE Riesgo_Burnout > ? AND Is_Deleted = 0;
 
 -- ====== SUBTAREAS ======
 insertSubtarea:
-INSERT INTO SubtareaEntity(Titulo, Completado, FK_ID_Tarea) VALUES(?, ?, ?);
+INSERT INTO SubtareaEntity(ID_Subtarea, Titulo, Completado, FK_ID_Tarea, Updated_At) VALUES(?, ?, ?, ?, ?);
 
 upsertSubtarea:
-INSERT OR REPLACE INTO SubtareaEntity(ID_Subtarea, Titulo, Completado, FK_ID_Tarea, Is_Deleted) VALUES(?, ?, ?, ?, ?);
+INSERT OR REPLACE INTO SubtareaEntity(ID_Subtarea, Titulo, Completado, FK_ID_Tarea, Is_Deleted, Updated_At) VALUES(?, ?, ?, ?, ?, ?);
 
 getSubtareasByTarea:
 SELECT * FROM SubtareaEntity WHERE FK_ID_Tarea = ? AND Is_Deleted = 0;
 
 updateSubtarea:
-UPDATE SubtareaEntity SET Titulo = ?, Completado = ? WHERE ID_Subtarea = ?;
+UPDATE SubtareaEntity SET Titulo = ?, Completado = ?, Updated_At = ? WHERE ID_Subtarea = ?;
 
 deleteSubtarea:
-UPDATE SubtareaEntity SET Is_Deleted = 1 WHERE ID_Subtarea = ?;
+UPDATE SubtareaEntity SET Is_Deleted = 1, Updated_At = ? WHERE ID_Subtarea = ?;
 
 -- ====== PREGUNTAS / ENCUESTAS ======
 insertPregunta:
-INSERT INTO PreguntaEntity(Pregunta, Categoria, FK_ID_Org) VALUES(?, ?, ?);
+INSERT INTO PreguntaEntity(Pregunta, Categoria, FK_ID_Org, Updated_At) VALUES(?, ?, ?, ?);
 
 upsertPregunta:
-INSERT OR REPLACE INTO PreguntaEntity(ID_Pregunta, Pregunta, Categoria, FK_ID_Org, Is_Deleted) VALUES(?, ?, ?, ?, ?);
+INSERT OR REPLACE INTO PreguntaEntity(ID_Pregunta, Pregunta, Categoria, FK_ID_Org, Is_Deleted, Updated_At) VALUES(?, ?, ?, ?, ?, ?);
 
 getPreguntasByOrg:
 SELECT * FROM PreguntaEntity WHERE FK_ID_Org = ? AND Is_Deleted = 0;
 
 updatePregunta:
-UPDATE PreguntaEntity SET Pregunta = ?, Categoria = ? WHERE ID_Pregunta = ?;
+UPDATE PreguntaEntity SET Pregunta = ?, Categoria = ?, Updated_At = ? WHERE ID_Pregunta = ?;
 
 deletePregunta:
-UPDATE PreguntaEntity SET Is_Deleted = 1 WHERE ID_Pregunta = ?;
+UPDATE PreguntaEntity SET Is_Deleted = 1, Updated_At = ? WHERE ID_Pregunta = ?;
 
 insertPreguntasMBI:
-INSERT OR IGNORE INTO PreguntaEntity(Pregunta, Categoria, FK_ID_Org)
+INSERT OR IGNORE INTO PreguntaEntity(Pregunta, Categoria, FK_ID_Org, Updated_At)
 VALUES
-('Debido a mi trabajo me siento emocionalmente agotado', 'CE', :idOrg),
-('Al final de la jornada me siento agotado.', 'CE', :idOrg),
-('Me encuentro cansado cuando me levanto por las mañanas y tengo que enfrentarme a otro día de trabajo.', 'CE', :idOrg),
-('Puedo comprender fácilmente cómo se sienten las personas que tengo que atender.', 'RP', :idOrg),
-('Creo que trato a algunas personas con indiferencia, como si fueran objetos impersonales.', 'D', :idOrg),
-('Trabajar con personas todos los días es estresante/tenso para mí.', 'CE', :idOrg),
-('Me enfrento bien a los problemas que me presentan las personas que tengo que atender.', 'RP', :idOrg),
-('Siento que mi trabajo me está desgastando.', 'CE', :idOrg),
-('Siento que mediante mi trabajo estoy influyendo positivamente en la vida de otros.', 'RP', :idOrg),
-('Creo que me comporto de manera más insensible con la gente desde que hago este trabajo.', 'D', :idOrg),
-('Me preocupa que este trabajo me esté endureciendo emocionalmente.', 'D', :idOrg),
-('Me encuentro con mucha vitalidad/energético.', 'RP', :idOrg),
-('Me siento frustrado por mi trabajo.', 'CE', :idOrg),
-('Siento que estoy haciendo un trabajo demasiado duro/trabajando demasiado.', 'CE', :idOrg),
-('Realmente no me importa lo que les ocurre a algunas personas a las que doy servicio.', 'D', :idOrg),
-('Trabajar en contacto directo con personas me produce estrés.', 'CE', :idOrg),
-('Tengo facilidad para crear un clima agradable en mi trabajo.', 'RP', :idOrg),
-('Me siento estimulado después de trabajar junto con personas.', 'RP', :idOrg),
-('He realizado muchas cosas valiosas en este trabajo.', 'RP', :idOrg),
-('Siento que he llegado al límite de mis posibilidades.', 'CE', :idOrg),
-('Siento que sé tratar con calma los conflictos emocionales en el trabajo.', 'RP', :idOrg),
-('Siento que las personas que atiendo me culpan de sus problemas.', 'D', :idOrg);
+('Debido a mi trabajo me siento emocionalmente agotado', 'CE', :idOrg, 0),
+('Al final de la jornada me siento agotado.', 'CE', :idOrg, 0),
+('Me encuentro cansado cuando me levanto por las mañanas y tengo que enfrentarme a otro día de trabajo.', 'CE', :idOrg, 0),
+('Puedo comprender fácilmente cómo se sienten las personas que tengo que atender.', 'RP', :idOrg, 0),
+('Creo que trato a algunas personas con indiferencia, como si fueran objetos impersonales.', 'D', :idOrg, 0),
+('Trabajar con personas todos los días es estresante/tenso para mí.', 'CE', :idOrg, 0),
+('Me enfrento bien a los problemas que me presentan las personas que tengo que atender.', 'RP', :idOrg, 0),
+('Siento que mi trabajo me está desgastando.', 'CE', :idOrg, 0),
+('Siento que mediante mi trabajo estoy influyendo positivamente en la vida de otros.', 'RP', :idOrg, 0),
+('Creo que me comporto de manera más insensible con la gente desde que hago este trabajo.', 'D', :idOrg, 0),
+('Me preocupa que este trabajo me esté endureciendo emocionalmente.', 'D', :idOrg, 0),
+('Me encuentro con mucha vitalidad/energético.', 'RP', :idOrg, 0),
+('Me siento frustrado por mi trabajo.', 'CE', :idOrg, 0),
+('Siento que estoy haciendo un trabajo demasiado duro/trabajando demasiado.', 'CE', :idOrg, 0),
+('Realmente no me importa lo que les ocurre a algunas personas a las que doy servicio.', 'D', :idOrg, 0),
+('Trabajar en contacto directo con personas me produce estrés.', 'CE', :idOrg, 0),
+('Tengo facilidad para crear un clima agradable en mi trabajo.', 'RP', :idOrg, 0),
+('Me siento estimulado después de trabajar junto con personas.', 'RP', :idOrg, 0),
+('He realizado muchas cosas valiosas en este trabajo.', 'RP', :idOrg, 0),
+('Siento que he llegado al límite de mis posibilidades.', 'CE', :idOrg, 0),
+('Siento que sé tratar con calma los conflictos emocionales en el trabajo.', 'RP', :idOrg, 0),
+('Siento que las personas que atiendo me culpan de sus problemas.', 'D', :idOrg, 0);
 
 -- ====== RESPUESTAS ======
 insertRespuesta:
-INSERT OR REPLACE INTO ResponderEntity(ID_Usuario, ID_Pregunta, Anonimo, Respuesta, Fecha)
-VALUES(?, ?, ?, ?, ?);
+INSERT OR REPLACE INTO ResponderEntity(ID_Respuesta, ID_Usuario, ID_Pregunta, Anonimo, Respuesta, Fecha, Updated_At)
+VALUES(?, ?, ?, ?, ?, ?, ?);
 
 deleteRespuestaByDate:
-DELETE FROM ResponderEntity
+UPDATE ResponderEntity SET Is_Deleted = 1, Updated_At = ?
 WHERE ID_Usuario = ?
 AND ID_Pregunta = ?
 AND date(Fecha, 'unixepoch', 'localtime') = date(?, 'unixepoch', 'localtime');
@@ -374,10 +374,10 @@ AND date(Fecha, 'unixepoch', 'localtime') = date(?, 'unixepoch', 'localtime');
 getRespuestasByPregunta:
 SELECT r.ID_Usuario, r.ID_Pregunta, r.Respuesta, r.Anonimo, u.Nombre
 FROM ResponderEntity r JOIN UsuarioEntity u ON r.ID_Usuario = u.ID_Usuario
-WHERE r.ID_Pregunta = ?;
+WHERE r.ID_Pregunta = ? AND r.Is_Deleted = 0;
 
 getRespuestasByUser:
-SELECT * FROM ResponderEntity WHERE ID_Usuario = ?;
+SELECT * FROM ResponderEntity WHERE ID_Usuario = ? AND Is_Deleted = 0;
 
 getLastRespuestasByUser:
 SELECT r1.*
@@ -385,10 +385,10 @@ FROM ResponderEntity r1
 JOIN (
     SELECT ID_Pregunta, MAX(Fecha) MaxFecha
     FROM ResponderEntity
-    WHERE ID_Usuario = ?
+    WHERE ID_Usuario = ? AND Is_Deleted = 0
     GROUP BY ID_Pregunta
 ) r2 ON r1.ID_Pregunta = r2.ID_Pregunta AND r1.Fecha = r2.MaxFecha
-WHERE r1.ID_Usuario = ?
+WHERE r1.ID_Usuario = ? AND r1.Is_Deleted = 0
 ORDER BY r1.Fecha DESC;
 
 getRespuestasByUserAndDate:
@@ -397,34 +397,32 @@ WHERE ID_Usuario = ?
 AND date(Fecha, 'unixepoch', 'localtime') = date(?, 'unixepoch', 'localtime');
 
 insertRespuestasBase:
-INSERT OR IGNORE INTO ResponderEntity(ID_Usuario, ID_Pregunta, Anonimo, Respuesta, Fecha)
-SELECT :idUsuario, ID_Pregunta, 0, -6, :fecha
+INSERT OR IGNORE INTO ResponderEntity(ID_Respuesta, ID_Usuario, ID_Pregunta, Anonimo, Respuesta, Fecha, Updated_At)
+SELECT :idRespuesta, :idUsuario, ID_Pregunta, 0, -6, :fecha, 0
 FROM PreguntaEntity
 WHERE FK_ID_Org = -9223372036854775808;
 
 -- ====== AJUSTES USUARIO ======
 insertOrUpdateAjusteUser:
-INSERT OR REPLACE INTO Ajuste_UserEntity(ID_Usuario, ID_Ajuste, Valor_Ajuste)
-VALUES(?, ?, ?);
+INSERT OR REPLACE INTO AjusteEntity(ID_Ajuste, FK_ID_Usuario, Nombre_Ajuste, Valor_Ajuste, Is_Deleted, Updated_At)
+VALUES(?, ?, ?, ?, ?, ?);
 
-getAjustesByUser:
-SELECT a.Nombre_Ajuste, au.Valor_Ajuste
-FROM AjusteEntity a JOIN Ajuste_UserEntity au ON a.ID_Ajuste = au.ID_Ajuste
-WHERE au.ID_Usuario = ?;
+getAjustesByUsuario:
+SELECT * FROM AjusteEntity WHERE FK_ID_Usuario = ? AND Is_Deleted = 0;
 
 -- ====== EQUIPOS - USUARIOS ======
 insertUserTeam:
-INSERT OR IGNORE INTO User_TeamEntity(ID_Usuario, ID_Equipo) VALUES(?, ?);
+INSERT OR IGNORE INTO User_TeamEntity(ID_Usuario, ID_Equipo, Updated_At) VALUES(?, ?, ?);
 
 deleteUserTeam:
-DELETE FROM User_TeamEntity WHERE ID_Usuario = ? AND ID_Equipo = ?;
+UPDATE User_TeamEntity SET Is_Deleted = 1, Updated_At = ? WHERE ID_Usuario = ? AND ID_Equipo = ?;
 
 deleteUserFromAllTeams:
-DELETE FROM User_TeamEntity WHERE ID_Usuario = ?;
+UPDATE User_TeamEntity SET Is_Deleted = 1, Updated_At = ? WHERE ID_Usuario = ?;
 
 deleteEmptyTeams:
-UPDATE EquipoEntity SET Is_Deleted = 1
-WHERE ID_Equipo NOT IN (SELECT DISTINCT ID_Equipo FROM User_TeamEntity)
+UPDATE EquipoEntity SET Is_Deleted = 1, Updated_At = ?
+WHERE ID_Equipo NOT IN (SELECT DISTINCT ID_Equipo FROM User_TeamEntity WHERE Is_Deleted = 0)
 AND Is_Deleted = 0;
 
 -- ====== ORGANIZACIONES ======
@@ -432,27 +430,20 @@ getAllOrganizaciones:
 SELECT * FROM OrganizacionEntity WHERE Is_Deleted = 0;
 
 upsertOrganizacion:
-INSERT OR REPLACE INTO OrganizacionEntity(ID_Org, Org_Name, Is_Deleted) VALUES(?, ?, ?);
+INSERT OR REPLACE INTO OrganizacionEntity(ID_Org, Org_Name, Is_Deleted, Updated_At) VALUES(?, ?, ?, ?);
 
 updateOrganizacion:
-UPDATE OrganizacionEntity SET Org_Name = ? WHERE ID_Org = ?;
+UPDATE OrganizacionEntity SET Org_Name = ?, Updated_At = ? WHERE ID_Org = ?;
 
 deleteOrganizacion:
-UPDATE OrganizacionEntity SET Is_Deleted = 1 WHERE ID_Org = ?;
+UPDATE OrganizacionEntity SET Is_Deleted = 1, Updated_At = ? WHERE ID_Org = ?;
 
 -- ===== OTROS =====
 getOrganizacionById:
 SELECT * FROM OrganizacionEntity WHERE ID_Org = ? AND Is_Deleted = 0;
 
-getAjustesByUsuario:
-SELECT a.ID_Ajuste, a.Nombre_Ajuste, au.Valor_Ajuste
-FROM AjusteEntity a JOIN Ajuste_UserEntity au ON a.ID_Ajuste = au.ID_Ajuste
-WHERE au.ID_Usuario = ? AND a.Is_Deleted = 0;
-
 getAjusteByIdYUsuario:
-SELECT a.ID_Ajuste, a.Nombre_Ajuste, au.Valor_Ajuste
-FROM AjusteEntity a JOIN Ajuste_UserEntity au ON a.ID_Ajuste = au.ID_Ajuste
-WHERE au.ID_Usuario = ? AND a.ID_Ajuste = ? AND a.Is_Deleted = 0;
+SELECT * FROM AjusteEntity WHERE FK_ID_Usuario = ? AND ID_Ajuste = ? AND Is_Deleted = 0;
 
 clearDB:
 DELETE FROM SubtareaEntity;
@@ -464,6 +455,5 @@ DELETE FROM OrganizacionEntity;
 DELETE FROM PreguntaEntity;
 DELETE FROM ResponderEntity;
 DELETE FROM AjusteEntity;
-DELETE FROM Ajuste_UserEntity;
 DELETE FROM User_TeamEntity;
 DELETE FROM OperacionPendienteEntity;

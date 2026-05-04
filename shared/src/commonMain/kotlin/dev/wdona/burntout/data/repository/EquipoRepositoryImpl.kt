@@ -11,6 +11,7 @@ import dev.wdona.burntout.domain.repository.EquipoRepository
 import dev.wdona.burntout.shared.domain.Equipo
 import dev.wdona.burntout.shared.domain.Usuario
 import dev.wdona.burntout.shared.utils.SettingsManager
+import dev.wdona.burntout.shared.utils.getCurrentTimestampSeconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
@@ -100,9 +101,9 @@ class EquipoRepositoryImpl(
             pendiente.insertOperacionPendiente(
                 TipoAccion.CREACION.getNombreAccion(),
                 Entity.EQUIPO.getNombreEntity(),
-                finalId,
+                finalId.toString(),
                 EquipoMapper.toJson(equipo.copy(idEquipo = finalId)),
-                System.currentTimeMillis(),
+                getCurrentTimestampSeconds(),
                 if (idServidor != -1L) 1L else 0L
             )
         } catch (e: Exception) {
@@ -134,9 +135,9 @@ class EquipoRepositoryImpl(
                 pendiente.insertOperacionPendiente(
                     TipoAccion.ACTUALIZACION.getNombreAccion(),
                     Entity.EQUIPO.getNombreEntity(),
-                    equipo.idEquipo,
+                    equipo.idEquipo.toString(),
                     EquipoMapper.toJson(equipo),
-                    System.currentTimeMillis(),
+                    getCurrentTimestampSeconds(),
                     if (exito) 1L else 0L
                 )
             } catch (e: Exception) {
@@ -167,9 +168,9 @@ class EquipoRepositoryImpl(
                 pendiente.insertOperacionPendiente(
                     TipoAccion.ELIMINACION.getNombreAccion(),
                     Entity.EQUIPO.getNombreEntity(),
-                    idEquipo,
+                    idEquipo.toString(),
                     "",
-                    System.currentTimeMillis(),
+                    getCurrentTimestampSeconds(),
                     if (exito) 1L else 0L
                 )
             } catch (e: Exception) {
@@ -197,9 +198,9 @@ class EquipoRepositoryImpl(
                     pendiente.insertOperacionPendiente(
                         TipoAccion.ACTUALIZACION.getNombreAccion(),
                         Entity.EQUIPO.getNombreEntity(),
-                        idEquipo,
+                        idEquipo.toString(),
                         "{\"puntos\":$puntos}",
-                        System.currentTimeMillis(),
+                        getCurrentTimestampSeconds(),
                         0L
                     )
                 } catch (e: Exception) {
@@ -231,9 +232,9 @@ class EquipoRepositoryImpl(
                 pendiente.insertOperacionPendiente(
                     TipoAccion.ACTUALIZACION.getNombreAccion(),
                     Entity.EQUIPO.getNombreEntity(),
-                    idEquipo,
+                    idEquipo.toString(),
                     "{\"idUsuario\":$idUsuario, \"accion\":\"ADD\"}",
-                    System.currentTimeMillis(),
+                    getCurrentTimestampSeconds(),
                     0L
                 )
             } catch (e: Exception) {
@@ -278,9 +279,9 @@ class EquipoRepositoryImpl(
                 pendiente.insertOperacionPendiente(
                     TipoAccion.ACTUALIZACION.getNombreAccion(),
                     Entity.EQUIPO.getNombreEntity(),
-                    idEquipo,
+                    idEquipo.toString(),
                     "{\"idUsuario\":$idUsuario, \"accion\":\"REMOVE\"}",
-                    System.currentTimeMillis(),
+                    getCurrentTimestampSeconds(),
                     0L
                 )
             } catch (e: Exception) {

@@ -5,6 +5,7 @@ import dev.wdona.burntout.data.datasource.mapper.UsuarioMapper
 import dev.wdona.burntout.shared.domain.Usuario
 import dev.wdona.burntout.shared.db.AppDatabase
 import dev.wdona.burntout.shared.utils.Logger
+import dev.wdona.burntout.shared.utils.getCurrentTimestampSeconds
 
 class UsuarioDaoImpl(appDatabase: AppDatabase) : UsuarioDao {
     private val queries = appDatabase.appDatabaseQueries
@@ -22,6 +23,7 @@ class UsuarioDaoImpl(appDatabase: AppDatabase) : UsuarioDao {
             UsuarioMapper.toDomain(it)
         }
     }
+
 
     override suspend fun getUsuariosByEquipo(idEquipo: Long): List<Usuario> {
         Logger.d(TAG, "getUsuariosByEquipo: $idEquipo")
@@ -45,7 +47,9 @@ class UsuarioDaoImpl(appDatabase: AppDatabase) : UsuarioDao {
             Riesgo_Burnout = usuario.riesgoBurnout,
             Descripcion = usuario.descripcion,
             FK_ID_Organizacion = usuario.idOrganizacion,
-            FK_ID_Equipo = usuario.idEquipo
+            FK_ID_Equipo = usuario.idEquipo,
+            Rol = usuario.rol,
+            Updated_At = usuario.updatedAt.takeIf { it > 0L } ?: getCurrentTimestampSeconds()
         )
         return queries.lastInsertRowId().executeAsOne()
     }
@@ -60,6 +64,8 @@ class UsuarioDaoImpl(appDatabase: AppDatabase) : UsuarioDao {
                 Riesgo_Burnout = usuario.riesgoBurnout,
                 Descripcion = usuario.descripcion,
                 FK_ID_Equipo = usuario.idEquipo,
+                Rol = usuario.rol,
+                Updated_At = usuario.updatedAt.takeIf { it > 0L } ?: getCurrentTimestampSeconds(),
                 ID_Usuario = usuario.idUsuario
             )
             true
@@ -72,7 +78,10 @@ class UsuarioDaoImpl(appDatabase: AppDatabase) : UsuarioDao {
     override suspend fun eliminarUsuario(idUsuario: Long): Boolean {
         Logger.d(TAG, "eliminarUsuario: $idUsuario")
         return try {
-            queries.deleteUsuario(idUsuario)
+            queries.deleteUsuario(
+                Updated_At = getCurrentTimestampSeconds(),
+                ID_Usuario = idUsuario
+            )
             true
         } catch (e: Exception) {
             Logger.d(TAG, "Error eliminarUsuario: ${e.message}")
@@ -92,7 +101,9 @@ class UsuarioDaoImpl(appDatabase: AppDatabase) : UsuarioDao {
                 Descripcion = usuario.descripcion,
                 FK_ID_Organizacion = usuario.idOrganizacion,
                 FK_ID_Equipo = usuario.idEquipo,
-                Is_Deleted = if (usuario.isDeleted) 1L else 0L
+                Rol = usuario.rol,
+                Is_Deleted = if (usuario.isDeleted) 1L else 0L,
+                Updated_At = usuario.updatedAt.takeIf { it > 0L } ?: getCurrentTimestampSeconds()
             )
             true
         } catch (e: Exception) {
@@ -103,16 +114,21 @@ class UsuarioDaoImpl(appDatabase: AppDatabase) : UsuarioDao {
 
     override suspend fun vincularUsuarioEquipo(idUsuario: Long, idEquipo: Long) {
         Logger.d(TAG, "vincularUsuarioEquipo: user=$idUsuario, equipo=$idEquipo")
+        val now = getCurrentTimestampSeconds()
         queries.transaction {
-            queries.insertUserTeam(idUsuario, idEquipo)
-            queries.updateUsuarioTeamId(idEquipo, idUsuario)
+            queries.insertUserTeam(idUsuario, idEquipo, now)
+            queries.updateUsuarioTeamId(idEquipo, now, idUsuario)
         }
     }
 
     override suspend fun updateRiesgoBurnout(idUsuario: Long, riesgo: Double): Boolean {
         Logger.d(TAG, "updateRiesgoBurnout: user=$idUsuario, riesgo=$riesgo")
         return try {
-            queries.updateRiesgoBurnout(riesgo, idUsuario)
+            queries.updateRiesgoBurnout(
+                Riesgo_Burnout = riesgo,
+                Updated_At = getCurrentTimestampSeconds(),
+                ID_Usuario = idUsuario
+            )
             true
         } catch (e: Exception) {
             Logger.d(TAG, "Error updateRiesgoBurnout: ${e.message}")

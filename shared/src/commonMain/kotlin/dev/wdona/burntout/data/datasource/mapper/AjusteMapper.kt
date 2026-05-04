@@ -1,8 +1,7 @@
 package dev.wdona.burntout.data.datasource.mapper
 
 import dev.wdona.burntout.domain.model.Ajuste
-import dev.wdona.burntout.shared.db.GetAjusteByIdYUsuario
-import dev.wdona.burntout.shared.db.GetAjustesByUsuario
+import dev.wdona.burntout.shared.db.AjusteEntity
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
@@ -11,27 +10,18 @@ object AjusteMapper {
         return Json.encodeToString(ajuste)
     }
 
-    fun toDomain(entity: GetAjusteByIdYUsuario): Ajuste {
+    fun toDomain(entity: AjusteEntity): Ajuste {
         return Ajuste(
             idAjuste = entity.ID_Ajuste,
+            idUsuario = entity.FK_ID_Usuario,
             nombre = entity.Nombre_Ajuste,
-            valorAjuste = entity.Valor_Ajuste ?: "NULL"
+            valorAjuste = entity.Valor_Ajuste,
+            isDeleted = entity.Is_Deleted == 1L,
+            updatedAt = entity.Updated_At
         )
     }
 
-    fun toDomainFromGetAjusteByIdYUsuario(entityList: List<GetAjusteByIdYUsuario>): List<Ajuste> {
-        return entityList.map { toDomain(it) }
-    }
-
-    fun toDomain(entity: GetAjustesByUsuario): Ajuste {
-        return Ajuste(
-            idAjuste = entity.ID_Ajuste,
-            nombre = entity.Nombre_Ajuste,
-            valorAjuste = entity.Valor_Ajuste ?: "NULL"
-        )
-    }
-
-    fun toDomainFromGetAjustesByUsuario(entity: List<GetAjustesByUsuario>): List<Ajuste> {
-        return entity.map { toDomain(it) }
+    fun toDomainList(entities: List<AjusteEntity>): List<Ajuste> {
+        return entities.map { toDomain(it) }
     }
 }

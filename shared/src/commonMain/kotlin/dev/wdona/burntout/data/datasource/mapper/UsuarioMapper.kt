@@ -16,7 +16,9 @@ object UsuarioMapper {
             descripcion = entity.Descripcion,
             idOrganizacion = entity.FK_ID_Organizacion,
             idEquipo = entity.FK_ID_Equipo,
-            isDeleted = entity.Is_Deleted != 0L
+            rol = entity.Rol,
+            isDeleted = entity.Is_Deleted != 0L,
+            updatedAt = entity.Updated_At
         )
     }
 
@@ -30,7 +32,9 @@ object UsuarioMapper {
             Descripcion = domain.descripcion,
             FK_ID_Organizacion = domain.idOrganizacion,
             FK_ID_Equipo = domain.idEquipo,
-            Is_Deleted = if (domain.isDeleted) 1L else 0L
+            Rol = domain.rol,
+            Is_Deleted = if (domain.isDeleted) 1L else 0L,
+            Updated_At = domain.updatedAt
         )
     }
 

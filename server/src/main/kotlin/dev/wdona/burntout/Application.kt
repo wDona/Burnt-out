@@ -1,5 +1,6 @@
 package dev.wdona.burntout
 
+import dev.wdona.burntout.api.latest.syncRoutes
 import dev.wdona.burntout.api.latest.ajustesRoutes
 import dev.wdona.burntout.api.latest.invitacionesRoutes
 import dev.wdona.burntout.api.latest.equiposRoutes
@@ -48,6 +49,7 @@ fun Application.module() {
     routing {
         // v1
         route("/api/v1") {
+            syncRoutes()
             ajustesRoutes()
             equiposRoutes()
             invitacionesRoutes()

@@ -11,6 +11,7 @@ import dev.wdona.burntout.domain.model.TipoAccion
 import dev.wdona.burntout.shared.domain.Pregunta
 import dev.wdona.burntout.domain.model.Respuesta
 import dev.wdona.burntout.shared.utils.SettingsManager
+import dev.wdona.burntout.shared.utils.getCurrentTimestampSeconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
@@ -202,10 +203,10 @@ class PreguntaRespuestaRepositoryImpl(
             } catch (e: Exception) {
                 println("Servidor invitado: ${e.message}")
             }
-            savePendingOp(
+            savePendingOpString(
                 TipoAccion.CREACION,
                 Entity.RESPONDER,
-                0L, // Composite key, relies on JSON content
+                respuesta.idRespuesta,
                 RespuestaMapper.toJson(respuesta),
                 exito
             )
@@ -213,13 +214,17 @@ class PreguntaRespuestaRepositoryImpl(
     }
 
     private suspend fun savePendingOp(tipo: TipoAccion, entity: Entity, id: Long, json: String, success: Boolean) {
+        savePendingOpString(tipo, entity, id.toString(), json, success)
+    }
+
+    private suspend fun savePendingOpString(tipo: TipoAccion, entity: Entity, id: String, json: String, success: Boolean) {
         withContext(NonCancellable + Dispatchers.IO) {
              pendiente.insertOperacionPendiente(
                  tipo.getNombreAccion(),
                  entity.getNombreEntity(),
                  id,
                  json,
-                 System.currentTimeMillis(),
+                 getCurrentTimestampSeconds(),
                  if (success) 1L else 0L
              )
         }

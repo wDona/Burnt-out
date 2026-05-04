@@ -15,7 +15,7 @@ import io.ktor.http.contentType
 import io.ktor.client.statement.HttpResponse
 
 class TableroApiImpl(private val client: HttpClient = ApiClient.client) : TableroApi {
-    override suspend fun getTableroById(idTablero: Long): Tablero =
+    override suspend fun getTableroById(idTablero: String): Tablero =
         client.get("tableros/$idTablero").body()
 
     override suspend fun getTablerosByOrg(idOrg: Long, idEquipo: Long): List<Tablero> =
@@ -33,6 +33,6 @@ class TableroApiImpl(private val client: HttpClient = ApiClient.client) : Tabler
             setBody(tablero)
         }
 
-    override suspend fun eliminarTablero(idTablero: Long): HttpResponse =
+    override suspend fun eliminarTablero(idTablero: String): HttpResponse =
         client.delete("tableros/$idTablero")
 }

@@ -17,7 +17,7 @@ class OperacionPendienteDaoImpl(appDatabase: AppDatabase) : OperacionPendienteDa
         }
     }
 
-    override suspend fun insertOperacionPendiente(tipoAccion: String, tablaAfectada: String, idAfectado: Long, datosJson: String, timestampCreacion: Long, sincronizado: Long) {
+    override suspend fun insertOperacionPendiente(tipoAccion: String, tablaAfectada: String, idAfectado: String, datosJson: String, timestampCreacion: Long, sincronizado: Long) {
         Logger.d(TAG, "insertOperacionPendiente: tipo=$tipoAccion, tabla=$tablaAfectada, id=$idAfectado, json=$datosJson")
         queries.insertOperacionPendiente(
             tipo_accion = tipoAccion,

@@ -6,24 +6,24 @@ import dev.wdona.burntout.shared.domain.Tarea
 
 class TareaLocalDataSourceImpl(private val dao: TareaDao) : TareaLocalDataSource {
 
-    override suspend fun getTareasByTablero(idTablero: Long): List<Tarea> =
+    override suspend fun getTareasByTablero(idTablero: String): List<Tarea> =
         dao.getTareasByTablero(idTablero)
 
     override suspend fun getTareaById(
-        idTarea: Long,
-        idTablero: Long
+        idTarea: String,
+        idTablero: String
     ): Tarea? = dao.getTareaById(idTarea)
 
-    override suspend fun crearTarea(tarea: Tarea) : Long =
+    override suspend fun crearTarea(tarea: Tarea) : String =
         dao.crearTarea(tarea)
 
     override suspend fun actualizarTarea(tarea: Tarea) =
         dao.actualizarTarea(tarea)
 
-    override suspend fun eliminarTarea(tareaId: Long) =
+    override suspend fun eliminarTarea(tareaId: String) =
         dao.eliminarTarea(tareaId)
 
-    override suspend fun eliminarTareasPorTablero(idTablero: Long) {
+    override suspend fun eliminarTareasPorTablero(idTablero: String) {
         dao.eliminarTareasByTableroId(idTablero)
     }
 

@@ -100,7 +100,7 @@ class UsuarioRepositoryImpl(
                 pendiente.insertOperacionPendiente(
                     TipoAccion.CREACION.getNombreAccion(),
                     Entity.USUARIO.getNombreEntity(),
-                    usuario.idUsuario,
+                    usuario.idUsuario.toString(),
                     UsuarioMapper.toJson(usuario),
                     System.currentTimeMillis(),
                     if (exito) 1L else 0L
@@ -132,7 +132,7 @@ class UsuarioRepositoryImpl(
                 pendiente.insertOperacionPendiente(
                     TipoAccion.ACTUALIZACION.getNombreAccion(),
                     Entity.USUARIO.getNombreEntity(),
-                    usuario.idUsuario,
+                    usuario.idUsuario.toString(),
                     UsuarioMapper.toJson(usuario),
                     System.currentTimeMillis(),
                     if (exito) 1L else 0L
@@ -164,7 +164,7 @@ class UsuarioRepositoryImpl(
                 pendiente.insertOperacionPendiente(
                     TipoAccion.ELIMINACION.getNombreAccion(),
                     Entity.USUARIO.getNombreEntity(),
-                    idUsuario,
+                    idUsuario.toString(),
                     "",
                     System.currentTimeMillis(),
                     if (exito) 1L else 0L

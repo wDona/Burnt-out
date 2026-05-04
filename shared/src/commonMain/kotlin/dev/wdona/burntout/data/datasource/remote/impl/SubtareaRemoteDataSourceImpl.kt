@@ -7,17 +7,17 @@ import io.ktor.http.isSuccess
 
 class SubtareaRemoteDataSourceImpl(private val api: SubtareaApi) : SubtareaRemoteDataSource {
 
-    override suspend fun getSubtareasByTarea(idTarea: Long): List<Subtarea> =
+    override suspend fun getSubtareasByTarea(idTarea: String): List<Subtarea> =
         api.getSubtareasByTarea(idTarea)
 
-    override suspend fun crearSubtarea(subtarea: Subtarea): Long {
+    override suspend fun crearSubtarea(subtarea: Subtarea): String {
         val response = api.crearSubtarea(subtarea)
-        return if (response.status.isSuccess()) subtarea.idSubtarea else -1L
+        return if (response.status.isSuccess()) subtarea.idSubtarea else ""
     }
 
     override suspend fun actualizarSubtarea(subtarea: Subtarea): Boolean =
         api.actualizarSubtarea(subtarea).status.isSuccess()
 
-    override suspend fun eliminarSubtarea(idSubtarea: Long): Boolean =
+    override suspend fun eliminarSubtarea(idSubtarea: String): Boolean =
         api.eliminarSubtarea(idSubtarea).status.isSuccess()
 }

@@ -9,6 +9,7 @@ import dev.wdona.burntout.domain.entity.Entity
 import dev.wdona.burntout.domain.model.TipoAccion
 import dev.wdona.burntout.shared.domain.Subtarea
 import dev.wdona.burntout.shared.utils.SettingsManager
+import dev.wdona.burntout.shared.utils.getCurrentTimestampSeconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
@@ -23,7 +24,7 @@ class SubtareaRepositoryImpl(
 
     private val repositoryScope = CoroutineScope(Dispatchers.Default)
 
-    override suspend fun getSubtareasByTarea(idTarea: Long): List<Subtarea> = withContext(NonCancellable + Dispatchers.IO) {
+    override suspend fun getSubtareasByTarea(idTarea: String): List<Subtarea> = withContext(NonCancellable + Dispatchers.IO) {
         if (!SettingsManager.isUsuarioInvitado()) {
             repositoryScope.launch {
                 try {
@@ -54,10 +55,11 @@ class SubtareaRepositoryImpl(
 
         withContext(NonCancellable + Dispatchers.IO) {
             var exito = false
-            var idRemoto: Long = -1
+            var idGenerado: String = ""
             try {
-                idRemoto = remote.crearSubtarea(subtarea)
-                exito = idRemoto != -1L
+                val response = remote.crearSubtarea(subtarea)
+                idGenerado = response
+                exito = idGenerado.isNotEmpty()
             } catch (e: Exception) {
                 println("Servidor offline al crear subtarea: ${e.message}")
             }
@@ -65,9 +67,9 @@ class SubtareaRepositoryImpl(
                 pendiente.insertOperacionPendiente(
                     TipoAccion.CREACION.getNombreAccion(),
                     Entity.SUBTAREA.getNombreEntity(),
-                    if (exito) idRemoto else 0L,
+                    if (exito) idGenerado else subtarea.idSubtarea,
                     SubtareaMapper.toJson(subtarea),
-                    System.currentTimeMillis(),
+                    getCurrentTimestampSeconds(),
                     if (exito) 1L else 0L
                 )
             } catch (e: Exception) {
@@ -100,7 +102,7 @@ class SubtareaRepositoryImpl(
                     Entity.SUBTAREA.getNombreEntity(),
                     subtarea.idSubtarea,
                     SubtareaMapper.toJson(subtarea),
-                    System.currentTimeMillis(),
+                    getCurrentTimestampSeconds(),
                     if (exito) 1L else 0L
                 )
             } catch (e: Exception) {
@@ -109,7 +111,7 @@ class SubtareaRepositoryImpl(
         }
     }
 
-    override suspend fun eliminarSubtarea(idSubtarea: Long) {
+    override suspend fun eliminarSubtarea(idSubtarea: String) {
         withContext(NonCancellable + Dispatchers.IO) {
             try {
                 local.eliminarSubtarea(idSubtarea)
@@ -133,7 +135,7 @@ class SubtareaRepositoryImpl(
                     Entity.SUBTAREA.getNombreEntity(),
                     idSubtarea,
                     "",
-                    System.currentTimeMillis(),
+                    getCurrentTimestampSeconds(),
                     if (exito) 1L else 0L
                 )
             } catch (e: Exception) {

@@ -5,12 +5,13 @@ import dev.wdona.burntout.data.datasource.mapper.TableroMapper
 import dev.wdona.burntout.shared.domain.Tablero
 import dev.wdona.burntout.shared.db.AppDatabase
 import dev.wdona.burntout.shared.utils.Logger
+import dev.wdona.burntout.shared.utils.getCurrentTimestampSeconds
 
 class TableroDaoImpl(appDatabase: AppDatabase) : TableroDao {
     private val queries = appDatabase.appDatabaseQueries
     private val TAG = "TableroDaoImpl"
 
-    override suspend fun getTableroById(idTablero: Long): Tablero {
+    override suspend fun getTableroById(idTablero: String): Tablero {
         Logger.d(TAG, "getTableroById: $idTablero")
         val entity = queries.getTableroById(idTablero).executeAsOne()
         return TableroMapper.toDomain(entity)
@@ -23,14 +24,16 @@ class TableroDaoImpl(appDatabase: AppDatabase) : TableroDao {
         }
     }
 
-    override suspend fun crearTablero(tablero: Tablero): Long {
+    override suspend fun crearTablero(tablero: Tablero): String {
         Logger.d(TAG, "crearTablero: $tablero")
         queries.insertTablero(
+            tablero.idTablero,
             tablero.titulo,
             tablero.idEquipo,
-            tablero.idOrganizacion
+            tablero.idOrganizacion,
+            getCurrentTimestampSeconds()
         )
-        return queries.lastInsertRowId().executeAsOne()
+        return tablero.idTablero
     }
 
     override suspend fun actualizarTablero(tablero: Tablero): Boolean {
@@ -39,6 +42,7 @@ class TableroDaoImpl(appDatabase: AppDatabase) : TableroDao {
             queries.updateTablero(
                 tablero.titulo,
                 tablero.idEquipo,
+                getCurrentTimestampSeconds(),
                 tablero.idTablero
             )
             true
@@ -48,10 +52,10 @@ class TableroDaoImpl(appDatabase: AppDatabase) : TableroDao {
         }
     }
 
-    override suspend fun eliminarTablero(idTablero: Long): Boolean {
+    override suspend fun eliminarTablero(idTablero: String): Boolean {
         Logger.d(TAG, "eliminarTablero: $idTablero")
         return try {
-            queries.deleteTablero(idTablero)
+            queries.deleteTablero(getCurrentTimestampSeconds(), idTablero)
             true
         } catch (e: Exception) {
             Logger.d(TAG, "Error eliminarTablero: ${e.message}")
@@ -67,7 +71,8 @@ class TableroDaoImpl(appDatabase: AppDatabase) : TableroDao {
                 tablero.titulo,
                 tablero.idEquipo,
                 tablero.idOrganizacion,
-                if (tablero.isDeleted) 1L else 0L
+                if (tablero.isDeleted) 1L else 0L,
+                getCurrentTimestampSeconds()
             )
             true
         } catch (e: Exception) {

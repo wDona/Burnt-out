@@ -13,7 +13,8 @@ object SubtareaMapper {
             descripcion = null,
             completado = entity.Completado != 0L,
             idTareaPerteneciente = entity.FK_ID_Tarea,
-            isDeleted = entity.Is_Deleted != 0L
+            isDeleted = entity.Is_Deleted != 0L,
+            updatedAt = entity.Updated_At
         )
     }
 

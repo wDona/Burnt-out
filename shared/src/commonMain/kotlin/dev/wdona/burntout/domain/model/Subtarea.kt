@@ -4,10 +4,11 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class Subtarea(
-    val idSubtarea: Long,
+    val idSubtarea: String,
     val titulo: String,
     val descripcion: String?,
     val completado: Boolean,
-    val idTareaPerteneciente: Long,
-    val isDeleted: Boolean = false
+    val idTareaPerteneciente: String,
+    val isDeleted: Boolean = false,
+    val updatedAt: Long = 0L
 )

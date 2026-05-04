@@ -4,8 +4,8 @@ import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
 import dev.wdona.burntout.domain.model.OperacionPendiente
 import dev.wdona.burntout.domain.repository.OperacionesPendientesRepository
+import dev.wdona.burntout.domain.repository.SyncRepository
 import dev.wdona.burntout.domain.usecase.RefrescarDatosUseCase
-import dev.wdona.burntout.domain.usecase.SincronizarPendientesUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -15,7 +15,7 @@ enum class EstadoSync { IDLE, SINCRONIZANDO, COMPLETADO, COMPLETADO_CON_ERRORES 
 
 class OperacionesPendientesViewModel(
     private val repository: OperacionesPendientesRepository,
-    private val sincronizarPendientes: SincronizarPendientesUseCase,
+    private val syncRepository: SyncRepository,
     private val refrescarDatos: RefrescarDatosUseCase
 ) : ScreenModel {
     private val _uiState = MutableStateFlow<OperacionPendiente?>(null)
@@ -29,7 +29,7 @@ class OperacionesPendientesViewModel(
     fun sincronizarAlIniciar() {
         screenModelScope.launch {
             _estadoSync.value = EstadoSync.SINCRONIZANDO
-            val todoOk = sincronizarPendientes()
+            val todoOk = syncRepository.sync()
             if (todoOk) {
                 refrescarDatos()
                 _estadoSync.value = EstadoSync.COMPLETADO

@@ -9,6 +9,7 @@ import dev.wdona.burntout.domain.entity.Entity
 import dev.wdona.burntout.domain.model.TipoAccion
 import dev.wdona.burntout.shared.domain.Tarea
 import dev.wdona.burntout.shared.utils.SettingsManager
+import dev.wdona.burntout.shared.utils.getCurrentTimestampSeconds
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.withContext
@@ -19,7 +20,7 @@ class TareaRepositoryImpl(
     private val pendiente: OperacionPendienteLocalDataSource
 ) : TareaRepository {
 
-    override suspend fun getTareasByTableroId(tableroId: Long): List<Tarea> = withContext(NonCancellable + Dispatchers.IO) {
+    override suspend fun getTareasByTableroId(tableroId: String): List<Tarea> = withContext(NonCancellable + Dispatchers.IO) {
         if (!SettingsManager.isUsuarioInvitado()) {
             try {
                 val serverTareas = remote.getTareasByTablero(tableroId)
@@ -33,7 +34,7 @@ class TareaRepositoryImpl(
         local.getTareasByTablero(tableroId)
     }
 
-    override suspend fun getTareaById(idTarea: Long, idTablero: Long): Tarea? = withContext(NonCancellable + Dispatchers.IO) {
+    override suspend fun getTareaById(idTarea: String, idTablero: String): Tarea? = withContext(NonCancellable + Dispatchers.IO) {
         val tareaLocal = local.getTareaById(idTarea, idTablero)
 
         if (SettingsManager.isUsuarioInvitado()) {
@@ -66,10 +67,10 @@ class TareaRepositoryImpl(
 
         withContext(NonCancellable + Dispatchers.IO) {
             var exitoRemoto = false
-            var idRemoto: Long = -1
+            var idRemoto: String = ""
             try {
                 idRemoto = remote.crearTarea(tarea)
-                exitoRemoto = idRemoto != -1L
+                exitoRemoto = idRemoto.isNotEmpty()
             } catch (e: Exception) {
                 println("Servidor offline al crear tarea: ${e.message}")
             }
@@ -77,13 +78,13 @@ class TareaRepositoryImpl(
                 pendiente.insertOperacionPendiente(
                     TipoAccion.CREACION.getNombreAccion(),
                     Entity.TAREA.getNombreEntity(),
-                    if (exitoRemoto) idRemoto else 0L,
+                    if (exitoRemoto) idRemoto else tarea.idTarea,
                     TareaMapper.toJson(tarea),
-                    System.currentTimeMillis(),
+                    getCurrentTimestampSeconds(),
                     if (exitoRemoto) 1L else 0L
                 )
             } catch (e: Exception) {
-                println("Error al registrar operación pendiente: ${e.message}")
+                println("Error al registrar operacion pendiente: ${e.message}")
             }
         }
     }
@@ -112,7 +113,7 @@ class TareaRepositoryImpl(
                     Entity.TAREA.getNombreEntity(),
                     tarea.idTarea,
                     TareaMapper.toJson(tarea),
-                    System.currentTimeMillis(),
+                    getCurrentTimestampSeconds(),
                     if (exito) 1L else 0L
                 )
             } catch (e: Exception) {
@@ -121,7 +122,7 @@ class TareaRepositoryImpl(
         }
     }
 
-    override suspend fun eliminarTarea(idTarea: Long) {
+    override suspend fun eliminarTarea(idTarea: String) {
         withContext(NonCancellable + Dispatchers.IO) {
             try {
                 local.eliminarTarea(idTarea)
@@ -144,8 +145,8 @@ class TareaRepositoryImpl(
                     TipoAccion.ELIMINACION.getNombreAccion(),
                     Entity.TAREA.getNombreEntity(),
                     idTarea,
-                    "",
-                    System.currentTimeMillis(),
+                    "{\"idTarea\":\"$idTarea\"}",
+                    getCurrentTimestampSeconds(),
                     if (exito) 1L else 0L
                 )
             } catch (e: Exception) {

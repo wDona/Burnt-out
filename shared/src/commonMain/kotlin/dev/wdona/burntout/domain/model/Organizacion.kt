@@ -6,5 +6,6 @@ import kotlinx.serialization.Serializable
 data class Organizacion(
     val idOrganizacion: Long,
     val nombre: String,
-    val isDeleted: Boolean = false
+    val isDeleted: Boolean = false,
+    val updatedAt: Long = 0L
 )

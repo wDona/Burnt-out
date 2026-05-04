@@ -6,7 +6,7 @@ import dev.wdona.burntout.shared.domain.Tablero
 import io.ktor.client.call.body
 
 class TableroRemoteDataSourceImpl(private val tableroApi: TableroApi) : TableroRemoteDataSource {
-    override suspend fun getTableroById(idTablero: Long): Tablero {
+    override suspend fun getTableroById(idTablero: String): Tablero {
         return tableroApi.getTableroById(idTablero)
     }
 
@@ -14,15 +14,16 @@ class TableroRemoteDataSourceImpl(private val tableroApi: TableroApi) : TableroR
         return tableroApi.getTablerosByOrg(idOrg, idEquipo)
     }
 
-    override suspend fun crearTablero(tablero: Tablero): Tablero {
-        return tableroApi.crearTablero(tablero).body()
+    override suspend fun crearTablero(tablero: Tablero): String {
+        val response = tableroApi.crearTablero(tablero)
+        return if (response.status.value in 200..299) tablero.idTablero else ""
     }
 
     override suspend fun actualizarTablero(tablero: Tablero): Boolean {
         return tableroApi.actualizarTablero(tablero).status.value in 200..299
     }
 
-    override suspend fun eliminarTablero(idTablero: Long): Boolean {
+    override suspend fun eliminarTablero(idTablero: String): Boolean {
         return tableroApi.eliminarTablero(idTablero).status.value in 200..299
     }
 }

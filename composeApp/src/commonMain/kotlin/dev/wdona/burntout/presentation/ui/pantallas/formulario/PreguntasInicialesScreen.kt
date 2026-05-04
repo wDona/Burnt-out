@@ -143,9 +143,10 @@ fun PreguntasInicialesContent(onVolver: (() -> Unit)? = null, viewModel: Pregunt
         println("CLICK en Responder: selected=$selectedCantidad, pregunta=$preguntaActual por usuario ${SettingsManager.getIdUsuarioActual()}")
         if (selectedCantidad != null && preguntaActual != null) {
             val respuesta = Respuesta(
+                idRespuesta = java.util.UUID.randomUUID().toString(),
                 idUsuario = SettingsManager.getIdUsuarioActual(),
                 idPregunta = preguntaActual.idPregunta,
-                anonimo = false,
+                anonimo = SettingsManager.isRespuestasAnonimas(),
                 respuesta = selectedCantidad!!.toLong(),
                 fecha = System.currentTimeMillis() / 1000L
             )

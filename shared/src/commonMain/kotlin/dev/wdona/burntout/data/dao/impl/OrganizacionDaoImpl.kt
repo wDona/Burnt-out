@@ -5,6 +5,7 @@ import dev.wdona.burntout.data.datasource.mapper.OrganizacionMapper
 import dev.wdona.burntout.shared.db.AppDatabase
 import dev.wdona.burntout.shared.domain.Organizacion
 import dev.wdona.burntout.shared.utils.Logger
+import dev.wdona.burntout.shared.utils.getCurrentTimestampSeconds
 
 class OrganizacionDaoImpl(appDatabase: AppDatabase) : OrganizacionDao {
     private val queries = appDatabase.appDatabaseQueries
@@ -30,7 +31,8 @@ class OrganizacionDaoImpl(appDatabase: AppDatabase) : OrganizacionDao {
             queries.upsertOrganizacion(
                 ID_Org = organizacion.idOrganizacion,
                 Org_Name = organizacion.nombre,
-                Is_Deleted = if (organizacion.isDeleted) 1L else 0L
+                Is_Deleted = if (organizacion.isDeleted) 1L else 0L,
+                Updated_At = getCurrentTimestampSeconds()
             )
             true
         } catch (e: Exception) {
@@ -44,7 +46,8 @@ class OrganizacionDaoImpl(appDatabase: AppDatabase) : OrganizacionDao {
         return try {
             queries.updateOrganizacion(
                 Org_Name = organizacion.nombre,
-                ID_Org = organizacion.idOrganizacion
+                ID_Org = organizacion.idOrganizacion,
+                Updated_At = getCurrentTimestampSeconds()
             )
             true
         } catch (e: Exception) {
@@ -56,7 +59,7 @@ class OrganizacionDaoImpl(appDatabase: AppDatabase) : OrganizacionDao {
     override suspend fun eliminarOrganizacion(idOrg: Long): Boolean {
         Logger.d(TAG, "eliminarOrganizacion: $idOrg")
         return try {
-            queries.deleteOrganizacion(idOrg)
+            queries.deleteOrganizacion(getCurrentTimestampSeconds(), idOrg)
             true
         } catch (e: Exception) {
             Logger.d(TAG, "Error eliminarOrganizacion: ${e.message}")

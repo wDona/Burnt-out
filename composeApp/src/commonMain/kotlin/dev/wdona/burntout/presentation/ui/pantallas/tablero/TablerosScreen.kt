@@ -68,7 +68,7 @@ class TablerosScreen(
         tablerosViewModel: TablerosViewModel,
         idOrg: Long,
         onIrACrearTablero: () -> Unit,
-        onVerTablero: (Long, String) -> Unit
+        onVerTablero: (String, String) -> Unit
     ) {
         val listaTableros by tablerosViewModel.listaTableros.collectAsStateWithLifecycle()
 

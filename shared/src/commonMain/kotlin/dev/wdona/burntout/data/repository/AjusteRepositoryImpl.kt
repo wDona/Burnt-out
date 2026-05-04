@@ -80,7 +80,7 @@ class AjusteRepositoryImpl(
                 operacionesPendientesDatasource.insertOperacionPendiente(
                     TipoAccion.ACTUALIZACION.getNombreAccion(),
                     Entity.AJUSTE.getNombreEntity(),
-                    ajuste.idAjuste,
+                    "" + ajuste.idAjuste,
                     AjusteMapper.toJson(ajuste),
                     System.currentTimeMillis(),
                     if (isSincronizado) 1L else 0L

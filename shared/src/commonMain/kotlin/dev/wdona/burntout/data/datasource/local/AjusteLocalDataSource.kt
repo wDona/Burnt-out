@@ -6,4 +6,5 @@ import dev.wdona.burntout.domain.model.Ajuste
 interface AjusteLocalDataSource : AjusteDataSource {
     suspend fun eliminarAjuste(idAjuste: Long)
     suspend fun anadirAjuste(ajuste: Ajuste)
+    suspend fun insertOrUpdateAjuste(ajuste: Ajuste)
 }

@@ -5,6 +5,7 @@ import dev.wdona.burntout.data.datasource.mapper.EquipoMapper
 import dev.wdona.burntout.shared.domain.Equipo
 import dev.wdona.burntout.shared.db.AppDatabase
 import dev.wdona.burntout.shared.utils.Logger
+import dev.wdona.burntout.shared.utils.getCurrentTimestampSeconds
 
 class EquipoDaoImpl(appDatabase: AppDatabase) : EquipoDao {
     private val queries = appDatabase.appDatabaseQueries
@@ -27,7 +28,8 @@ class EquipoDaoImpl(appDatabase: AppDatabase) : EquipoDao {
         Logger.d(TAG, "crearEquipo: ${equipo.titulo}")
         queries.insertEquipo(
             equipo.titulo,
-            equipo.idOrganizacion
+            equipo.idOrganizacion,
+            getCurrentTimestampSeconds()
         )
         return queries.lastInsertRowId().executeAsOne()
     }
@@ -40,7 +42,8 @@ class EquipoDaoImpl(appDatabase: AppDatabase) : EquipoDao {
                 equipo.titulo,
                 equipo.puntuacion ?: 0,
                 equipo.idOrganizacion,
-                if (equipo.isDeleted) 1L else 0L
+                if (equipo.isDeleted) 1L else 0L,
+                equipo.updatedAt
             )
             true
         } catch (e: Exception) {
@@ -54,6 +57,7 @@ class EquipoDaoImpl(appDatabase: AppDatabase) : EquipoDao {
         return try {
             queries.updateEquipo(
                 equipo.titulo,
+                getCurrentTimestampSeconds(),
                 equipo.idEquipo
             )
             true
@@ -66,7 +70,10 @@ class EquipoDaoImpl(appDatabase: AppDatabase) : EquipoDao {
     override suspend fun eliminarEquipo(idEquipo: Long): Boolean {
         Logger.d(TAG, "eliminarEquipo: $idEquipo")
         return try {
-            queries.deleteEquipo(idEquipo)
+            queries.deleteEquipo(
+                getCurrentTimestampSeconds(),
+                idEquipo
+            )
             true
         } catch (e: Exception) {
             Logger.d(TAG, "Error eliminarEquipo: ${e.message}")
@@ -77,7 +84,11 @@ class EquipoDaoImpl(appDatabase: AppDatabase) : EquipoDao {
     override suspend fun updatePuntuacion(idEquipo: Long, puntos: Long): Boolean {
         Logger.d(TAG, "updatePuntuacion: equipo=$idEquipo, puntos=$puntos")
         return try {
-            queries.updatePuntuacionEquipo(puntos, idEquipo)
+            queries.updatePuntuacionEquipo(
+                puntos,
+                getCurrentTimestampSeconds(),
+                idEquipo
+            )
             true
         } catch (e: Exception) {
             Logger.d(TAG, "Error updatePuntuacion: ${e.message}")
@@ -87,12 +98,13 @@ class EquipoDaoImpl(appDatabase: AppDatabase) : EquipoDao {
 
     override suspend fun addUsuarioAlEquipo(idEquipo: Long, idUsuario: Long): Boolean {
         Logger.d(TAG, "addUsuarioAlEquipo: equipo=$idEquipo, user=$idUsuario")
+        val now = getCurrentTimestampSeconds()
         return try {
             queries.transaction {
-                queries.deleteUserFromAllTeams(idUsuario)
-                queries.insertUserTeam(idUsuario, idEquipo)
-                queries.updateUsuarioTeamId(idEquipo, idUsuario)
-                queries.deleteEmptyTeams()
+                queries.deleteUserFromAllTeams(now, idUsuario)
+                queries.insertUserTeam(idUsuario, idEquipo, now)
+                queries.updateUsuarioTeamId(idEquipo, now, idUsuario)
+                queries.deleteEmptyTeams(now)
             }
             true
         } catch (e: Exception) {
@@ -103,11 +115,12 @@ class EquipoDaoImpl(appDatabase: AppDatabase) : EquipoDao {
 
     override suspend fun removeUsuarioDelEquipo(idEquipo: Long, idUsuario: Long): Boolean {
         Logger.d(TAG, "removeUsuarioDelEquipo: equipo=$idEquipo, user=$idUsuario")
+        val now = getCurrentTimestampSeconds()
         return try {
             queries.transaction {
-                queries.deleteUserTeam(idUsuario, idEquipo)
-                queries.updateUsuarioTeamId(0L, idUsuario) // 0 o null segun convención
-                queries.deleteEmptyTeams()
+                queries.deleteUserTeam(now, idUsuario, idEquipo)
+                queries.updateUsuarioTeamId(0L, now, idUsuario) // 0 o null segun convención
+                queries.deleteEmptyTeams(now)
             }
             true
         } catch (e: Exception) {

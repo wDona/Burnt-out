@@ -19,6 +19,8 @@ object SettingsManager {
     private const val KEY_SINCRONIZADO_EN_ESTA_APERTURA = "sincronizado_en_esta_apertura"
     private const val KEY_RESPUESTAS_ANONIMAS = "respuestas_anonimas"
 
+    private val KEY_LAST_SYNC_TIMESTAMP get() = "last_sync_timestamp_${_idUsuarioActualFlow.value}"
+
     private val _idUsuarioActualFlow = MutableStateFlow(settings.getLong(KEY_ID_USUARIO_ACTUAL, Long.MIN_VALUE))
     val idUsuarioActualFlow = _idUsuarioActualFlow.asStateFlow()
 
@@ -45,6 +47,9 @@ object SettingsManager {
 
     private val _respuestasAnonimasFlow = MutableStateFlow(settings.getBoolean(KEY_RESPUESTAS_ANONIMAS, false))
     val respuestasAnonimasFlow = _respuestasAnonimasFlow.asStateFlow()
+
+    private val _lastSyncTimestampFlow = MutableStateFlow(settings.getLong("last_sync_timestamp_${settings.getLong(KEY_ID_USUARIO_ACTUAL, Long.MIN_VALUE)}", 0L))
+    val lastSyncTimestampFlow = _lastSyncTimestampFlow.asStateFlow()
 
     private val KEY_ULTIMA_FECHA_CUESTIONARIO get() = "ultima_fecha_cuestionario_${_idUsuarioActualFlow.value}"
     private val KEY_PRIMER_CUESTIONARIO_HECHO get() = "cuestionario_inicial_hecho_${_idUsuarioActualFlow.value}"
@@ -92,6 +97,13 @@ object SettingsManager {
     fun getSincronizadoEnEstaApertura(): Boolean = _sincronizadoEnEstaAperturaFlow.value
     fun isRespuestasAnonimas(): Boolean = _respuestasAnonimasFlow.value
     fun isAdminOrOwner(): Boolean = _rolActualFlow.value >= 1L
+
+    fun getLastSyncTimestamp(): Long = settings.getLong(KEY_LAST_SYNC_TIMESTAMP, 0L)
+    fun setLastSyncTimestamp(timestamp: Long) {
+        settings.putLong(KEY_LAST_SYNC_TIMESTAMP, timestamp)
+        _lastSyncTimestampFlow.value = timestamp
+    }
+
     fun setRespuestasAnonimas(anonimas: Boolean) {
         settings.putBoolean(KEY_RESPUESTAS_ANONIMAS, anonimas)
         _respuestasAnonimasFlow.value = anonimas
@@ -150,6 +162,7 @@ object SettingsManager {
         settings.putLong(KEY_ID_USUARIO_ACTUAL, usuario.idUsuario)
         _idUsuarioActualFlow.value = usuario.idUsuario
         
+        _lastSyncTimestampFlow.value = getLastSyncTimestamp()
         _isAutenticadoFlow.value = true
         _esUltimoCuestionarioHecho.value = settings.getBoolean(KEY_PRIMER_CUESTIONARIO_HECHO, false)
         _cuestionarioHoyHechoFlow.value = checkCuestionarioHoyHecho()
@@ -168,6 +181,7 @@ object SettingsManager {
         settings.putLong(KEY_ID_USUARIO_ACTUAL, Long.MIN_VALUE)
         _idUsuarioActualFlow.value = Long.MIN_VALUE
         
+        _lastSyncTimestampFlow.value = getLastSyncTimestamp()
         _isAutenticadoFlow.value = true
     }
 
@@ -181,6 +195,7 @@ object SettingsManager {
         _tokenUsuarioFlow.value = ""
         _isAutenticadoFlow.value = false
         _sincronizadoEnEstaAperturaFlow.value = false
+        _lastSyncTimestampFlow.value = 0L
         _esUltimoCuestionarioHecho.value = false
         _cuestionarioHoyHechoFlow.value = false
     }

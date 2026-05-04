@@ -107,6 +107,7 @@ fun PreguntaContent(onVolver: (() -> Unit)? = null, viewModel: FormularioViewMod
     val responderAccion = {
         if (selectedCantidad != null && preguntaActual != null) {
             val respuesta = Respuesta(
+                idRespuesta = java.util.UUID.randomUUID().toString(),
                 idUsuario = SettingsManager.getIdUsuarioActual(),
                 idPregunta = preguntaActual.idPregunta,
                 anonimo = SettingsManager.isRespuestasAnonimas(),

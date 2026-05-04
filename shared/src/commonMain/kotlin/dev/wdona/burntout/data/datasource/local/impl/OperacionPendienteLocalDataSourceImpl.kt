@@ -13,7 +13,7 @@ class OperacionPendienteLocalDataSourceImpl(val dao: OperacionPendienteDao) : Op
     override suspend fun insertOperacionPendiente(
         tipoAccion: String,
         tablaAfectada: String,
-        idAfectado: Long,
+        idAfectado: String,
         datosJson: String,
         timestampCreacion: Long,
         sincronizado: Long

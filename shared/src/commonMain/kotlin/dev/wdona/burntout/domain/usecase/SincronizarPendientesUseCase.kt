@@ -85,13 +85,17 @@ class SincronizarPendientesUseCase(
         return when (op.tipoAccion) {
             TipoAccion.CREACION.getNombreAccion() -> {
                 val tarea = json.decodeFromString<Tarea>(op.datosJson)
-                tareaRemote.crearTarea(tarea) != -1L
+                tareaRemote.crearTarea(tarea).isNotEmpty()
             }
             TipoAccion.ACTUALIZACION.getNombreAccion() -> {
                 val tarea = json.decodeFromString<Tarea>(op.datosJson)
                 tareaRemote.actualizarTarea(tarea)
             }
-            TipoAccion.ELIMINACION.getNombreAccion() -> tareaRemote.eliminarTarea(op.idAfectado)
+            TipoAccion.ELIMINACION.getNombreAccion() -> {
+                val regex = "\"idTarea\":\"([^\"]+)\"".toRegex()
+                val idTarea = regex.find(op.datosJson)?.groupValues?.get(1) ?: op.idAfectado.toString()
+                tareaRemote.eliminarTarea(idTarea)
+            }
             else -> true
         }
     }
@@ -100,7 +104,7 @@ class SincronizarPendientesUseCase(
         return when (op.tipoAccion) {
             TipoAccion.CREACION.getNombreAccion() -> {
                 val tablero = json.decodeFromString<Tablero>(op.datosJson)
-                tableroRemote.crearTablero(tablero).idTablero > 0L
+                tableroRemote.crearTablero(tablero).isNotEmpty()
             }
             TipoAccion.ACTUALIZACION.getNombreAccion() -> {
                 val tablero = json.decodeFromString<Tablero>(op.datosJson)
@@ -121,7 +125,7 @@ class SincronizarPendientesUseCase(
                 val equipo = json.decodeFromString<Equipo>(op.datosJson)
                 equipoRemote.actualizarEquipo(equipo)
             }
-            TipoAccion.ELIMINACION.getNombreAccion() -> equipoRemote.eliminarEquipo(op.idAfectado)
+            TipoAccion.ELIMINACION.getNombreAccion() -> equipoRemote.eliminarEquipo(op.idAfectado.toLong())
             else -> true
         }
     }
@@ -136,7 +140,7 @@ class SincronizarPendientesUseCase(
                 val usuario = json.decodeFromString<Usuario>(op.datosJson)
                 usuarioRemote.actualizarUsuario(usuario)
             }
-            TipoAccion.ELIMINACION.getNombreAccion() -> usuarioRemote.eliminarUsuario(op.idAfectado)
+            TipoAccion.ELIMINACION.getNombreAccion() -> usuarioRemote.eliminarUsuario(op.idAfectado.toLong())
             else -> true
         }
     }
@@ -151,7 +155,7 @@ class SincronizarPendientesUseCase(
                 val pregunta = json.decodeFromString<Pregunta>(op.datosJson)
                 preguntaRespuestaRemote.actualizarPregunta(pregunta)
             }
-            TipoAccion.ELIMINACION.getNombreAccion() -> preguntaRespuestaRemote.eliminarPregunta(op.idAfectado)
+            TipoAccion.ELIMINACION.getNombreAccion() -> preguntaRespuestaRemote.eliminarPregunta(op.idAfectado.toLong())
             else -> true
         }
     }
@@ -171,7 +175,7 @@ class SincronizarPendientesUseCase(
         return when (op.tipoAccion) {
             TipoAccion.CREACION.getNombreAccion() -> {
                 val subtarea = json.decodeFromString<Subtarea>(op.datosJson)
-                subtareaRemote.crearSubtarea(subtarea) != -1L
+                subtareaRemote.crearSubtarea(subtarea).isNotEmpty()
             }
             TipoAccion.ACTUALIZACION.getNombreAccion() -> {
                 val subtarea = json.decodeFromString<Subtarea>(op.datosJson)
@@ -192,7 +196,7 @@ class SincronizarPendientesUseCase(
                 val org = json.decodeFromString<Organizacion>(op.datosJson)
                 organizacionRemote.actualizarOrganizacion(org)
             }
-            TipoAccion.ELIMINACION.getNombreAccion() -> organizacionRemote.eliminarOrganizacion(op.idAfectado)
+            TipoAccion.ELIMINACION.getNombreAccion() -> organizacionRemote.eliminarOrganizacion(op.idAfectado.toLong())
             else -> true
         }
     }

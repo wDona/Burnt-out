@@ -25,7 +25,11 @@ class AjusteLocalDataSourceImpl(private val dao: AjusteDao) : AjusteLocalDataSou
         idAjuste: Long,
         idUsuario: Long
     ): Ajuste {
-        return dao.getAjusteByIdYUsuario(idAjuste, idUsuario)
+        return dao.getAjusteByIdYUsuario(idAjuste, idUsuario) ?: throw Exception("Ajuste no encontrado")
+    }
+
+    override suspend fun insertOrUpdateAjuste(ajuste: Ajuste) {
+        dao.insertOrUpdateAjuste(ajuste)
     }
 
 }

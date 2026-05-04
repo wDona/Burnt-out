@@ -5,49 +5,55 @@ import dev.wdona.burntout.data.datasource.mapper.TareaMapper
 import dev.wdona.burntout.shared.domain.Tarea
 import dev.wdona.burntout.shared.db.AppDatabase
 import dev.wdona.burntout.shared.utils.Logger
+import dev.wdona.burntout.shared.utils.getCurrentTimestampSeconds
 
 class TareaDaoImpl(appDatabase: AppDatabase) : TareaDao {
     private val queries = appDatabase.appDatabaseQueries
     private val TAG = "TareaDaoImpl"
 
-    override suspend fun getTareasByTablero(idTablero: Long): List<Tarea> {
+    override suspend fun getTareasByTablero(idTablero: String): List<Tarea> {
         Logger.d(TAG, "getTareasByTablero: $idTablero")
         return TareaMapper.toDomainList(
             queries.getTareasByTablero(idTablero)
         )
     }
 
-    override suspend fun getTareaById(idTarea: Long): Tarea? {
+    override suspend fun getTareaById(idTarea: String): Tarea? {
         Logger.d(TAG, "getTareaById: $idTarea")
         val entity = queries.getTareaById(idTarea).executeAsOneOrNull()
         return entity?.let { TareaMapper.toDomain(it) }
     }
 
-    override suspend fun crearTarea(tarea: Tarea) : Long {
+    override suspend fun crearTarea(tarea: Tarea) : String {
         Logger.d(TAG, "crearTarea: $tarea")
+        val generatedId = tarea.idTarea.ifEmpty { java.util.UUID.randomUUID().toString() }
         queries.insertTarea(
+            ID_Tarea = generatedId,
             Titulo = tarea.titulo,
             Descripcion = tarea.descripcion,
             Estado = tarea.estado,
             FK_ID_Tabl = tarea.idTableroPerteneciente,
             FK_ID_Usuario = tarea.idUsuarioAsignado,
-            Fecha_Vencimiento = tarea.fechaVencimiento
+            Fecha_Vencimiento = tarea.fechaVencimiento,
+            Updated_At = tarea.updatedAt.takeIf { it > 0L } ?: getCurrentTimestampSeconds()
         )
-        return queries.lastInsertRowId().executeAsOne()
+        return generatedId
     }
 
     override suspend fun actualizarTarea(tarea: Tarea) : Boolean {
         Logger.d(TAG, "actualizarTarea: $tarea")
         try {
             queries.updateTareaById(
-                ID_Tarea = tarea.idTarea,
                 Titulo = tarea.titulo,
                 Descripcion = tarea.descripcion,
                 Estado = tarea.estado,
-                Fecha_Vencimiento = tarea.fechaVencimiento
+                Fecha_Vencimiento = tarea.fechaVencimiento,
+                Updated_At = tarea.updatedAt.takeIf { it > 0L } ?: getCurrentTimestampSeconds(),
+                ID_Tarea = tarea.idTarea
             )
             queries.assignTareaToUsuario(
                 FK_ID_Usuario = tarea.idUsuarioAsignado,
+                Updated_At = tarea.updatedAt.takeIf { it > 0L } ?: getCurrentTimestampSeconds(),
                 ID_Tarea = tarea.idTarea
             )
         } catch (e: Exception) {
@@ -57,10 +63,13 @@ class TareaDaoImpl(appDatabase: AppDatabase) : TareaDao {
         return true
     }
 
-    override suspend fun eliminarTarea(tareaId: Long) : Boolean {
+    override suspend fun eliminarTarea(tareaId: String) : Boolean {
         Logger.d(TAG, "eliminarTarea: $tareaId")
         try {
-            queries.deleteTareaById(tareaId)
+            queries.deleteTareaById(
+                Updated_At = getCurrentTimestampSeconds(),
+                ID_Tarea = tareaId
+            )
         } catch (e: Exception) {
             Logger.d(TAG, "Error eliminarTarea: ${e.message}")
             return false
@@ -71,7 +80,6 @@ class TareaDaoImpl(appDatabase: AppDatabase) : TareaDao {
     override suspend fun insertOrUpdateTarea(tarea: Tarea) : Boolean {
         Logger.d(TAG, "insertOrUpdateTarea: $tarea")
         try {
-            // Esta se usa para sincronización, aquí SÍ pasamos el ID
             queries.upsertTarea(
                 ID_Tarea = tarea.idTarea,
                 Titulo = tarea.titulo,
@@ -80,7 +88,8 @@ class TareaDaoImpl(appDatabase: AppDatabase) : TareaDao {
                 FK_ID_Tabl = tarea.idTableroPerteneciente,
                 FK_ID_Usuario = tarea.idUsuarioAsignado,
                 Fecha_Vencimiento = tarea.fechaVencimiento,
-                Is_Deleted = if (tarea.isDeleted) 1L else 0L
+                Is_Deleted = if (tarea.isDeleted) 1L else 0L,
+                Updated_At = tarea.updatedAt.takeIf { it > 0L } ?: getCurrentTimestampSeconds()
             )
         } catch (e: Exception) {
             Logger.d(TAG, "Error insertOrUpdateTarea: ${e.message}")
@@ -89,8 +98,11 @@ class TareaDaoImpl(appDatabase: AppDatabase) : TareaDao {
         return true
     }
 
-    override suspend fun eliminarTareasByTableroId(tableroId: Long) {
+    override suspend fun eliminarTareasByTableroId(tableroId: String) {
         Logger.d(TAG, "eliminarTareasByTableroId: $tableroId")
-        queries.deleteTareasByTablero(tableroId)
+        queries.deleteTareasByTablero(
+            Updated_At = getCurrentTimestampSeconds(),
+            FK_ID_Tabl = tableroId
+        )
     }
 }

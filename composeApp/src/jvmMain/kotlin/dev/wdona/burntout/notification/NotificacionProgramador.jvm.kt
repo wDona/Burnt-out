@@ -10,9 +10,9 @@ import java.util.TimerTask
 actual class NotificacionProgramador {
 
     private val timer = Timer("notificaciones-tarea", true)
-    private val tareas = mutableMapOf<Long, List<TimerTask>>()
+    private val tareas = mutableMapOf<String, List<TimerTask>>()
 
-    actual fun programarNotificaciones(idTarea: Long, titulo: String, fechaVencimiento: Long) {
+    actual fun programarNotificaciones(idTarea: String, titulo: String, fechaVencimiento: Long) {
         cancelarNotificaciones(idTarea)
         val ahora = System.currentTimeMillis()
         val ms24h = 24 * 60 * 60 * 1000L
@@ -35,7 +35,7 @@ actual class NotificacionProgramador {
         tareas[idTarea] = nuevasTareas
     }
 
-    actual fun cancelarNotificaciones(idTarea: Long) {
+    actual fun cancelarNotificaciones(idTarea: String) {
         tareas.remove(idTarea)?.forEach { it.cancel() }
     }
 

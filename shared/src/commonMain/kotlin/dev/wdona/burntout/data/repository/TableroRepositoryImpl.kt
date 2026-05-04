@@ -9,6 +9,7 @@ import dev.wdona.burntout.domain.model.TipoAccion
 import dev.wdona.burntout.domain.repository.TableroRepository
 import dev.wdona.burntout.shared.domain.Tablero
 import dev.wdona.burntout.shared.utils.SettingsManager
+import dev.wdona.burntout.shared.utils.getCurrentTimestampSeconds
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.sync.Mutex
@@ -37,7 +38,7 @@ class TableroRepositoryImpl(
         }
     }
 
-    override suspend fun getTableroById(idTablero: Long): Tablero = withContext(NonCancellable + Dispatchers.IO) {
+    override suspend fun getTableroById(idTablero: String): Tablero = withContext(NonCancellable + Dispatchers.IO) {
         mutex.withLock {
             if (!SettingsManager.isUsuarioInvitado()) {
                 try {
@@ -54,41 +55,29 @@ class TableroRepositoryImpl(
     override suspend fun crearTablero(tablero: Tablero) {
         withContext(NonCancellable + Dispatchers.IO) {
             mutex.withLock {
-                var idProvisionaln: Long = -1
                 try {
-                    idProvisionaln = local.crearTablero(tablero)
+                    local.crearTablero(tablero)
                 } catch (e: Exception) {
                     println("Error local al crear tablero: ${e.message}")
                 }
 
                 if (SettingsManager.isUsuarioInvitado()) return@withLock
 
-                var tableroCreado: Tablero? = null
+                var exitoRemoto = false
                 try {
-                    tableroCreado = remote.crearTablero(tablero)
+                    exitoRemoto = remote.crearTablero(tablero).isNotEmpty()
                 } catch (e: Exception) {
                     println("Servidor offline al crear tablero: ${e.message}")
                 }
 
-                if (tableroCreado != null) {
-                    if (idProvisionaln > 0L && idProvisionaln != tableroCreado.idTablero) {
-                        local.eliminarTablero(idProvisionaln)
-                    }
-                    local.insertOrUpdateTablero(tableroCreado)
-                }
-
-                val tableroPendiente = tableroCreado ?: tablero.copy(
-                    idTablero = if (idProvisionaln > 0L) idProvisionaln else tablero.idTablero
-                )
-                val tableroIdParaPendiente = tableroPendiente.idTablero
                 try {
                     pendiente.insertOperacionPendiente(
                         TipoAccion.CREACION.getNombreAccion(),
                         Entity.TABLERO.getNombreEntity(),
-                        tableroIdParaPendiente,
-                        TableroMapper.toJson(tableroPendiente),
+                        tablero.idTablero,
+                        TableroMapper.toJson(tablero),
                         System.currentTimeMillis(),
-                        if (tableroCreado != null) 1L else 0L
+                        if (exitoRemoto) 1L else 0L
                     )
                 } catch (e: Exception) {
                     println("Error al registrar operación pendiente: ${e.message}")
@@ -120,7 +109,7 @@ class TableroRepositoryImpl(
                         Entity.TABLERO.getNombreEntity(),
                         tablero.idTablero,
                         TableroMapper.toJson(tablero),
-                        System.currentTimeMillis(),
+                        getCurrentTimestampSeconds(),
                         if (exito) 1L else 0L
                     )
                 } catch (e: Exception) {
@@ -130,7 +119,7 @@ class TableroRepositoryImpl(
         }
     }
 
-    override suspend fun eliminarTablero(idTablero: Long) {
+    override suspend fun eliminarTablero(idTablero: String) {
         withContext(NonCancellable + Dispatchers.IO) {
             mutex.withLock {
                 try {
@@ -153,7 +142,7 @@ class TableroRepositoryImpl(
                         Entity.TABLERO.getNombreEntity(),
                         idTablero,
                         "",
-                        System.currentTimeMillis(),
+                        getCurrentTimestampSeconds(),
                         if (exito) 1L else 0L
                     )
                 } catch (e: Exception) {

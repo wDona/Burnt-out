@@ -15,7 +15,7 @@ internal data class CompletadoRequest(val completado: Boolean)
 fun Route.subtareasRoutes() {
     route("/subtareas") {
         get {
-            val idTarea = call.request.queryParameters["idTarea"]?.toLongOrNull()
+            val idTarea = call.request.queryParameters["idTarea"]
             println("[${call.request.origin.remoteHost}] GET /subtareas idTarea=$idTarea")
             val resultado = dbQuery {
                 val query = if (idTarea != null) {
@@ -39,20 +39,21 @@ fun Route.subtareasRoutes() {
         post {
             val subtarea = call.receive<Subtarea>()
             println("[${call.request.origin.remoteHost}] POST /subtareas titulo=${subtarea.titulo}")
-            val nuevoId = dbQuery {
+            dbQuery {
                 SubtareasTable.insert {
+                    it[id] = subtarea.idSubtarea
                     it[titulo] = subtarea.titulo
                     it[descripcion] = subtarea.descripcion
                     it[completado] = subtarea.completado
                     it[idTarea] = subtarea.idTareaPerteneciente
                     it[isDeleted] = subtarea.isDeleted
-                }[SubtareasTable.id]
+                }
             }
-            call.respond(HttpStatusCode.Created, subtarea.copy(idSubtarea = nuevoId))
+            call.respond(HttpStatusCode.Created, subtarea)
         }
         route("/{id}") {
             get {
-                val id = call.parameters["id"]?.toLongOrNull()
+                val id = call.parameters["id"]
                     ?: return@get call.respond(HttpStatusCode.BadRequest)
                 println("[${call.request.origin.remoteHost}] GET /subtareas/$id")
                 val subtarea = dbQuery {
@@ -70,7 +71,7 @@ fun Route.subtareasRoutes() {
                 call.respond(subtarea)
             }
             patch {
-                val id = call.parameters["id"]?.toLongOrNull()
+                val id = call.parameters["id"]
                     ?: return@patch call.respond(HttpStatusCode.BadRequest)
                 val request = call.receive<CompletadoRequest>()
                 println("[${call.request.origin.remoteHost}] PATCH /subtareas/$id completado=${request.completado}")
@@ -96,7 +97,7 @@ fun Route.subtareasRoutes() {
                 call.respond(updatedSubtarea)
             }
             delete {
-                val id = call.parameters["id"]?.toLongOrNull()
+                val id = call.parameters["id"]
                     ?: return@delete call.respond(HttpStatusCode.BadRequest)
                 println("[${call.request.origin.remoteHost}] DELETE /subtareas/$id")
                 val deletedCount = dbQuery {

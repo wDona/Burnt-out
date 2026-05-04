@@ -13,7 +13,8 @@ object TableroMapper {
             titulo = entity.Titulo,
             idOrganizacion = entity.FK_ID_Org,
             idEquipo = entity.FK_ID_Equipo,
-            isDeleted = entity.Is_Deleted != 0L
+            isDeleted = entity.Is_Deleted != 0L,
+            updatedAt = entity.Updated_At
         )
     }
 
@@ -23,7 +24,8 @@ object TableroMapper {
             Titulo = domain.titulo,
             FK_ID_Org = domain.idOrganizacion,
             FK_ID_Equipo = domain.idEquipo,
-            Is_Deleted = if (domain.isDeleted) 1L else 0L
+            Is_Deleted = if (domain.isDeleted) 1L else 0L,
+            Updated_At = domain.updatedAt
         )
     }
 
@@ -35,6 +37,8 @@ object TableroMapper {
             tablero.idEquipo?.let { 
                 put(TableroJsonFields.ID_EQUIPO.nombreCampo, JsonPrimitive(it)) 
             }
+            put("updated_at", JsonPrimitive(tablero.updatedAt))
+            put("is_deleted", JsonPrimitive(if (tablero.isDeleted) 1 else 0))
         }.toString()
     }
 }

@@ -82,7 +82,7 @@ class OrganizacionRepositoryImpl(
                 pendiente.insertOperacionPendiente(
                     TipoAccion.CREACION.getNombreAccion(),
                     Entity.ORGANIZACION.getNombreEntity(),
-                    if (exito) idRemoto else 0L,
+                    if (exito) idRemoto.toString() else "0",
                     OrganizacionMapper.toJson(organizacion),
                     System.currentTimeMillis(),
                     if (exito) 1L else 0L
@@ -113,7 +113,7 @@ class OrganizacionRepositoryImpl(
                 pendiente.insertOperacionPendiente(
                     TipoAccion.ACTUALIZACION.getNombreAccion(),
                     Entity.ORGANIZACION.getNombreEntity(),
-                    organizacion.idOrganizacion,
+                    organizacion.idOrganizacion.toString(),
                     OrganizacionMapper.toJson(organizacion),
                     System.currentTimeMillis(),
                     if (exito) 1L else 0L
@@ -144,7 +144,7 @@ class OrganizacionRepositoryImpl(
                 pendiente.insertOperacionPendiente(
                     TipoAccion.ELIMINACION.getNombreAccion(),
                     Entity.ORGANIZACION.getNombreEntity(),
-                    idOrg,
+                    idOrg.toString(),
                     "",
                     System.currentTimeMillis(),
                     if (exito) 1L else 0L

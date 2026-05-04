@@ -14,7 +14,8 @@ class PreguntaMapper {
                 pregunta = entity.Pregunta,
                 idOrganizacion = entity.FK_ID_Org,
                 categoria = entity.Categoria,
-                isDeleted = entity.Is_Deleted != 0L
+                isDeleted = entity.Is_Deleted != 0L,
+                updatedAt = entity.Updated_At
             )
         }
 
@@ -28,6 +29,8 @@ class PreguntaMapper {
                 put(PreguntaJsonFields.PREGUNTA.nombreCampo, JsonPrimitive(pregunta.pregunta))
                 put(PreguntaJsonFields.ID_ORGANIZACION.nombreCampo, JsonPrimitive(pregunta.idOrganizacion))
                 put("categoria", JsonPrimitive(pregunta.categoria))
+                put("updated_at", JsonPrimitive(pregunta.updatedAt))
+                put("is_deleted", JsonPrimitive(if (pregunta.isDeleted) 1 else 0))
             }.toString()
         }
     }

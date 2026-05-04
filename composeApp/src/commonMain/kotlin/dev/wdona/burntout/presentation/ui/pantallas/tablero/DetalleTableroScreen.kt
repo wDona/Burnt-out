@@ -32,7 +32,7 @@ import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.TareasViewMo
 import dev.wdona.burntout.presentation.viewmodel.viewmodels.TareasViewModel
 import dev.wdona.burntout.shared.utils.SettingsManager
 
-class DetalleTableroScreen(val idTablero: Long, val nombreTablero: String, val tareasViewModelFactory: TareasViewModelFactory) : Screen {
+class DetalleTableroScreen(val idTablero: String, val nombreTablero: String, val tareasViewModelFactory: TareasViewModelFactory) : Screen {
     override val key: ScreenKey = uniqueScreenKey
 
     @Composable
@@ -70,10 +70,10 @@ class DetalleTableroScreen(val idTablero: Long, val nombreTablero: String, val t
 fun DetalleTableroContent(
     tareasViewModel: TareasViewModel,
     nombreTablero: String,
-    idTablero: Long,
+    idTablero: String,
     onVolver: () -> Unit,
-    onIrACrearTarea: (Long) -> Unit,
-    onIrATarea: (Long, Long) -> Unit
+    onIrACrearTarea: (String) -> Unit,
+    onIrATarea: (String, String) -> Unit,
 ) {
     val listaTareas by tareasViewModel.listaTareas.collectAsStateWithLifecycle()
     val miembros by tareasViewModel.miembros.collectAsState()
