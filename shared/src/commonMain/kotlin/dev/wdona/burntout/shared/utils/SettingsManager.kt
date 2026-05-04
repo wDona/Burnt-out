@@ -17,6 +17,7 @@ object SettingsManager {
     private const val KEY_RIESGO_D_USUARIO_ACTUAL = "riesgo_d_usuario_actual"
     private const val KEY_RIESGO_RP_USUARIO_ACTUAL = "riesgo_rp_usuario_actual"
     private const val KEY_SINCRONIZADO_EN_ESTA_APERTURA = "sincronizado_en_esta_apertura"
+    private const val KEY_RESPUESTAS_ANONIMAS = "respuestas_anonimas"
 
     private val _idUsuarioActualFlow = MutableStateFlow(settings.getLong(KEY_ID_USUARIO_ACTUAL, Long.MIN_VALUE))
     val idUsuarioActualFlow = _idUsuarioActualFlow.asStateFlow()
@@ -41,6 +42,9 @@ object SettingsManager {
 
     private val _sincronizadoEnEstaAperturaFlow = MutableStateFlow(settings.getBoolean(KEY_SINCRONIZADO_EN_ESTA_APERTURA, false))
     val sincronizadoEnEstaAperturaFlow = _sincronizadoEnEstaAperturaFlow.asStateFlow()
+
+    private val _respuestasAnonimasFlow = MutableStateFlow(settings.getBoolean(KEY_RESPUESTAS_ANONIMAS, false))
+    val respuestasAnonimasFlow = _respuestasAnonimasFlow.asStateFlow()
 
     private val KEY_ULTIMA_FECHA_CUESTIONARIO get() = "ultima_fecha_cuestionario_${_idUsuarioActualFlow.value}"
     private val KEY_PRIMER_CUESTIONARIO_HECHO get() = "cuestionario_inicial_hecho_${_idUsuarioActualFlow.value}"
@@ -86,6 +90,11 @@ object SettingsManager {
         return isHoyHecho
     }
     fun getSincronizadoEnEstaApertura(): Boolean = _sincronizadoEnEstaAperturaFlow.value
+    fun isRespuestasAnonimas(): Boolean = _respuestasAnonimasFlow.value
+    fun setRespuestasAnonimas(anonimas: Boolean) {
+        settings.putBoolean(KEY_RESPUESTAS_ANONIMAS, anonimas)
+        _respuestasAnonimasFlow.value = anonimas
+    }
     fun isAutenticado(): Boolean = _isAutenticadoFlow.value
     fun isUsuarioInvitado(): Boolean = getIdUsuarioActual() == Long.MIN_VALUE
 

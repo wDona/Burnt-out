@@ -49,7 +49,7 @@ fun MiembroCard(miembro: Usuario, onClick: () -> Unit) {
             tint = BurntOutMaterialTheme.getColorScheme().onSurface
         )
         Text(
-            text = miembro.nombre,
+            text = "@${miembro.nombre}",
             style = MaterialTheme.typography.titleMedium,
             color = BurntOutMaterialTheme.getColorScheme().onSurface,
         )

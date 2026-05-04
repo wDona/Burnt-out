@@ -104,7 +104,7 @@ fun PreguntaContent(onVolver: (() -> Unit)? = null, viewModel: FormularioViewMod
             val respuesta = Respuesta(
                 idUsuario = SettingsManager.getIdUsuarioActual(),
                 idPregunta = preguntaActual.idPregunta,
-                anonimo = false,
+                anonimo = SettingsManager.isRespuestasAnonimas(),
                 respuesta = selectedCantidad!!.toLong(),
                 fecha = System.currentTimeMillis() / 1000L
             )

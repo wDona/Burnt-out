@@ -1,10 +1,27 @@
 package dev.wdona.burntout.presentation.ui.pantallas
 
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ExitToApp
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
@@ -12,21 +29,17 @@ import cafe.adriel.voyager.core.screen.ScreenKey
 import cafe.adriel.voyager.core.screen.uniqueScreenKey
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import dev.wdona.burntout.presentation.ui.components.ajustes.FilaAjusteInfo
-import dev.wdona.burntout.presentation.ui.components.ajustes.FilaAjusteSwitch
 import dev.wdona.burntout.presentation.ui.components.template.ScaffoldBase
 import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.AjustesViewModelFactory
 import dev.wdona.burntout.presentation.viewmodel.viewmodels.AjustesViewModel
 import dev.wdona.burntout.shared.db.DatabaseActions
-import kotlin.text.ifEmpty
 
 class SettingsScreen(val factory: AjustesViewModelFactory) : Screen {
     override val key: ScreenKey = uniqueScreenKey
 
     @Composable
     override fun Content() {
-        val navigator = LocalNavigator.currentOrThrow // Para poder volver o ir a otra
-
+        val navigator = LocalNavigator.currentOrThrow
         val viewmodel = rememberScreenModel { factory.create() }
         SettingsContent(
             viewmodel,
@@ -42,36 +55,103 @@ class SettingsScreen(val factory: AjustesViewModelFactory) : Screen {
 @Composable
 fun SettingsContent(viewModel: AjustesViewModel, onVolver: () -> Unit, onLogout: () -> Unit) {
     val ajustes by viewModel.ajustesUiState.collectAsStateWithLifecycle()
+    val respuestasAnonimas by viewModel.respuestasAnonimas.collectAsStateWithLifecycle()
 
     ScaffoldBase(
         titulo = "Ajustes",
         onVolver = onVolver,
-    ){
-        Column {
-            FilaAjusteSwitch(
-                if (ajustes.primerCuestionarioHecho) "Es primera ejecucion" else "No es primera ejecucion",
-                ajustes.primerCuestionarioHecho,
-                onSwitch = {
-                    viewModel.togglePrimeraEjecucion()
+    ) {
+        Column(
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            ) {
+                Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+                    Text(
+                        text = "Privacidad",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.padding(bottom = 4.dp)
+                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = "Respuestas anónimas",
+                                style = MaterialTheme.typography.bodyLarge
+                            )
+                            Text(
+                                text = "Tus respuestas al cuestionario no mostrarán tu nombre",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        Switch(
+                            checked = respuestasAnonimas,
+                            onCheckedChange = { viewModel.toggleRespuestasAnonimas() },
+                            modifier = Modifier.padding(start = 12.dp)
+                        )
+                    }
                 }
-            )
-            FilaAjusteInfo("Id de usuario: " + ajustes.idUsuario)
-            FilaAjusteInfo("Token de usuario: " + ajustes.token.ifEmpty { "No hay token" })
-            FilaAjusteInfo("Nombre de usuario: " + ajustes.nombreUsuario.ifEmpty { "Invitado" })
-            FilaAjusteInfo("Organizacion de usuario: " + ajustes.idOrganizacion)
-            FilaAjusteInfo("Equipo de usuario: " + ajustes.idEquipo)
-            FilaAjusteInfo("Version de app: " + ajustes.versionApp)
-            FilaAjusteInfo("Sincronizado en esta apertura: " + if (ajustes.syncOk) "Sí" else "No")
+            }
 
-            TextButton(
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            ) {
+                Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+                    Text(
+                        text = "Información",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.padding(bottom = 4.dp)
+                    )
+                    FilaInfo("Versión", ajustes.versionApp)
+//                    HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
+//                    FilaInfo("Organización", ajustes.idOrganizacion.toString())
+                }
+            }
+
+            OutlinedButton(
                 onClick = {
                     viewModel.resetSettings()
                     onLogout()
-                }
+                },
+                modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.error),
+                colors = ButtonDefaults.outlinedButtonColors(
+                    contentColor = MaterialTheme.colorScheme.error
+                )
             ) {
-                Text("Resetear Datos de Aplicación (Debug)")
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ExitToApp,
+                    contentDescription = null,
+                    modifier = Modifier.padding(end = 8.dp)
+                )
+                Text("Cerrar sesión")
             }
         }
     }
+}
 
+@Composable
+private fun FilaInfo(etiqueta: String, valor: String) {
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(text = etiqueta, style = MaterialTheme.typography.bodyLarge)
+        Text(
+            text = valor,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
 }

@@ -1,22 +1,18 @@
 package dev.wdona.burntout.presentation.ui.pantallas.perfil
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.CloudOff
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Person4
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -78,10 +74,6 @@ class PerfilScreen(val factory: MiPerfilViewModelFactory, val ajustesFactory: Aj
             viewmodel,
             onAjustes = { navigator.push(SettingsScreen(ajustesFactory)) },
             onVolver = onVolver,
-            onLogout = {
-                SettingsManager.clearAll()
-                navigator.popUntilRoot()
-            },
             settingsViewModel,
             idUsuarioActual = idUsuarioActual
         )
@@ -95,7 +87,6 @@ fun PerfilContent(
     viewModel: PerfilViewModel,
     onAjustes: () -> Unit,
     onVolver: (() -> Unit)? = null,
-    onLogout: () -> Unit,
     settingsViewModel: AjustesViewModel,
     idUsuarioActual: Long
 ) {
@@ -256,26 +247,6 @@ fun PerfilContent(
                                 Text("Editar perfil")
                             }
 
-                            OutlinedButton(
-                                onClick = onLogout,
-                                modifier = Modifier
-                                    .padding(top = 8.dp)
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 32.dp)
-                                    .height(56.dp),
-                                shape = RoundedCornerShape(28.dp),
-                                border = BorderStroke(1.dp, BurntOutMaterialTheme.getColorScheme().error),
-                                colors = ButtonDefaults.outlinedButtonColors(
-                                    contentColor = BurntOutMaterialTheme.getColorScheme().error
-                                )
-                            ) {
-                                Icon(
-                                    imageVector = Icons.AutoMirrored.Filled.ExitToApp,
-                                    contentDescription = "Cerrar sesion",
-                                    modifier = Modifier.padding(end = 8.dp)
-                                )
-                                Text("Cerrar sesion")
-                            }
                         }
                     }
                 }

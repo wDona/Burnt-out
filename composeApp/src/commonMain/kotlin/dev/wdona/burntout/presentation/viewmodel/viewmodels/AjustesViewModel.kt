@@ -23,7 +23,8 @@ data class AjustesUiState(
     val nombreUsuario: String = "Invitado",
     val versionApp: String = AppInfo.version,
     val hoyHecho: Boolean = false,
-    val syncOk: Boolean = true
+    val syncOk: Boolean = true,
+    val respuestasAnonimas: Boolean = false
 )
 
 class AjustesViewModel(private val repository: AjusteRepository) : ScreenModel {
@@ -33,17 +34,18 @@ class AjustesViewModel(private val repository: AjusteRepository) : ScreenModel {
         SettingsManager.cuestionarioHoyHechoFlow,
         SettingsManager.sincronizadoEnEstaAperturaFlow,
         SettingsManager.idEquipoActualFlow,
-        SettingsManager.idUsuarioActualFlow
-    ) { primerCuestionario, hoyHecho, sincronizado, idEquipoActual, idUsuarioActual ->
+        SettingsManager.respuestasAnonimasFlow
+    ) { primerCuestionario, hoyHecho, sincronizado, idEquipoActual, anonimas ->
         AjustesUiState(
             primerCuestionarioHecho = primerCuestionario,
             hoyHecho = hoyHecho,
             token = SettingsManager.getTokenUsuario(),
-            idUsuario = idUsuarioActual,
+            idUsuario = SettingsManager.getIdUsuarioActual(),
             idEquipo = idEquipoActual,
             idOrganizacion = SettingsManager.getIdOrganizacionActual(),
             nombreUsuario = SettingsManager.getNombreUsuario(),
-            syncOk = sincronizado
+            syncOk = sincronizado,
+            respuestasAnonimas = anonimas
         )
     }.stateIn(
         scope = screenModelScope,
@@ -56,7 +58,8 @@ class AjustesViewModel(private val repository: AjusteRepository) : ScreenModel {
             idOrganizacion = SettingsManager.getIdOrganizacionActual(),
             idEquipo = SettingsManager.getIdEquipoActual(),
             nombreUsuario = SettingsManager.getNombreUsuario(),
-            syncOk = SettingsManager.getSincronizadoEnEstaApertura()
+            syncOk = SettingsManager.getSincronizadoEnEstaApertura(),
+            respuestasAnonimas = SettingsManager.isRespuestasAnonimas()
         )
     )
 
@@ -81,6 +84,15 @@ class AjustesViewModel(private val repository: AjusteRepository) : ScreenModel {
     fun togglePrimeraEjecucion() {
         val nuevoValor = !SettingsManager.getPrimerCuestionarioHecho()
         SettingsManager.setPrimerCuestionarioHecho(nuevoValor)
+    }
+
+    private val _respuestasAnonimas = MutableStateFlow(SettingsManager.isRespuestasAnonimas())
+    val respuestasAnonimas = _respuestasAnonimas.asStateFlow()
+
+    fun toggleRespuestasAnonimas() {
+        val nuevo = !_respuestasAnonimas.value
+        SettingsManager.setRespuestasAnonimas(nuevo)
+        _respuestasAnonimas.value = nuevo
     }
 
     fun resetSettings() {
