@@ -89,6 +89,7 @@ fun main() = application {
                         }
                     }
                 } else if (isDatabaseReady) {
+                    val networkObserver = remember { NetworkObserver(null) }
                     App(
                         tareaFactory = TareasViewModelFactory(),
                         equipoViewModelFactory = EquipoViewModelFactory(),
@@ -98,7 +99,8 @@ fun main() = application {
                         formularioViewModelFactory = FormularioViewModelFactory(),
                         ajustesViewModelFactory = AjustesViewModelFactory(),
                         operacionesPendientesViewModelFactory = OperacionesPendientesViewModelFactory(),
-                        loginViewModelFactory = LoginViewModelFactory()
+                        loginViewModelFactory = LoginViewModelFactory(),
+                        networkObserver = networkObserver
                     )
                 } else {
 //                    Box(

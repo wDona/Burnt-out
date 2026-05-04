@@ -97,6 +97,7 @@ class MainActivity : ComponentActivity() {
                     val formularioViewModelFactory = remember { FormularioViewModelFactory(applicationContext) }
                     val operacionesPendientesViewModelFactory = remember { OperacionesPendientesViewModelFactory(applicationContext) }
                     val loginViewModelFactory = remember { LoginViewModelFactory(applicationContext) }
+                    val networkObserver = remember { NetworkObserver(applicationContext) }
 
                     App(
                         tareaFactory,
@@ -107,7 +108,8 @@ class MainActivity : ComponentActivity() {
                         ajustesViewModelFactory,
                         formularioViewModelFactory,
                         operacionesPendientesViewModelFactory,
-                        loginViewModelFactory
+                        loginViewModelFactory,
+                        networkObserver
                     )
                 }
             }

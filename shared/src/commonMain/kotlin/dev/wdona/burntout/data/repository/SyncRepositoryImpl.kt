@@ -5,6 +5,7 @@ import dev.wdona.burntout.data.api.SyncPullRequest
 import dev.wdona.burntout.data.datasource.local.*
 import dev.wdona.burntout.domain.repository.SyncRepository
 import dev.wdona.burntout.domain.usecase.SincronizarPendientesUseCase
+import dev.wdona.burntout.shared.utils.Logger
 import dev.wdona.burntout.shared.utils.SettingsManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -24,6 +25,7 @@ class SyncRepositoryImpl(
 
     override suspend fun sync(): Boolean = withContext(Dispatchers.IO) {
         val pushOk = sincronizarPendientes()
+        Logger.d("BurntOut Pendientes", "Sincronización de pendientes (push): $pushOk")
         if (!pushOk) return@withContext false
 
         try {
@@ -31,6 +33,7 @@ class SyncRepositoryImpl(
             val idUsuario = SettingsManager.getIdUsuarioActual()
             val idOrg = SettingsManager.getIdOrganizacionActual()
 
+            Logger.d("BurntOut Sync", "Iniciando Pull Sync")
             val response = syncApi.pull(SyncPullRequest(lastSync, idUsuario, idOrg))
 
             response.organizaciones.forEach { organizacionLocal.insertOrUpdateOrganizacion(it) }
@@ -43,6 +46,8 @@ class SyncRepositoryImpl(
             // Para respuestas, como son inmutables o se identifican por UUID, insertOrUpdate es seguro
             response.respuestas.forEach { preguntaRespuestaLocal.responderPregunta(it) }
             response.ajustes.forEach { ajusteLocal.insertOrUpdateAjuste(it) }
+
+            Logger.d("BurntOut Sync", "Pull Sync completado")
 
             SettingsManager.setLastSyncTimestamp(response.serverTimestamp)
             true
