@@ -6,17 +6,28 @@ import dev.wdona.burntout.data.api.impl.EquipoApiImpl
 import dev.wdona.burntout.data.api.impl.OrganizacionApiImpl
 import dev.wdona.burntout.data.api.impl.PreguntaRespuestaApiImpl
 import dev.wdona.burntout.data.api.impl.SubtareaApiImpl
+import dev.wdona.burntout.data.api.impl.SyncApiImpl
 import dev.wdona.burntout.data.api.impl.TableroApiImpl
 import dev.wdona.burntout.data.api.impl.TareaApiImpl
 import dev.wdona.burntout.data.api.impl.UsuarioApiImpl
 import dev.wdona.burntout.data.dao.impl.AjusteDaoImpl
 import dev.wdona.burntout.data.dao.impl.EquipoDaoImpl
 import dev.wdona.burntout.data.dao.impl.OperacionPendienteDaoImpl
+import dev.wdona.burntout.data.dao.impl.OrganizacionDaoImpl
+import dev.wdona.burntout.data.dao.impl.PreguntaRespuestaDaoImpl
+import dev.wdona.burntout.data.dao.impl.SubtareaDaoImpl
 import dev.wdona.burntout.data.dao.impl.TableroDaoImpl
+import dev.wdona.burntout.data.dao.impl.TareaDaoImpl
+import dev.wdona.burntout.data.dao.impl.UsuarioDaoImpl
 import dev.wdona.burntout.data.datasource.local.impl.AjusteLocalDataSourceImpl
 import dev.wdona.burntout.data.datasource.local.impl.EquipoLocalDataSourceImpl
 import dev.wdona.burntout.data.datasource.local.impl.OperacionPendienteLocalDataSourceImpl
+import dev.wdona.burntout.data.datasource.local.impl.OrganizacionLocalDataSourceImpl
+import dev.wdona.burntout.data.datasource.local.impl.PreguntaRespuestaLocalDataSourceImpl
+import dev.wdona.burntout.data.datasource.local.impl.SubtareaLocalDataSourceImpl
 import dev.wdona.burntout.data.datasource.local.impl.TableroLocalDataSourceImpl
+import dev.wdona.burntout.data.datasource.local.impl.TareaLocalDataSourceImpl
+import dev.wdona.burntout.data.datasource.local.impl.UsuarioLocalDataSourceImpl
 import dev.wdona.burntout.data.datasource.remote.impl.AjusteRemoteDataSourceImpl
 import dev.wdona.burntout.data.datasource.remote.impl.EquipoRemoteDataSourceImpl
 import dev.wdona.burntout.data.datasource.remote.impl.OrganizacionRemoteDataSourceImpl
@@ -28,8 +39,10 @@ import dev.wdona.burntout.data.datasource.remote.impl.UsuarioRemoteDataSourceImp
 import dev.wdona.burntout.data.repository.AjusteRepositoryImpl
 import dev.wdona.burntout.data.repository.EquipoRepositoryImpl
 import dev.wdona.burntout.data.repository.OperacionesPendientesRepositoryImpl
+import dev.wdona.burntout.data.repository.SyncRepositoryImpl
 import dev.wdona.burntout.data.repository.TableroRepositoryImpl
 import dev.wdona.burntout.domain.repository.OperacionesPendientesRepository
+import dev.wdona.burntout.domain.repository.SyncRepository
 import dev.wdona.burntout.domain.usecase.RefrescarDatosUseCase
 import dev.wdona.burntout.domain.usecase.SincronizarPendientesUseCase
 import dev.wdona.burntout.presentation.viewmodel.viewmodels.OperacionesPendientesViewModel
@@ -46,7 +59,7 @@ actual class OperacionesPendientesViewModelFactory(@Transient private val contex
         val pendienteDataSource = OperacionPendienteLocalDataSourceImpl(pendienteDao)
         val pendientesRepository = OperacionesPendientesRepositoryImpl(pendienteDataSource)
 
-        // Remote datasources para sincronizar operaciones pendientes
+        // Remote datasources
         val tareaRemote = TareaRemoteDataSourceImpl(TareaApiImpl())
         val tableroRemote = TableroRemoteDataSourceImpl(TableroApiImpl())
         val equipoRemote = EquipoRemoteDataSourceImpl(EquipoApiImpl())
@@ -56,42 +69,59 @@ actual class OperacionesPendientesViewModelFactory(@Transient private val contex
         val subtareaRemote = SubtareaRemoteDataSourceImpl(SubtareaApiImpl())
         val organizacionRemote = OrganizacionRemoteDataSourceImpl(OrganizacionApiImpl())
 
-        val sincronizarPendientes = SincronizarPendientesUseCase(
-            pendientesRepository, tareaRemote, tableroRemote, equipoRemote,
-            usuarioRemote, preguntaRespuestaRemote, ajusteRemote, subtareaRemote, organizacionRemote
-        )
-
-        // Repos para refrescar datos tras la sincronización
+        // Local datasources
+        val tareaLocal = TareaLocalDataSourceImpl(TareaDaoImpl(database))
+        val subtareaLocal = SubtareaLocalDataSourceImpl(SubtareaDaoImpl(database))
         val tableroLocal = TableroLocalDataSourceImpl(TableroDaoImpl(database))
-        val tableroRepo = TableroRepositoryImpl(tableroLocal, tableroRemote, pendienteDataSource)
-
         val equipoLocal = EquipoLocalDataSourceImpl(EquipoDaoImpl(database))
-        val equipoRepo = EquipoRepositoryImpl(equipoLocal, equipoRemote, usuarioRemote, pendienteDataSource)
-
+        val usuarioLocal = UsuarioLocalDataSourceImpl(UsuarioDaoImpl(database))
+        val organizacionLocal = OrganizacionLocalDataSourceImpl(OrganizacionDaoImpl(database))
+        val preguntaRespuestaLocal = PreguntaRespuestaLocalDataSourceImpl(PreguntaRespuestaDaoImpl(database))
         val ajusteLocal = AjusteLocalDataSourceImpl(AjusteDaoImpl(database))
-        val ajusteRepo = AjusteRepositoryImpl(
-            ajusteLocal,
-            ajusteRemote,
+
+        val sincronizarPendientes = SincronizarPendientesUseCase(
+            pendientesRepository,
+            tareaRemote,
+            tableroRemote,
             equipoRemote,
             usuarioRemote,
-            equipoLocal,
-            pendienteDataSource
+            preguntaRespuestaRemote,
+            ajusteRemote,
+            subtareaRemote,
+            organizacionRemote
         )
+
+        val syncRepository: SyncRepository = SyncRepositoryImpl(
+            SyncApiImpl(),
+            sincronizarPendientes,
+            tareaLocal,
+            subtareaLocal,
+            tableroLocal,
+            equipoLocal,
+            usuarioLocal,
+            organizacionLocal,
+            preguntaRespuestaLocal,
+            ajusteLocal
+        )
+
+        val tableroRepo = TableroRepositoryImpl(tableroLocal, tableroRemote, pendienteDataSource)
+        val equipoRepo = EquipoRepositoryImpl(equipoLocal, equipoRemote, usuarioRemote, pendienteDataSource)
+        val ajusteRepo = AjusteRepositoryImpl(ajusteLocal, ajusteRemote, equipoRemote, usuarioRemote, equipoLocal, pendienteDataSource)
 
         val refrescarDatos = RefrescarDatosUseCase(tableroRepo, equipoRepo, ajusteRepo)
 
-        return getInstance(pendientesRepository, sincronizarPendientes, refrescarDatos)
+        return getInstance(pendientesRepository, syncRepository, refrescarDatos)
     }
 
     companion object {
         private var instance: OperacionesPendientesViewModel? = null
         fun getInstance(
             repository: OperacionesPendientesRepository,
-            sincronizarPendientes: SincronizarPendientesUseCase,
+            syncRepository: SyncRepository,
             refrescarDatos: RefrescarDatosUseCase
         ): OperacionesPendientesViewModel {
             if (instance == null) {
-                instance = OperacionesPendientesViewModel(repository, sincronizarPendientes, refrescarDatos)
+                instance = OperacionesPendientesViewModel(repository, syncRepository, refrescarDatos)
             }
             return instance!!
         }
