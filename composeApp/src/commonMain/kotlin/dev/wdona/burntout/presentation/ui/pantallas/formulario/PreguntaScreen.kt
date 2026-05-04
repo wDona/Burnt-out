@@ -58,6 +58,7 @@ import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.FormularioVi
 import dev.wdona.burntout.presentation.viewmodel.viewmodels.FormularioViewModel
 import dev.wdona.burntout.domain.model.Respuesta
 import dev.wdona.burntout.presentation.ui.components.common.FilaTextoPlaceholder
+import dev.wdona.burntout.presentation.viewmodel.viewmodels.FormularioUiState
 import dev.wdona.burntout.shared.utils.SettingsManager
 import dev.wdona.burntout.shared.utils.getCurrentTimestampSeconds
 
@@ -69,14 +70,18 @@ class PreguntaScreen(private val viewModelFactory: FormularioViewModelFactory, p
         val viewModel = rememberScreenModel { viewModelFactory.createFormularioViewModel() }
 
         val idOrganizacion = SettingsManager.getIdOrganizacionActual()
-        
+        val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+        val preguntas = uiState.preguntas
+
         LaunchedEffect(idOrganizacion) {
             try {
-                viewModel.cargarPreguntas(idOrganizacion)
-                viewModel.cargarRespuestasByIdUsuario(
-                    SettingsManager.getIdUsuarioActual(),
-                    getCurrentTimestampSeconds()
-                )
+                if (preguntas.isEmpty()) {
+                    viewModel.cargarPreguntas(idOrganizacion)
+                    viewModel.cargarRespuestasByIdUsuario(
+                        SettingsManager.getIdUsuarioActual(),
+                        getCurrentTimestampSeconds()
+                    )
+                }
             } catch (e: Exception) {
                 println("Error al cargar preguntas: ${e.message}")
             }
@@ -84,14 +89,14 @@ class PreguntaScreen(private val viewModelFactory: FormularioViewModelFactory, p
 
         PreguntaContent(
             onVolver = onVolver,
-            viewModel = viewModel
+            viewModel = viewModel,
+            uiState = uiState
         )
     }
 }
 
 @Composable
-fun PreguntaContent(onVolver: (() -> Unit)? = null, viewModel: FormularioViewModel) {
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+fun PreguntaContent(onVolver: (() -> Unit)? = null, viewModel: FormularioViewModel, uiState: FormularioUiState = viewModel.uiState.collectAsStateWithLifecycle().value) {
     val preguntaActual = uiState.preguntaActual
     val isLoading = uiState.isLoading
     val respuestaActual by viewModel.respuestaActual.collectAsStateWithLifecycle()
