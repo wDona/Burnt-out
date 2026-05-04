@@ -249,6 +249,7 @@ private suspend fun crearUsuarioConOrg(request: RegistroRequest, nombreOrg: Stri
     println("[SERVER] Se encontraron ${preguntas.size} preguntas para inicializar respuestas")
     preguntas.forEach { preguntaId ->
         RespuestasTable.insert {
+            it[RespuestasTable.id] = java.util.UUID.randomUUID().toString()
             it[RespuestasTable.idPregunta] = preguntaId
             it[RespuestasTable.idUsuario] = idUsuario
             it[RespuestasTable.respuesta] = -1
@@ -318,6 +319,7 @@ private suspend fun unirseConCodigo(request: RegistroRequest, codigo: String): U
 
         preguntas.forEach { preguntaId ->
             RespuestasTable.insert {
+                it[RespuestasTable.id] = java.util.UUID.randomUUID().toString()
                 it[RespuestasTable.idPregunta] = preguntaId
                 it[RespuestasTable.idUsuario] = idUsuario
                 it[RespuestasTable.respuesta] = -1
