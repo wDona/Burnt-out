@@ -111,7 +111,7 @@ fun LeaderboardContent(
     val listaEquipos = uiState.leaderboard
     val isLoading = uiState.isLoading
     val esInvitado = SettingsManager.isUsuarioInvitado()
-    val esAdmin = SettingsManager.getRolActual() == 1L
+    val esAdmin = SettingsManager.isAdminOrOwner()
 
     val titulo = if (isLoading) "" else "Leaderboard"
 
