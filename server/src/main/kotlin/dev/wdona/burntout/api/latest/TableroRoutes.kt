@@ -37,7 +37,7 @@ fun Route.tablerosRoutes() {
         }
         post {
             val tablero = call.receive<Tablero>()
-            println("[${call.request.origin.remoteHost}] POST /tableros titulo=${tablero.titulo}")
+            println("[${call.request.origin.remoteHost}] POST /tableros ->${tablero}")
             dbQuery {
                 TablerosTable.insert {
                     it[id] = tablero.idTablero
