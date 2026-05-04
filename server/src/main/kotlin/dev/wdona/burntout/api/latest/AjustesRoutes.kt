@@ -22,7 +22,8 @@ fun Route.ajustesRoutes() {
                         idAjuste = it[AjustesTable.id],
                         nombre = it[AjustesTable.nombre],
                         valorAjuste = it[AjustesTable.valorAjuste],
-                        isDeleted = it[AjustesTable.isDeleted]
+                        isDeleted = it[AjustesTable.isDeleted],
+                        idUsuario = it[AjustesTable.idUsuario]
                     )
                 }
             }
@@ -41,7 +42,7 @@ fun Route.ajustesRoutes() {
                     it[isDeleted] = ajuste.isDeleted
                 }[AjustesTable.id]
             }
-            call.respond(HttpStatusCode.Created, Ajuste(nuevoId, ajuste.nombre, ajuste.valorAjuste, ajuste.isDeleted))
+            call.respond(HttpStatusCode.Created, Ajuste(nuevoId, idUsuario, ajuste.nombre, ajuste.valorAjuste, ajuste.isDeleted))
         }
         route("/{id}") {
             put {
@@ -59,7 +60,7 @@ fun Route.ajustesRoutes() {
                     }
                 }
                 if (updatedCount == 0) return@put call.respond(HttpStatusCode.NotFound)
-                call.respond(Ajuste(id, ajuste.nombre, ajuste.valorAjuste, ajuste.isDeleted))
+                call.respond(Ajuste(id, idUsuario, ajuste.nombre, ajuste.valorAjuste, ajuste.isDeleted))
             }
             delete {
                 val idUsuario = call.parameters["idUsuario"]?.toLongOrNull()
