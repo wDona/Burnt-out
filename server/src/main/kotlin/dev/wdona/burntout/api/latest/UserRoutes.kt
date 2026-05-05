@@ -135,6 +135,7 @@ fun Route.usuariosRoutes() {
                         it[idOrganizacion] = usuario.idOrganizacion
                         it[idEquipo] = usuario.idEquipo
                         it[isDeleted] = usuario.isDeleted
+                        it[updatedAt] = System.currentTimeMillis() / 1000
                     }
                 }
                 if (updatedCount == 0) return@put call.respond(HttpStatusCode.NotFound)

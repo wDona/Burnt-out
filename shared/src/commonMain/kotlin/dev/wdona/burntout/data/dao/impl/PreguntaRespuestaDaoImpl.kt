@@ -38,7 +38,7 @@ class PreguntaRespuestaDaoImpl(appDatabase: AppDatabase) : PreguntaRespuestaDao 
             Categoria = pregunta.categoria,
             FK_ID_Org = pregunta.idOrganizacion,
             Is_Deleted = if (pregunta.isDeleted) 1L else 0L,
-            Updated_At = getCurrentTimestampSeconds()
+            Updated_At = pregunta.updatedAt.takeIf { it > 0L } ?: getCurrentTimestampSeconds()
         )
     }
 

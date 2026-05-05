@@ -32,7 +32,7 @@ class OrganizacionDaoImpl(appDatabase: AppDatabase) : OrganizacionDao {
                 ID_Org = organizacion.idOrganizacion,
                 Org_Name = organizacion.nombre,
                 Is_Deleted = if (organizacion.isDeleted) 1L else 0L,
-                Updated_At = getCurrentTimestampSeconds()
+                Updated_At = organizacion.updatedAt.takeIf { it > 0L } ?: getCurrentTimestampSeconds()
             )
             true
         } catch (e: Exception) {

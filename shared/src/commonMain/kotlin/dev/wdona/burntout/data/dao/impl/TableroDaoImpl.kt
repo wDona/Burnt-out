@@ -72,7 +72,7 @@ class TableroDaoImpl(appDatabase: AppDatabase) : TableroDao {
                 tablero.idEquipo,
                 tablero.idOrganizacion,
                 if (tablero.isDeleted) 1L else 0L,
-                getCurrentTimestampSeconds()
+                tablero.updatedAt.takeIf { it > 0L } ?: getCurrentTimestampSeconds()
             )
             true
         } catch (e: Exception) {
