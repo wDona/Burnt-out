@@ -15,7 +15,7 @@ fun Route.syncRoutes() {
     route("/sync") {
         post("/pull") {
             val req = call.receive<SyncPullRequest>()
-            val serverTimestamp = System.currentTimeMillis()
+            val serverTimestamp = System.currentTimeMillis() / 1000
 
             val response = dbQuery {
                 val tareas = TareasTable.selectAll()

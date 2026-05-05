@@ -32,6 +32,7 @@ fun Route.organizacionesRoutes() {
                 val id = OrganizacionesTable.insert {
                     it[nombre] = organizacion.nombre
                     it[isDeleted] = organizacion.isDeleted
+                    it[updatedAt] = System.currentTimeMillis() / 1000
                 }[OrganizacionesTable.id]
 
                 DatabaseFactory.insertPreguntasMBI(id)
@@ -66,6 +67,7 @@ fun Route.organizacionesRoutes() {
                     OrganizacionesTable.update({ OrganizacionesTable.id eq id }) {
                         it[nombre] = organizacion.nombre
                         it[isDeleted] = organizacion.isDeleted
+                        it[updatedAt] = System.currentTimeMillis() / 1000
                     }
                 }
                 if (updatedCount == 0) return@put call.respond(HttpStatusCode.NotFound)

@@ -44,6 +44,7 @@ fun Route.preguntasRespuestasRoutes() {
                     it[idOrganizacion] = pregunta.idOrganizacion
                     it[categoria] = pregunta.categoria
                     it[isDeleted] = pregunta.isDeleted
+                    it[updatedAt] = System.currentTimeMillis() / 1000
                 }[PreguntasTable.id]
             }
             call.respond(HttpStatusCode.Created, pregunta.copy(idPregunta = nuevaId))
@@ -77,6 +78,7 @@ fun Route.preguntasRespuestasRoutes() {
                         it[idOrganizacion] = pregunta.idOrganizacion
                         it[categoria] = pregunta.categoria
                         it[isDeleted] = pregunta.isDeleted
+                        it[updatedAt] = System.currentTimeMillis() / 1000
                     }
                 }
                 if (updatedCount == 0) return@put call.respond(HttpStatusCode.NotFound)
@@ -149,6 +151,7 @@ fun Route.preguntasRespuestasRoutes() {
                         it[RespuestasTable.respuesta] = respuesta.respuesta
                         it[nombreUsuario] = respuesta.nombreUsuario
                         it[fecha] = respuesta.fecha
+                        it[updatedAt] = System.currentTimeMillis() / 1000
                     }
                 } else {
                     RespuestasTable.insert {
@@ -159,6 +162,7 @@ fun Route.preguntasRespuestasRoutes() {
                         it[RespuestasTable.respuesta] = respuesta.respuesta
                         it[nombreUsuario] = respuesta.nombreUsuario
                         it[fecha] = respuesta.fecha
+                        it[updatedAt] = System.currentTimeMillis() / 1000
                     }
                 }
             }

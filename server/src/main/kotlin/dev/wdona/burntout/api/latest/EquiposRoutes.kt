@@ -52,6 +52,7 @@ fun Route.equiposRoutes() {
                     it[puntuacion] = equipo.puntuacion
                     it[idOrganizacion] = equipo.idOrganizacion
                     it[isDeleted] = equipo.isDeleted
+                    it[updatedAt] = System.currentTimeMillis() / 1000
                 }[EquiposTable.id]
                 
                 equipo.idMiembros.forEach { idMiembroParam ->
@@ -121,6 +122,7 @@ fun Route.equiposRoutes() {
                         it[puntuacion] = equipo.puntuacion
                         it[idOrganizacion] = equipo.idOrganizacion
                         it[isDeleted] = equipo.isDeleted
+                        it[updatedAt] = System.currentTimeMillis() / 1000
                     }
                     if (updatedCount > 0) {
                         EquipoMiembrosTable.deleteWhere { EquipoMiembrosTable.idEquipo eq id }

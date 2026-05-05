@@ -119,7 +119,7 @@ fun MenuCrearTareaContent(idTablero: String, tareasViewModel: TareasViewModel, o
     fun guardarTarea() {
         if (textStateNombreTarea.isNotBlank()) {
             val nuevaTarea = Tarea(
-                idTarea = "",
+                idTarea = java.util.UUID.randomUUID().toString(),
                 titulo = textStateNombreTarea,
                 descripcion = textStateDescripcion,
                 estado = estadoSelected.string,

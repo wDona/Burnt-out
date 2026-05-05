@@ -47,6 +47,7 @@ fun Route.subtareasRoutes() {
                     it[completado] = subtarea.completado
                     it[idTarea] = subtarea.idTareaPerteneciente
                     it[isDeleted] = subtarea.isDeleted
+                    it[updatedAt] = System.currentTimeMillis() / 1000
                 }
             }
             call.respond(HttpStatusCode.Created, subtarea)
@@ -78,6 +79,7 @@ fun Route.subtareasRoutes() {
                 val isSuccess = dbQuery {
                     val count = SubtareasTable.update({ (SubtareasTable.id eq id) and (SubtareasTable.isDeleted eq false) }) {
                         it[completado] = request.completado
+                        it[updatedAt] = System.currentTimeMillis() / 1000
                     }
                     count > 0
                 }

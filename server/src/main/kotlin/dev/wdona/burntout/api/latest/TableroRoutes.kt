@@ -45,6 +45,7 @@ fun Route.tablerosRoutes() {
                     it[idOrganizacion] = tablero.idOrganizacion
                     it[idEquipo] = tablero.idEquipo
                     it[isDeleted] = tablero.isDeleted
+                    it[updatedAt] = System.currentTimeMillis() / 1000
                 }
             }
             call.respond(HttpStatusCode.Created, tablero)
@@ -78,6 +79,7 @@ fun Route.tablerosRoutes() {
                         it[idOrganizacion] = tablero.idOrganizacion
                         it[idEquipo] = tablero.idEquipo
                         it[isDeleted] = tablero.isDeleted
+                        it[updatedAt] = System.currentTimeMillis() / 1000
                     }
                 }
                 if (updatedCount == 0) return@put call.respond(HttpStatusCode.NotFound)

@@ -55,6 +55,7 @@ fun Route.tareasRoutes() {
                     it[idUsuarioAsignado] = tarea.idUsuarioAsignado
                     it[fechaVencimiento] = tarea.fechaVencimiento
                     it[isDeleted] = tarea.isDeleted
+                    it[updatedAt] = System.currentTimeMillis() / 1000
                 }
             }
             call.respond(HttpStatusCode.Created, tarea)
@@ -97,6 +98,7 @@ fun Route.tareasRoutes() {
                         it[idUsuarioAsignado] = tarea.idUsuarioAsignado
                         it[fechaVencimiento] = tarea.fechaVencimiento
                         it[isDeleted] = tarea.isDeleted
+                        it[updatedAt] = System.currentTimeMillis() / 1000
                     }
                 }
                 if (updatedCount == 0) return@put call.respond(HttpStatusCode.NotFound)
@@ -122,6 +124,7 @@ fun Route.tareasRoutes() {
                 val updatedTarea = dbQuery {
                     val count = TareasTable.update({ (TareasTable.id eq id) and (TareasTable.isDeleted eq false) }) {
                         it[estado] = request.estado
+                        it[updatedAt] = System.currentTimeMillis() / 1000
                     }
                     if (count > 0) {
                         val row = TareasTable .selectAll().where { (TareasTable.id eq id) and (TareasTable.isDeleted eq false) }.single()

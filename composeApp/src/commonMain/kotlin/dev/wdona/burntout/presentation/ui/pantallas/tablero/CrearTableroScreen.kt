@@ -57,7 +57,7 @@ fun MenuCrearTableroContent(tablerosViewModel: TablerosViewModel, onVolver: () -
             creandoTablero = true
             tablerosViewModel.crearTablero(
                 Tablero(
-                    "",
+                    java.util.UUID.randomUUID().toString(),
                     textStateNombreTablero,
                     SettingsManager.getIdOrganizacionActual(), // FIXME
                     SettingsManager.getIdEquipoActual() // FIXME
