@@ -3,16 +3,21 @@ package dev.wdona.burntout
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -43,15 +48,15 @@ fun App(
 ) {
     val isAutenticado by SettingsManager.isAutenticadoFlow.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
+    val wasConnected = rememberSaveable { mutableStateOf<Boolean?>(null) }
 
     LaunchedEffect(isAutenticado) {
         if (!isAutenticado) return@LaunchedEffect
-        var previous: Boolean? = null
         networkObserver.isConnected.collect { connected ->
-            if (previous == false && connected) {
+            if (wasConnected.value == false && connected) {
                 operacionesPendientesViewModelFactory.create().sincronizarPorReconexion()
             }
-            previous = connected
+            wasConnected.value = connected
         }
     }
 
@@ -95,9 +100,22 @@ fun App(
                 SnackbarHost(
                     hostState = snackbarHostState,
                     modifier = Modifier
-                        .align(Alignment.TopCenter)
-                        .padding(top = 16.dp),
-                    snackbar = { data -> Snackbar(data) }
+                        .align(Alignment.BottomCenter)
+                        .padding(top = 24.dp, start = 24.dp, bottom = 72.dp, end = 24.dp)
+                        .wrapContentWidth(Alignment.Start),
+                    snackbar = { data ->
+                        Surface(
+                            shape = RoundedCornerShape(8.dp),
+                            color = MaterialTheme.colorScheme.inverseSurface,
+                            contentColor = MaterialTheme.colorScheme.inverseOnSurface,
+                        ) {
+                            Text(
+                                text = data.visuals.message,
+                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
+                    }
                 )
             }
         }
@@ -115,23 +133,26 @@ private fun SyncStatusObserver(
     LaunchedEffect(estadoSync) {
         snackbarHostState.currentSnackbarData?.dismiss()
         when (estadoSync) {
-            EstadoSync.SINCRONIZANDO -> snackbarHostState.showSnackbar(
-                message = "Sincronizando cambios...",
-                duration = SnackbarDuration.Long
-            )
-            EstadoSync.COMPLETADO -> snackbarHostState.showSnackbar(
-                message = "Cambios sincronizados",
-                duration = SnackbarDuration.Short
-            )
-            EstadoSync.COMPLETADO_SIN_CAMBIOS -> snackbarHostState.showSnackbar(
-                message = "Todo al día",
-                duration = SnackbarDuration.Short
-            )
-            EstadoSync.COMPLETADO_CON_ERRORES -> snackbarHostState.showSnackbar(
-                message = "Algunos cambios no pudieron sincronizarse",
+            EstadoSync.SINCRONIZANDO -> {}
+//                snackbarHostState.showSnackbar(
+//                message = "Sincronizando cambios...",
+//                duration = SnackbarDuration.Indefinite
+//            )
+            EstadoSync.COMPLETADO -> {}
+            EstadoSync.COMPLETADO_SIN_CAMBIOS -> {}
+            EstadoSync.CON_ERRORES -> snackbarHostState.showSnackbar(
+                message = "Error sincronizando",
                 duration = SnackbarDuration.Long
             )
             EstadoSync.IDLE -> {}
+            EstadoSync.CON_ERRORES_RECONECTAR -> snackbarHostState.showSnackbar(
+                message = "Error sincronizando, revisa tu conexión a internet",
+                duration = SnackbarDuration.Long
+            )
+        }
+
+        if (estadoSync != EstadoSync.IDLE && estadoSync != EstadoSync.SINCRONIZANDO) {
+            vm.resetEstadoSync()
         }
     }
 }

@@ -9,6 +9,7 @@ import dev.wdona.burntout.domain.model.TipoAccion
 import dev.wdona.burntout.domain.repository.OrganizacionRepository
 import dev.wdona.burntout.shared.domain.Organizacion
 import dev.wdona.burntout.shared.utils.SettingsManager
+import dev.wdona.burntout.shared.utils.getCurrentTimestampSeconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
@@ -84,7 +85,7 @@ class OrganizacionRepositoryImpl(
                     Entity.ORGANIZACION.getNombreEntity(),
                     if (exito) idRemoto.toString() else "0",
                     OrganizacionMapper.toJson(organizacion),
-                    System.currentTimeMillis(),
+                    getCurrentTimestampSeconds(),
                     if (exito) 1L else 0L
                 )
             } catch (e: Exception) {
@@ -115,7 +116,7 @@ class OrganizacionRepositoryImpl(
                     Entity.ORGANIZACION.getNombreEntity(),
                     organizacion.idOrganizacion.toString(),
                     OrganizacionMapper.toJson(organizacion),
-                    System.currentTimeMillis(),
+                    getCurrentTimestampSeconds(),
                     if (exito) 1L else 0L
                 )
             } catch (e: Exception) {
@@ -146,7 +147,7 @@ class OrganizacionRepositoryImpl(
                     Entity.ORGANIZACION.getNombreEntity(),
                     idOrg.toString(),
                     "",
-                    System.currentTimeMillis(),
+                    getCurrentTimestampSeconds(),
                     if (exito) 1L else 0L
                 )
             } catch (e: Exception) {

@@ -12,6 +12,7 @@ class CompletarTareaUseCase(
     private val equipoRepository: EquipoRepository
 ) {
     suspend operator fun invoke(tarea: Tarea, idEquipo: Long) {
+        if (tarea.estado == TipoEstadoTarea.COMPLETADA.string) return
         tareaRepository.actualizarTarea(tarea.copy(estado = TipoEstadoTarea.COMPLETADA.string))
         equipoRepository.updatePuntuacion(idEquipo, PUNTOS_POR_TAREA)
     }

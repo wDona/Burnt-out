@@ -76,7 +76,7 @@ class TableroRepositoryImpl(
                         Entity.TABLERO.getNombreEntity(),
                         tablero.idTablero,
                         TableroMapper.toJson(tablero),
-                        System.currentTimeMillis(),
+                        getCurrentTimestampSeconds(),
                         if (exitoRemoto) 1L else 0L
                     )
                 } catch (e: Exception) {

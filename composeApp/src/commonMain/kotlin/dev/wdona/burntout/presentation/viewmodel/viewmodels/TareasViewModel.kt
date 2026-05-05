@@ -43,6 +43,8 @@ class TareasViewModel(
     }
 
     fun completarTarea(tarea: Tarea, idEquipo: Long) {
+        if (tarea.estado == TipoEstadoTarea.COMPLETADA.string) return
+        _listaTareas.value = _listaTareas.value.filter { it.idTarea != tarea.idTarea }
         screenModelScope.launch {
             completarTareaUseCase(tarea, idEquipo)
             notificacionProgramador.cancelarNotificaciones(tarea.idTarea)

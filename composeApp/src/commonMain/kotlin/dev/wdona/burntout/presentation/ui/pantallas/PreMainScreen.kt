@@ -92,6 +92,7 @@ class PreMainScreen(
                             tableroFactory = tableroFactory,
                             ajustesFactory = ajustesFactory,
                             leaderboardFactory = leaderboardFactory,
+                            operacionesPendientesFactory = operacionesPendientesFactory,
                             idEquipo = uiState.idEquipo
                         )
                     )
@@ -106,6 +107,7 @@ class PreMainScreen(
                             tableroFactory = tableroFactory,
                             ajustesFactory = ajustesFactory,
                             leaderboardFactory = leaderboardFactory,
+                            operacionesPendientesFactory = operacionesPendientesFactory,
                             idEquipo = uiState.idEquipo
                         )
                     )
@@ -119,6 +121,7 @@ class PreMainScreen(
                             tableroFactory = tableroFactory,
                             ajustesFactory = ajustesFactory,
                             leaderboardFactory = leaderboardFactory,
+                            operacionesPendientesFactory = operacionesPendientesFactory,
                         )
                     )
                 }

@@ -181,12 +181,12 @@ class EquipoRepositoryImpl(
 
     override suspend fun updatePuntuacion(idEquipo: Long, puntos: Long) {
         withContext(NonCancellable + Dispatchers.IO) {
-            local.updatePuntuacion(idEquipo, puntos)
-        }
-
-        if (SettingsManager.isUsuarioInvitado()) return
-
-        withContext(NonCancellable + Dispatchers.IO) {
+            try {
+                local.updatePuntuacion(idEquipo, puntos)
+            } catch (e: Exception) {
+                println("Error local al actualizar puntuacion: ${e.message}")
+            }
+            if (SettingsManager.isUsuarioInvitado()) return@withContext
             var exito = false
             try {
                 exito = remote.updatePuntuacion(idEquipo, puntos)

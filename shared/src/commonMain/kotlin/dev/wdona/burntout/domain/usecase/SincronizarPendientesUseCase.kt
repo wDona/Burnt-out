@@ -203,10 +203,16 @@ class SincronizarPendientesUseCase(
 
     private suspend fun ejecutarRespuesta(op: OperacionPendiente): Boolean {
         return try {
-            val respuesta = json.decodeFromString<Respuesta>(op.datosJson)
+            val datosJson = if (!op.datosJson.contains("\"idRespuesta\"")) {
+                op.datosJson.trimEnd('}') + ",\"idRespuesta\":\"${java.util.UUID.randomUUID()}\"}"
+            } else {
+                op.datosJson
+            }
+            val respuesta = json.decodeFromString<Respuesta>(datosJson)
             preguntaRespuestaRemote.responderPregunta(respuesta)
             true
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            println("Error al sincronizar respuesta: ${e.message}")
             false
         }
     }

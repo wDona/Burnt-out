@@ -63,10 +63,12 @@ import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.AjustesViewM
 import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.LeaderboardViewModelFactory
 import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.EquipoViewModelFactory
 import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.MiPerfilViewModelFactory
+import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.OperacionesPendientesViewModelFactory
 import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.TablerosViewModelFactory
 import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.TareasViewModelFactory
 import dev.wdona.burntout.presentation.viewmodel.viewmodels.PreguntasInicialesViewModel
 import dev.wdona.burntout.shared.utils.SettingsManager
+import kotlin.math.round
 
 class PreguntasInicialesScreen(
     private val viewModelFactory: FormularioViewModelFactory,
@@ -79,6 +81,7 @@ class PreguntasInicialesScreen(
     private val tableroFactory: TablerosViewModelFactory,
     private val leaderboardFactory: LeaderboardViewModelFactory,
     private val ajustesFactory: AjustesViewModelFactory,
+    private val operacionesPendientesFactory: OperacionesPendientesViewModelFactory,
     private val idEquipo: Long = SettingsManager.getIdEquipoActual()
 ) : Screen {
     override val key: ScreenKey = uniqueScreenKey
@@ -96,6 +99,7 @@ class PreguntasInicialesScreen(
                     leaderboardFactory = leaderboardFactory,
                     ajustesFactory = ajustesFactory,
                     formularioFactory = viewModelFactory,
+                    operacionesPendientesFactory = operacionesPendientesFactory,
                 )
             )
         }
@@ -127,7 +131,9 @@ fun PreguntasInicialesContent(onVolver: (() -> Unit)? = null, viewModel: Pregunt
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val preguntaActual = uiState.preguntaActual
     val isLoading = uiState.isLoading
+    val nRespuestas = uiState.respuestas.size
     val respuestaActual by viewModel.respuestaActual.collectAsStateWithLifecycle()
+    val tiempoPorPregunta = 8
 
     LaunchedEffect(isLoading, preguntaActual) {
         if (!isLoading && preguntaActual == null && uiState.preguntas.isNotEmpty()) {
@@ -176,10 +182,12 @@ fun PreguntasInicialesContent(onVolver: (() -> Unit)? = null, viewModel: Pregunt
         }
     }
 
-    val tiempo = if ((uiState.preguntas.size * 6) > 60) {
-        "~${(uiState.preguntas.size * 6) / 60} mins"
+
+
+    val tiempo = if (((uiState.preguntas.size - nRespuestas) * tiempoPorPregunta) > 60f) {
+        "~${round(((uiState.preguntas.size - nRespuestas) * tiempoPorPregunta / 60f) * 100.0) / 100f} mins"
     } else {
-        "~${uiState.preguntas.size * 6} segs"
+        "~${round((uiState.preguntas.size - nRespuestas) * tiempoPorPregunta * 100.0) / 100f} segs"
     }
 
     val titulo = "Diario inicial"
@@ -200,7 +208,7 @@ fun PreguntasInicialesContent(onVolver: (() -> Unit)? = null, viewModel: Pregunt
                 "Siguiente pregunta"
             )
         },
-        textoFAB = "Siguiente", // TODO: PONER TEXTO DE TERMINAR EN LA ULTIMA
+//        textoFAB = "Siguiente", // TODO: PONER TEXTO DE TERMINAR EN LA ULTIMA
         fabModifier = Modifier
             .focusRequester(focusRequester)
             .onPreviewKeyEvent {
@@ -350,10 +358,7 @@ fun PreguntasInicialesContent(onVolver: (() -> Unit)? = null, viewModel: Pregunt
                                         }
                                     } else {
                                         println("Carga el else de preguntasInicialesContent")
-                                        Text("No hay más preguntas por hoy.")
-                                        LaunchedEffect(1) {
-                                            SettingsManager.setUltimaFechaCuestionarioHoy()
-                                            SettingsManager.setPrimerCuestionarioHecho(true) // COMENTADO PARA DEBUG
+                                        LaunchedEffect(uiState) {
                                             onSaltar?.invoke()
                                         }
                                     }

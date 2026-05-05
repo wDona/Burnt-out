@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.CheckCircleOutline
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material.icons.filled.MoreVert
@@ -65,14 +66,17 @@ fun CardTarea(tarea: Tarea, nombreAsignado: String, onClick: () -> Unit, onDelet
                 .padding(vertical = 6.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = "Estado de tarea: ${tarea.estado}",
-                modifier = Modifier
-                    .padding(horizontal = 16.dp)
-                    .padding(top = 2.dp),
-                tint = color
-            )
+            IconButton(
+                onClick = { if (tarea.estado.lowercase() != TipoEstadoTarea.COMPLETADA.string.lowercase()) onCompletar() },
+                modifier = Modifier.padding(start = 4.dp)
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = "Estado de tarea: ${tarea.estado}",
+                    modifier = Modifier.padding(top = 2.dp),
+                    tint = color
+                )
+            }
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = tarea.titulo,
@@ -108,6 +112,18 @@ fun CardTarea(tarea: Tarea, nombreAsignado: String, onClick: () -> Unit, onDelet
             expanded = showMenu,
             onDismissRequest = { showMenu = false }
         ) {
+            if (tarea.estado.lowercase() != TipoEstadoTarea.COMPLETADA.string.lowercase()) {
+                DropdownMenuItem(
+                    text = { Text("Completar") },
+                    onClick = {
+                        onCompletar()
+                        showMenu = false
+                    },
+                    leadingIcon = {
+                        Icon(Icons.Default.CheckCircleOutline, contentDescription = null)
+                    }
+                )
+            }
             DropdownMenuItem(
                 text = { Text("Eliminar") },
                 onClick = {

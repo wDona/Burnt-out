@@ -21,6 +21,7 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import dev.wdona.burntout.presentation.ui.components.tablero.CardTablero
 import dev.wdona.burntout.presentation.ui.components.template.ScaffoldBase
+import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.OperacionesPendientesViewModelFactory
 import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.TablerosViewModelFactory
 import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.TareasViewModelFactory
 import dev.wdona.burntout.presentation.viewmodel.viewmodels.TablerosViewModel
@@ -28,7 +29,8 @@ import dev.wdona.burntout.shared.utils.SettingsManager
 
 class TablerosScreen(
     private val tableroFactory: TablerosViewModelFactory,
-    private val tareasViewModelFactory: TareasViewModelFactory
+    private val tareasViewModelFactory: TareasViewModelFactory,
+    private val operacionesPendientesViewModelFactory: OperacionesPendientesViewModelFactory
 ) : Screen {
     override val key: ScreenKey = uniqueScreenKey
 
@@ -55,7 +57,8 @@ class TablerosScreen(
                     DetalleTableroScreen(
                         idTablero = idTablero,
                         nombreTablero = nombreTablero,
-                        tareasViewModelFactory = tareasViewModelFactory
+                        tareasViewModelFactory = tareasViewModelFactory,
+                        operacionesPendientesViewModelFactory = operacionesPendientesViewModelFactory
                     )
                 )
             }
@@ -75,7 +78,6 @@ class TablerosScreen(
         ScaffoldBase(
             titulo = "Tableros",
             onFAB = onIrACrearTablero,
-            textoFAB = "Nuevo Tablero"
         ) {
             if (listaTableros.isEmpty()) {
                 Box(

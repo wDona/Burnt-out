@@ -1,7 +1,6 @@
 package dev.wdona.burntout.presentation.viewmodel.viewmodels
 
 import cafe.adriel.voyager.core.model.ScreenModel
-import cafe.adriel.voyager.core.model.screenModelScope
 import dev.wdona.burntout.domain.model.OperacionPendiente
 import dev.wdona.burntout.domain.repository.OperacionesPendientesRepository
 import dev.wdona.burntout.domain.repository.SyncRepository
@@ -14,7 +13,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-enum class EstadoSync { IDLE, SINCRONIZANDO, COMPLETADO, COMPLETADO_SIN_CAMBIOS, COMPLETADO_CON_ERRORES }
+enum class EstadoSync { IDLE, SINCRONIZANDO, COMPLETADO, COMPLETADO_SIN_CAMBIOS, CON_ERRORES, CON_ERRORES_RECONECTAR }
 
 class OperacionesPendientesViewModel(
     private val repository: OperacionesPendientesRepository,
@@ -33,6 +32,9 @@ class OperacionesPendientesViewModel(
     private val _estadoSync = MutableStateFlow(EstadoSync.IDLE)
     val estadoSync: StateFlow<EstadoSync> = _estadoSync.asStateFlow()
 
+    private val _syncTick = MutableStateFlow(0L)
+    val syncTick: StateFlow<Long> = _syncTick.asStateFlow()
+
     fun sincronizarAlIniciar() {
         appScope.launch {
             val hayPendientes = repository.getOperacionesPendientes().isNotEmpty()
@@ -40,9 +42,10 @@ class OperacionesPendientesViewModel(
             val todoOk = syncRepository.sync()
             if (todoOk) {
                 refrescarDatos()
+                _syncTick.value++
                 _estadoSync.value = if (hayPendientes) EstadoSync.COMPLETADO else EstadoSync.COMPLETADO_SIN_CAMBIOS
             } else {
-                _estadoSync.value = EstadoSync.COMPLETADO_CON_ERRORES
+                _estadoSync.value = EstadoSync.CON_ERRORES
             }
         }
     }
@@ -55,10 +58,15 @@ class OperacionesPendientesViewModel(
             val todoOk = syncRepository.sync()
             if (todoOk) {
                 refrescarDatos()
+                _syncTick.value++
                 _estadoSync.value = if (hayPendientes) EstadoSync.COMPLETADO else EstadoSync.COMPLETADO_SIN_CAMBIOS
             } else {
-                _estadoSync.value = EstadoSync.COMPLETADO_CON_ERRORES
+                _estadoSync.value = EstadoSync.CON_ERRORES_RECONECTAR
             }
         }
+    }
+
+    fun resetEstadoSync() {
+        _estadoSync.value = EstadoSync.IDLE
     }
 }

@@ -114,7 +114,7 @@ fun EquipoContent(viewModel: EquipoViewModel, esMiEquipo: Boolean, esAdminOrOwne
         subtitle = subtitulo,
         onVolver = onVolver,
         onFAB = if (esMiEquipo) { { onClickAddUsuario() } } else null,
-        textoFAB = if (esMiEquipo) "Añadir usuario" else null,
+        textoFAB = if (esMiEquipo) "" else null,
         iconFAB = if (esMiEquipo) { { Icon(Icons.Default.Add, contentDescription = "Añadir usuario") } } else null,
 //        onSalirEquipo = if (esMiEquipo) {
 //            {

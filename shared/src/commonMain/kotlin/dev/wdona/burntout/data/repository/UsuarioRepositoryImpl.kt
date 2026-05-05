@@ -10,6 +10,7 @@ import dev.wdona.burntout.domain.repository.UsuarioRepository
 import dev.wdona.burntout.shared.domain.RegistroRequest
 import dev.wdona.burntout.shared.domain.Usuario
 import dev.wdona.burntout.shared.utils.SettingsManager
+import dev.wdona.burntout.shared.utils.getCurrentTimestampSeconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
@@ -36,7 +37,6 @@ class UsuarioRepositoryImpl(
         }
         try {
             val usuario = remote.getUserById(idUsuario)
-            local.eliminarUsuario(usuario.idUsuario)
             local.insertOrUpdateUsuario(usuario)
             usuario
         } catch (e: Exception) {
@@ -51,7 +51,6 @@ class UsuarioRepositoryImpl(
             repositoryScope.launch {
                 try {
                     val usuarios = remote.getUsuariosByOrg(idOrg)
-                    local.eliminarUsuariosPorOrg(idOrg)
                     usuarios.forEach { local.insertOrUpdateUsuario(it) }
                 } catch (e: Exception) {
                     println("Servidor offline (getUsuariosByOrg): ${e.message}")
@@ -65,7 +64,6 @@ class UsuarioRepositoryImpl(
         if (!SettingsManager.isUsuarioInvitado()) {
             try {
                 val usuarios = remote.getMiembrosEquipo(idEquipo)
-                usuarios.forEach { local.eliminarUsuario(it.idUsuario) }
                 usuarios.forEach {
                     local.insertOrUpdateUsuario(it)
                     local.vincularUsuarioEquipo(it.idUsuario, idEquipo)
@@ -102,7 +100,7 @@ class UsuarioRepositoryImpl(
                     Entity.USUARIO.getNombreEntity(),
                     usuario.idUsuario.toString(),
                     UsuarioMapper.toJson(usuario),
-                    System.currentTimeMillis(),
+                    getCurrentTimestampSeconds(),
                     if (exito) 1L else 0L
                 )
             } catch (e: Exception) {
@@ -134,7 +132,7 @@ class UsuarioRepositoryImpl(
                     Entity.USUARIO.getNombreEntity(),
                     usuario.idUsuario.toString(),
                     UsuarioMapper.toJson(usuario),
-                    System.currentTimeMillis(),
+                    getCurrentTimestampSeconds(),
                     if (exito) 1L else 0L
                 )
             } catch (e: Exception) {
@@ -166,7 +164,7 @@ class UsuarioRepositoryImpl(
                     Entity.USUARIO.getNombreEntity(),
                     idUsuario.toString(),
                     "",
-                    System.currentTimeMillis(),
+                    getCurrentTimestampSeconds(),
                     if (exito) 1L else 0L
                 )
             } catch (e: Exception) {
@@ -214,15 +212,7 @@ class UsuarioRepositoryImpl(
         try {
             val usuario = remote.login(username, contrasena)
 
-            try {
-                val usuarioLocal = local.getUsuarioByUsername(username)
-                local.eliminarUsuario(usuarioLocal.idUsuario)
-            } catch (ignore: Exception) {
-            }
-
-            // TODO: si existia ya y tenia un id offline, habria que actualizar
-            //      las tablas relacionadas que apuntaban a ese ID offline (tareas, respuestas, etc.)
-            //      al nuevo id de servidor?
+            // No eliminamos, insertOrUpdateUsuario (REPLACE) ya se encarga de actualizar
             local.insertOrUpdateUsuario(usuario)
             usuario
         } catch (e: Exception) {

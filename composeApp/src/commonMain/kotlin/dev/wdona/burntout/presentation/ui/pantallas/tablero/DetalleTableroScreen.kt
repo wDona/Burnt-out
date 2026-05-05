@@ -14,6 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -28,21 +29,34 @@ import dev.wdona.burntout.presentation.ui.components.tarea.CardTarea
 import dev.wdona.burntout.presentation.ui.components.template.ScaffoldBase
 import dev.wdona.burntout.presentation.ui.pantallas.tarea.MenuCrearTareaScreen
 import dev.wdona.burntout.presentation.ui.pantallas.tarea.TareaDetalleScreen
+import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.OperacionesPendientesViewModelFactory
 import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.TareasViewModelFactory
 import dev.wdona.burntout.presentation.viewmodel.viewmodels.TareasViewModel
 import dev.wdona.burntout.shared.utils.SettingsManager
 
-class DetalleTableroScreen(val idTablero: String, val nombreTablero: String, val tareasViewModelFactory: TareasViewModelFactory) : Screen {
+class DetalleTableroScreen(
+    val idTablero: String,
+    val nombreTablero: String,
+    val tareasViewModelFactory: TareasViewModelFactory,
+    val operacionesPendientesViewModelFactory: OperacionesPendientesViewModelFactory
+) : Screen {
     override val key: ScreenKey = uniqueScreenKey
 
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
         val tareaViewModel = rememberScreenModel { tareasViewModelFactory.create() }
+        val syncViewModel = remember { operacionesPendientesViewModelFactory.create() }
+        val syncTick by syncViewModel.syncTick.collectAsState()
 
         LaunchedEffect(Unit) {
             tareaViewModel.cargarTareas(idTablero)
             tareaViewModel.cargarMiembrosEquipo(SettingsManager.getIdEquipoActual())
+            syncViewModel.sincronizarPorReconexion()
+        }
+
+        LaunchedEffect(syncTick) {
+            if (syncTick > 0L) tareaViewModel.cargarTareas(idTablero)
         }
 
         DetalleTableroContent(
@@ -111,7 +125,7 @@ fun DetalleTableroContent(
                             nombreAsignado = nombreAsignado,
                             onClick = { onIrATarea(tarea.idTarea, idTablero) },
                             onDelete = { tareasViewModel.eliminarTarea(tarea.idTarea, idTablero) },
-                            onCompletar = {}
+                            onCompletar = { tareasViewModel.completarTarea(tarea, SettingsManager.getIdEquipoActual()) }
                         )
                     }
                 }

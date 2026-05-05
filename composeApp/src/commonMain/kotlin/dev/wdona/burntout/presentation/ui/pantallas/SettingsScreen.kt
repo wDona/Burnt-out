@@ -1,6 +1,8 @@
 package dev.wdona.burntout.presentation.ui.pantallas
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -17,8 +19,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -77,7 +81,7 @@ fun SettingsContent(viewModel: AjustesViewModel, onVolver: () -> Unit, onLogout:
                         modifier = Modifier.padding(bottom = 4.dp)
                     )
                     Row(
-                        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+                        modifier = Modifier.fillMaxWidth().clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) { viewModel.toggleRespuestasAnonimas() }.padding(vertical = 8.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
@@ -118,13 +122,13 @@ fun SettingsContent(viewModel: AjustesViewModel, onVolver: () -> Unit, onLogout:
                 }
             }
 
-            OutlinedButton(
+            TextButton(
                 onClick = {
                     viewModel.resetSettings()
                     onLogout()
                 },
                 modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.error),
+//                border = BorderStroke(1.dp, MaterialTheme.colorScheme.error),
                 colors = ButtonDefaults.outlinedButtonColors(
                     contentColor = MaterialTheme.colorScheme.error
                 )

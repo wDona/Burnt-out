@@ -38,13 +38,14 @@ class MainScreen(
     private val tableroFactory: TablerosViewModelFactory,
     private val leaderboardFactory: LeaderboardViewModelFactory,
     private val ajustesFactory: AjustesViewModelFactory,
-    private val formularioFactory: FormularioViewModelFactory
+    private val formularioFactory: FormularioViewModelFactory,
+    private val operacionesPendientesFactory: OperacionesPendientesViewModelFactory
 ) : Screen {
     override val key: ScreenKey = uniqueScreenKey
 
     @Composable
     override fun Content() {
-        val tablerosTab = remember { TablerosTab(tableroFactory, tareaFactory) }
+        val tablerosTab = remember { TablerosTab(tableroFactory, tareaFactory, operacionesPendientesFactory) }
         val equipoTab = remember { EquipoTab(equipoFactory, perfilFactory, ajustesFactory) }
         val leaderboardTab = remember { LeaderboardTab(leaderboardFactory, ajustesFactory, equipoFactory, perfilFactory) }
         val perfilTab = remember { PerfilTab(perfilFactory, ajustesFactory) }
@@ -97,7 +98,8 @@ private fun RowScope.TabNavigationItem(
 
 private class TablerosTab(
     val factory: TablerosViewModelFactory,
-    val tareaFactory: TareasViewModelFactory
+    val tareaFactory: TareasViewModelFactory,
+    val operacionesPendientesFactory: OperacionesPendientesViewModelFactory
 ) : Tab {
     override val key = "TablerosTab"
     @get:Composable
@@ -106,7 +108,7 @@ private class TablerosTab(
 
     @Composable
     override fun Content() {
-        Navigator(TablerosScreen(factory, tareaFactory)) { navigator ->
+        Navigator(TablerosScreen(factory, tareaFactory, operacionesPendientesFactory)) { navigator ->
             CrossfadeTransition(navigator)
         }
     }

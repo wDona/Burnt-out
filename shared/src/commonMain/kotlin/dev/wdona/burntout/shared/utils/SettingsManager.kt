@@ -98,7 +98,7 @@ object SettingsManager {
     fun isRespuestasAnonimas(): Boolean = _respuestasAnonimasFlow.value
     fun isAdminOrOwner(): Boolean = _rolActualFlow.value >= 1L
 
-    fun getLastSyncTimestamp(): Long = settings.getLong(KEY_LAST_SYNC_TIMESTAMP, 0L)
+    fun getLastSyncTimestamp(): Long = _lastSyncTimestampFlow.value
     fun setLastSyncTimestamp(timestamp: Long) {
         settings.putLong(KEY_LAST_SYNC_TIMESTAMP, timestamp)
         _lastSyncTimestampFlow.value = timestamp

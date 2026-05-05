@@ -27,6 +27,7 @@ class RespuestaMapper {
 
         fun toJson(respuesta: Respuesta): String {
             return buildJsonObject {
+                put("idRespuesta", JsonPrimitive(respuesta.idRespuesta))
                 put(RespuestaJsonFields.ID_USUARIO.nombreCampo, JsonPrimitive(respuesta.idUsuario))
                 put(RespuestaJsonFields.ID_PREGUNTA.nombreCampo, JsonPrimitive(respuesta.idPregunta))
                 put(RespuestaJsonFields.ANONIMO.nombreCampo, JsonPrimitive(respuesta.anonimo))
@@ -34,8 +35,11 @@ class RespuestaMapper {
                 if (respuesta.nombreUsuario != null) {
                     put(RespuestaJsonFields.NOMBRE_USUARIO.nombreCampo, JsonPrimitive(respuesta.nombreUsuario))
                 }
-                put("updated_at", JsonPrimitive(respuesta.updatedAt))
-                put("is_deleted", JsonPrimitive(if (respuesta.isDeleted) 1 else 0))
+                if (respuesta.fecha != null) {
+                    put("fecha", JsonPrimitive(respuesta.fecha))
+                }
+                put("updatedAt", JsonPrimitive(respuesta.updatedAt))
+                put("isDeleted", JsonPrimitive(respuesta.isDeleted))
             }.toString()
         }
     }

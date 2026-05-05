@@ -65,9 +65,14 @@ class PreguntasInicialesViewModel(
                     respuestas.indexOfFirst { it.idPregunta == pregunta.idPregunta }
                 }.take(nPreguntas)
 
+                val idsRespondidasHoy = respuestas.filter {
+                    val fechaRespuesta = convertTimestampToStringDate(it.fecha ?: 0L)
+                    fechaRespuesta == hoyString
+                }.map { it.idPregunta }.toSet()
 
-                _uiState.update { it.copy(preguntas = preguntas, isLoading = false) }
-                seleccionarSiguientePreguntaSinResponder()
+                val siguiente = preguntas.firstOrNull { it.idPregunta !in idsRespondidasHoy }
+
+                _uiState.update { it.copy(preguntas = preguntas, isLoading = false, preguntaActual = siguiente) }
             } catch (e: Exception) {
                 _uiState.update { it.copy(isLoading = false, error = e.message) }
             }

@@ -24,9 +24,13 @@ class TareaRepositoryImpl(
         if (!SettingsManager.isUsuarioInvitado()) {
             try {
                 val serverTareas = remote.getTareasByTablero(tableroId)
-
-                // Sincronizacion aditiva: no borramos en lectura para no vaciar cache local por desajustes de IDs.
-                serverTareas.forEach { local.insertOrUpdateTarea(it) }
+                val localMap = local.getTareasByTablero(tableroId).associateBy { it.idTarea }
+                serverTareas.forEach { serverTarea ->
+                    val localTarea = localMap[serverTarea.idTarea]
+                    if (localTarea == null || serverTarea.updatedAt >= localTarea.updatedAt) {
+                        local.insertOrUpdateTarea(serverTarea)
+                    }
+                }
             } catch (e: Exception) {
                 println("Servidor offline (getTareas): ${e.message}")
             }
@@ -61,27 +65,15 @@ class TareaRepositoryImpl(
             } catch (e: Exception) {
                 println("Error local al crear tarea: ${e.message}")
             }
-        }
-
-        if (SettingsManager.isUsuarioInvitado()) return
-
-        withContext(NonCancellable + Dispatchers.IO) {
-            var exitoRemoto = false
-            var idRemoto: String = ""
-            try {
-                idRemoto = remote.crearTarea(tarea)
-                exitoRemoto = idRemoto.isNotEmpty()
-            } catch (e: Exception) {
-                println("Servidor offline al crear tarea: ${e.message}")
-            }
+            if (SettingsManager.isUsuarioInvitado()) return@withContext
             try {
                 pendiente.insertOperacionPendiente(
                     TipoAccion.CREACION.getNombreAccion(),
                     Entity.TAREA.getNombreEntity(),
-                    if (exitoRemoto) idRemoto else tarea.idTarea,
+                    tarea.idTarea,
                     TareaMapper.toJson(tarea),
                     getCurrentTimestampSeconds(),
-                    if (exitoRemoto) 1L else 0L
+                    0L
                 )
             } catch (e: Exception) {
                 println("Error al registrar operacion pendiente: ${e.message}")
@@ -96,17 +88,7 @@ class TareaRepositoryImpl(
             } catch (e: Exception) {
                 println("Error local al actualizar tarea: ${e.message}")
             }
-        }
-
-        if (SettingsManager.isUsuarioInvitado()) return
-
-        withContext(NonCancellable + Dispatchers.IO) {
-            var exito = false
-            try {
-                exito = remote.actualizarTarea(tarea)
-            } catch (e: Exception) {
-                println("Servidor offline al actualizar tarea: ${e.message}")
-            }
+            if (SettingsManager.isUsuarioInvitado()) return@withContext
             try {
                 pendiente.insertOperacionPendiente(
                     TipoAccion.ACTUALIZACION.getNombreAccion(),
@@ -114,7 +96,7 @@ class TareaRepositoryImpl(
                     tarea.idTarea,
                     TareaMapper.toJson(tarea),
                     getCurrentTimestampSeconds(),
-                    if (exito) 1L else 0L
+                    0L
                 )
             } catch (e: Exception) {
                 println("Error al registrar operación pendiente: ${e.message}")
@@ -129,17 +111,7 @@ class TareaRepositoryImpl(
             } catch (e: Exception) {
                 println("Error local al eliminar tarea: ${e.message}")
             }
-        }
-
-        if (SettingsManager.isUsuarioInvitado()) return
-
-        withContext(NonCancellable + Dispatchers.IO) {
-            var exito = false
-            try {
-                exito = remote.eliminarTarea(idTarea)
-            } catch (e: Exception) {
-                println("Servidor offline al eliminar tarea: ${e.message}")
-            }
+            if (SettingsManager.isUsuarioInvitado()) return@withContext
             try {
                 pendiente.insertOperacionPendiente(
                     TipoAccion.ELIMINACION.getNombreAccion(),
@@ -147,7 +119,7 @@ class TareaRepositoryImpl(
                     idTarea,
                     "{\"idTarea\":\"$idTarea\"}",
                     getCurrentTimestampSeconds(),
-                    if (exito) 1L else 0L
+                    0L
                 )
             } catch (e: Exception) {
                 println("Error al registrar operación pendiente: ${e.message}")

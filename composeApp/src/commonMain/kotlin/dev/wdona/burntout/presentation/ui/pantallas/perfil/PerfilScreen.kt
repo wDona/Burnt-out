@@ -204,7 +204,7 @@ fun PerfilContent(
                                     viewModel.actualizarPerfil(
                                         usuario.copy(
                                             nombre = nombreEdit.trim(),
-                                            descripcion = descripcionEdit.trim().ifBlank { null }
+                                            descripcion = descripcionEdit.trim().ifBlank { "Sin descripción" }
                                         )
                                     )
                                 }
@@ -218,19 +218,19 @@ fun PerfilContent(
                         ) {
                             Text("Guardar")
                         }
-                        TextButton(onClick = { modoEdicion = false }) {
+                        TextButton(onClick = { modoEdicion = false }, modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp)) {
                             Text("Cancelar")
                         }
                     } else {
 //                        Text(usuario.username, style = MaterialTheme.typography.titleMedium)
 //                        Text(usuario.nombre, style = MaterialTheme.typography.bodyLarge)
-                        Text(usuario.descripcion ?: "-", style = MaterialTheme.typography.bodyMedium)
+                        Text(usuario.descripcion ?: "Sin descripción", style = MaterialTheme.typography.bodyMedium)
 
                         if (esPropioUsuario) {
-                            OutlinedButton(
+                            TextButton(
                                 onClick = {
                                     nombreEdit = usuario.nombre
-                                    descripcionEdit = usuario.descripcion ?: ""
+                                    descripcionEdit = if (usuario.descripcion == "Sin descripción") "" else usuario.descripcion ?: ""
                                     modoEdicion = true
                                 },
                                 modifier = Modifier

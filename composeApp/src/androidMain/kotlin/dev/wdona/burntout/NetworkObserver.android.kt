@@ -19,9 +19,11 @@ actual class NetworkObserver actual constructor(context: Any?) {
             override fun onAvailable(network: Network) { trySend(true) }
             override fun onLost(network: Network) { trySend(false) }
         }
+
         val request = NetworkRequest.Builder()
             .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
             .build()
+
         connectivityManager.registerNetworkCallback(request, callback)
         val caps = connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork)
         trySend(caps?.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) == true)

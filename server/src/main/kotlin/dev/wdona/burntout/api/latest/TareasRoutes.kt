@@ -46,7 +46,7 @@ fun Route.tareasRoutes() {
             val tarea = call.receive<Tarea>()
             println("[${call.request.origin.remoteHost}] POST /tareas titulo=${tarea.titulo}")
             dbQuery {
-                TareasTable.insert {
+                TareasTable.insertIgnore {
                     it[id] = tarea.idTarea
                     it[titulo] = tarea.titulo
                     it[descripcion] = tarea.descripcion
