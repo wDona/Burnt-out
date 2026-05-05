@@ -1,6 +1,6 @@
 # Burn't Out
 
-Aplicación de gestión de proyectos estilo Trello con monitoreo de burnout integrado. Mi proyecto intermodular para el Grado Superior de DAM.
+Aplicación de gestión de entregas estilo Trello con monitoreo de burnout y gamificacion integrados. Mi proyecto intermodular para el Grado Superior de DAM.
 
 [![Ver Anteproyecto](https://img.shields.io/badge/Ver%20Anteproyecto-📄-red?style=for-the-badge)](./Burn't_Out_Anteproyecto.pdf)
 
@@ -8,7 +8,7 @@ Aplicación de gestión de proyectos estilo Trello con monitoreo de burnout inte
 
 ## Descarga
 
-### Windows, Linux (.deb), Android:
+### Windows, Linux (Debian), Android:
 [![Descargar](https://img.shields.io/badge/Descargar-📄-green?style=for-the-badge)](https://github.com/wDona/Burnt-out/releases)
 
 ### AUR (Arch)
@@ -70,16 +70,15 @@ Las tarjetas también muestran un indicador visual junto al avatar del usuario s
 - **Arquitectura:** Kotlin Multiplatform (Android + Desktop JVM), Clean Architecture + MVVM
 - **UI:** Compose Multiplatform
 - **Backend:** API REST con Ktor
-- **Persistencia local:** SQLite con SQLDelight
+- **Persistencia local:** SQLite + SQLDelight
 - **Persistencia en nube:** Exposed ORM
-- **Seguridad:** TLS, hashing de credenciales, autenticación JWT
 - Soporte para trabajo offline con sincronización automática
 
 ### Ejecutar en desarrollo
 
 Requisitos: JDK 11+, Android Studio o IntelliJ IDEA con plugin KMP.
 
-| Entorno | Comando (macOS/Linux) | Comando (Windows) |
+| Entorno | Comando (Linux) | Comando (Windows) |
 | :--- | :--- | :--- |
 | **Desktop** | `./gradlew :composeApp:run` | `.\gradlew.bat :composeApp:run` |
 | **Android** | `./gradlew :composeApp:installDebug` | `.\gradlew.bat :composeApp:installDebug` |
@@ -87,4 +86,4 @@ Requisitos: JDK 11+, Android Studio o IntelliJ IDEA con plugin KMP.
 
 ---
 
-*Desarrollado por wDona. Diseño usando Material Theme Builder.*
+*Desarrollado por wDona. Colores de Material Theme Builder*
