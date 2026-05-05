@@ -40,19 +40,23 @@ actual class NotificacionProgramador {
     }
 
     private fun mostrarNotificacion(titulo: String, mensaje: String) {
-        try {
-            if (SystemTray.isSupported()) {
-                val tray = SystemTray.getSystemTray()
-                val img = BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB)
-                val icon = TrayIcon(img, "BurntOut")
-                icon.isImageAutoSize = true
-                tray.add(icon)
-                icon.displayMessage(titulo, mensaje, TrayIcon.MessageType.INFO)
-                Thread.sleep(5000)
-                tray.remove(icon)
+        Thread {
+            try {
+                if (SystemTray.isSupported()) {
+                    val tray = SystemTray.getSystemTray()
+                    val img = BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB)
+                    val icon = TrayIcon(img, "BurntOut")
+                    icon.isImageAutoSize = true
+                    tray.add(icon)
+                    icon.displayMessage(titulo, mensaje, TrayIcon.MessageType.INFO)
+                    Thread.sleep(8000)
+                    tray.remove(icon)
+                } else {
+                    println("[BurntOut] $titulo: $mensaje")
+                }
+            } catch (e: Exception) {
+                println("[BurntOut] $titulo: $mensaje (${e.message})")
             }
-        } catch (e: Exception) {
-            println("Notificacion: $titulo — $mensaje")
-        }
+        }.also { it.isDaemon = true }.start()
     }
 }

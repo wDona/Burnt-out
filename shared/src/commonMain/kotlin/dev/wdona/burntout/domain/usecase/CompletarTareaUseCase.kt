@@ -5,7 +5,7 @@ import dev.wdona.burntout.domain.model.TipoEstadoTarea
 import dev.wdona.burntout.domain.repository.EquipoRepository
 import dev.wdona.burntout.shared.domain.Tarea
 
-private const val PUNTOS_POR_TAREA = 10L
+private const val PUNTOS_POR_TAREA = 100L
 
 class CompletarTareaUseCase(
     private val tareaRepository: TareaRepository,

@@ -13,8 +13,7 @@ class TareaVencimientoReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         val titulo = intent.getStringExtra(EXTRA_TITULO) ?: return
         val tipo = intent.getStringExtra(EXTRA_TIPO) ?: TIPO_ENTREGA
-        val idTarea = intent.getLongExtra(EXTRA_ID_TAREA, -1L)
-        if (idTarea == -1L) return
+        val idTarea = intent.getStringExtra(EXTRA_ID_TAREA) ?: return
 
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         crearCanalSiNecesario(notificationManager)
@@ -33,7 +32,7 @@ class TareaVencimientoReceiver : BroadcastReceiver() {
             .setAutoCancel(true)
             .build()
 
-        val notifId = (idTarea * 10 + if (tipo == TIPO_24H) 0 else 1).toInt()
+        val notifId = (Math.abs(idTarea.hashCode()) * 10 + if (tipo == TIPO_24H) 0 else 1)
         notificationManager.notify(notifId, notificacion)
     }
 

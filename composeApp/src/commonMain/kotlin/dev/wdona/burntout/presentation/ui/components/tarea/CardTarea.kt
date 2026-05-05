@@ -32,6 +32,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.layout.size
 import dev.wdona.burntout.domain.model.TipoEstadoTarea
 import dev.wdona.burntout.presentation.ui.components.common.formatearFecha
 import dev.wdona.burntout.shared.domain.Tarea
@@ -87,12 +89,13 @@ fun CardTarea(tarea: Tarea, nombreAsignado: String, onClick: () -> Unit, onDelet
                         Icon(
                             imageVector = Icons.Default.CalendarToday,
                             contentDescription = "Fecha de vencimiento",
-                            modifier = Modifier.padding(end = 4.dp),
+                            modifier = Modifier.size(11.dp).padding(end = 2.dp),
                             tint = MaterialTheme.colorScheme.outline
                         )
                         Text(
                             text = formatearFecha(fecha),
                             style = MaterialTheme.typography.labelSmall,
+                            fontSize = 10.sp,
                             color = MaterialTheme.colorScheme.outline
                         )
                     }
