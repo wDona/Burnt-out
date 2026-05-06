@@ -12,7 +12,7 @@ actual class NotificacionProgramador {
     private val timer = Timer("notificaciones-tarea", true)
     private val tareas = mutableMapOf<String, List<TimerTask>>()
 
-    actual fun programarNotificaciones(idTarea: String, titulo: String, fechaVencimiento: Long) {
+    actual fun programarNotificaciones(idTarea: String, titulo: String, fechaVencimiento: Long, notificacionPersonalizada: Long?) {
         cancelarNotificaciones(idTarea)
         val ahora = System.currentTimeMillis()
         val ms24h = 24 * 60 * 60 * 1000L
@@ -30,6 +30,13 @@ actual class NotificacionProgramador {
                 override fun run() = mostrarNotificacion("Tarea vencida", "\"$titulo\" ha llegado a su fecha de entrega")
             }
             timer.schedule(tarea, Date(fechaVencimiento))
+            nuevasTareas.add(tarea)
+        }
+        if (notificacionPersonalizada != null && notificacionPersonalizada > ahora) {
+            val tarea = object : TimerTask() {
+                override fun run() = mostrarNotificacion("Recordatorio de tarea", "\"$titulo\" tiene una fecha de entrega próxima")
+            }
+            timer.schedule(tarea, Date(notificacionPersonalizada))
             nuevasTareas.add(tarea)
         }
         tareas[idTarea] = nuevasTareas

@@ -5,6 +5,6 @@ import java.util.Date
 import java.util.Locale
 
 actual fun formatearFecha(epochMs: Long): String {
-    val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+    val sdf = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
     return sdf.format(Date(epochMs))
 }

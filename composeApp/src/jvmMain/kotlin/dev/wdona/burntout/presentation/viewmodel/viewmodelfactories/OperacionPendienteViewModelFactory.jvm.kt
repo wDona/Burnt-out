@@ -40,6 +40,7 @@ import dev.wdona.burntout.data.repository.EquipoRepositoryImpl
 import dev.wdona.burntout.data.repository.OperacionesPendientesRepositoryImpl
 import dev.wdona.burntout.data.repository.SyncRepositoryImpl
 import dev.wdona.burntout.data.repository.TableroRepositoryImpl
+import dev.wdona.burntout.notification.NotificacionProgramador
 import dev.wdona.burntout.domain.repository.OperacionesPendientesRepository
 import dev.wdona.burntout.domain.repository.SyncRepository
 import dev.wdona.burntout.domain.usecase.RefrescarDatosUseCase
@@ -87,6 +88,7 @@ actual class OperacionesPendientesViewModelFactory {
             organizacionRemote
         )
 
+        val notificacionProgramador = NotificacionProgramador()
         val syncRepository: SyncRepository = SyncRepositoryImpl(
             SyncApiImpl(),
             sincronizarPendientesUseCase,
@@ -97,7 +99,14 @@ actual class OperacionesPendientesViewModelFactory {
             usuarioLocal,
             organizacionLocal,
             preguntaRespuestaLocal,
-            ajusteLocal
+            ajusteLocal,
+            onTareasSincronizadas = { tareas ->
+                tareas.forEach { tarea ->
+                    tarea.fechaVencimiento?.let { fecha ->
+                        notificacionProgramador.programarNotificaciones(tarea.idTarea, tarea.titulo, fecha, tarea.notificacionPersonalizada)
+                    }
+                }
+            }
         )
 
         val tableroRepo = TableroRepositoryImpl(tableroLocal, tableroRemote, pendienteDataSource)

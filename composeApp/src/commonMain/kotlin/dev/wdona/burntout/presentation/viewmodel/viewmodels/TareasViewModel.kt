@@ -62,7 +62,7 @@ class TareasViewModel(
         screenModelScope.launch {
             repository.crearTarea(tarea)
             tarea.fechaVencimiento?.let {
-                notificacionProgramador.programarNotificaciones(tarea.idTarea, tarea.titulo, it)
+                notificacionProgramador.programarNotificaciones(tarea.idTarea, tarea.titulo, it, tarea.notificacionPersonalizada)
             }
             cargarTareas(tarea.idTableroPerteneciente)
         }
@@ -73,7 +73,7 @@ class TareasViewModel(
             repository.actualizarTarea(tarea)
             notificacionProgramador.cancelarNotificaciones(tarea.idTarea)
             tarea.fechaVencimiento?.let {
-                notificacionProgramador.programarNotificaciones(tarea.idTarea, tarea.titulo, it)
+                notificacionProgramador.programarNotificaciones(tarea.idTarea, tarea.titulo, it, tarea.notificacionPersonalizada)
             }
             cargarTareas(tarea.idTableroPerteneciente)
         }

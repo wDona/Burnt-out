@@ -18,6 +18,7 @@ class TareaMapper {
                 idUsuarioAsignado = tareaEntity.FK_ID_Usuario,
                 idSubtareas = idSubtareas,
                 fechaVencimiento = tareaEntity.Fecha_Vencimiento,
+                notificacionPersonalizada = tareaEntity.Notificacion_Personalizada,
                 isDeleted = tareaEntity.Is_Deleted != 0L,
                 updatedAt = tareaEntity.Updated_At
             )
@@ -32,6 +33,7 @@ class TareaMapper {
                 FK_ID_Tabl = tarea.idTableroPerteneciente,
                 FK_ID_Usuario = tarea.idUsuarioAsignado,
                 Fecha_Vencimiento = tarea.fechaVencimiento,
+                Notificacion_Personalizada = tarea.notificacionPersonalizada,
                 Is_Deleted = if (tarea.isDeleted) 1L else 0L,
                 Updated_At = tarea.updatedAt
             )
@@ -47,6 +49,7 @@ class TareaMapper {
                 idUsuarioAsignado = tareaEntity.FK_ID_Usuario,
                 idSubtareas = emptyList(),
                 fechaVencimiento = tareaEntity.Fecha_Vencimiento,
+                notificacionPersonalizada = tareaEntity.Notificacion_Personalizada,
                 isDeleted = tareaEntity.Is_Deleted != 0L,
                 updatedAt = tareaEntity.Updated_At
             )

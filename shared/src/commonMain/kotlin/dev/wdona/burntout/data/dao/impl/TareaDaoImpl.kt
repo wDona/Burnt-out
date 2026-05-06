@@ -35,6 +35,7 @@ class TareaDaoImpl(appDatabase: AppDatabase) : TareaDao {
             FK_ID_Tabl = tarea.idTableroPerteneciente,
             FK_ID_Usuario = tarea.idUsuarioAsignado,
             Fecha_Vencimiento = tarea.fechaVencimiento,
+            Notificacion_Personalizada = tarea.notificacionPersonalizada,
             Updated_At = tarea.updatedAt.takeIf { it > 0L } ?: getCurrentTimestampSeconds()
         )
         return generatedId
@@ -48,6 +49,7 @@ class TareaDaoImpl(appDatabase: AppDatabase) : TareaDao {
                 Descripcion = tarea.descripcion,
                 Estado = tarea.estado,
                 Fecha_Vencimiento = tarea.fechaVencimiento,
+                Notificacion_Personalizada = tarea.notificacionPersonalizada,
                 Updated_At = tarea.updatedAt.takeIf { it > 0L } ?: getCurrentTimestampSeconds(),
                 ID_Tarea = tarea.idTarea
             )
@@ -88,6 +90,7 @@ class TareaDaoImpl(appDatabase: AppDatabase) : TareaDao {
                 FK_ID_Tabl = tarea.idTableroPerteneciente,
                 FK_ID_Usuario = tarea.idUsuarioAsignado,
                 Fecha_Vencimiento = tarea.fechaVencimiento,
+                Notificacion_Personalizada = tarea.notificacionPersonalizada,
                 Is_Deleted = if (tarea.isDeleted) 1L else 0L,
                 Updated_At = tarea.updatedAt.takeIf { it > 0L } ?: getCurrentTimestampSeconds()
             )

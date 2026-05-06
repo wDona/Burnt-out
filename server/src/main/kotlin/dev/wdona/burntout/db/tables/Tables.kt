@@ -69,6 +69,7 @@ object TareasTable : Table() {
     val idTablero = varchar("id_tablero_perteneciente", 50)
     val idUsuarioAsignado = long("id_usuario_asignado")
     val fechaVencimiento = long("fecha_vencimiento").nullable()
+    val notificacionPersonalizada = long("notificacion_personalizada").nullable()
     val isDeleted = bool("is_deleted").default(false)
     val updatedAt = long("updated_at").default(0L)
     override val primaryKey = PrimaryKey(id)

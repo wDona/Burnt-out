@@ -18,21 +18,25 @@ class TareaVencimientoReceiver : BroadcastReceiver() {
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         crearCanalSiNecesario(notificationManager)
 
-        val (titulo24h, cuerpo) = if (tipo == TIPO_24H) {
-            "Tarea próxima a vencer" to "\"$titulo\" vence en 24 horas"
-        } else {
-            "Tarea vencida" to "\"$titulo\" ha llegado a su fecha de entrega"
+        val (tituloNotif, cuerpo) = when (tipo) {
+            TIPO_24H -> "Tarea próxima a vencer" to "\"$titulo\" vence en 24 horas"
+            TIPO_CUSTOM -> "Recordatorio de tarea" to "\"$titulo\" tiene una fecha de entrega próxima"
+            else -> "Tarea vencida" to "\"$titulo\" ha llegado a su fecha de entrega"
         }
 
         val notificacion = NotificationCompat.Builder(context, CANAL_ID)
             .setSmallIcon(android.R.drawable.ic_dialog_alert)
-            .setContentTitle(titulo24h)
+            .setContentTitle(tituloNotif)
             .setContentText(cuerpo)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setAutoCancel(true)
             .build()
 
-        val notifId = (Math.abs(idTarea.hashCode()) * 10 + if (tipo == TIPO_24H) 0 else 1)
+        val notifId = when (tipo) {
+            TIPO_24H -> Math.abs(idTarea.hashCode()) * 10 + 0
+            TIPO_CUSTOM -> Math.abs(idTarea.hashCode()) * 10 + 2
+            else -> Math.abs(idTarea.hashCode()) * 10 + 1
+        }
         notificationManager.notify(notifId, notificacion)
     }
 
@@ -54,5 +58,6 @@ class TareaVencimientoReceiver : BroadcastReceiver() {
         const val EXTRA_ID_TAREA = "id_tarea"
         const val TIPO_24H = "24h"
         const val TIPO_ENTREGA = "entrega"
+        const val TIPO_CUSTOM = "custom"
     }
 }

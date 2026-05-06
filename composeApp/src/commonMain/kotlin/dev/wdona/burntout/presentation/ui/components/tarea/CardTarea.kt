@@ -12,10 +12,7 @@ import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.CheckCircleOutline
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.RadioButtonUnchecked
-import androidx.compose.material.icons.filled.Square
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -50,12 +47,7 @@ fun CardTarea(tarea: Tarea, nombreAsignado: String, onClick: () -> Unit, onDelet
         else -> Color.DarkGray
     }
 
-    val icon = when (tarea.estado.lowercase()) {
-        TipoEstadoTarea.PENDIENTE.string.lowercase() -> Icons.Default.RadioButtonUnchecked
-        TipoEstadoTarea.EN_PROCESO.string.lowercase() -> Icons.Default.MoreHoriz
-        TipoEstadoTarea.COMPLETADA.string.lowercase() -> Icons.Default.CheckCircle
-        else -> Icons.Default.Square
-    }
+    val completada = tarea.estado.lowercase() == TipoEstadoTarea.COMPLETADA.string.lowercase()
 
     Box {
         Row(
@@ -69,20 +61,20 @@ fun CardTarea(tarea: Tarea, nombreAsignado: String, onClick: () -> Unit, onDelet
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(
-                onClick = { if (tarea.estado.lowercase() != TipoEstadoTarea.COMPLETADA.string.lowercase()) onCompletar() },
+                onClick = { if (!completada) onCompletar() },
                 modifier = Modifier.padding(start = 4.dp)
             ) {
                 Icon(
-                    imageVector = icon,
-                    contentDescription = "Estado de tarea: ${tarea.estado}",
+                    imageVector = if (completada) Icons.Default.CheckCircle else Icons.Default.CheckCircleOutline,
+                    contentDescription = "Completar tarea",
                     modifier = Modifier.padding(top = 2.dp),
-                    tint = color
                 )
             }
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = tarea.titulo,
-                    textAlign = TextAlign.Start
+                    textAlign = TextAlign.Start,
+                    color = color
                 )
                 tarea.fechaVencimiento?.let { fecha ->
                     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -115,7 +107,7 @@ fun CardTarea(tarea: Tarea, nombreAsignado: String, onClick: () -> Unit, onDelet
             expanded = showMenu,
             onDismissRequest = { showMenu = false }
         ) {
-            if (tarea.estado.lowercase() != TipoEstadoTarea.COMPLETADA.string.lowercase()) {
+            if (!completada) {
                 DropdownMenuItem(
                     text = { Text("Completar") },
                     onClick = {

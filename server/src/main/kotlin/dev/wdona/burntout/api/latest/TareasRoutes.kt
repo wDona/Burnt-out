@@ -36,6 +36,7 @@ fun Route.tareasRoutes() {
                         idUsuarioAsignado = row[TareasTable.idUsuarioAsignado],
                         idSubtareas = subtareas.ifEmpty { null },
                         fechaVencimiento = row[TareasTable.fechaVencimiento],
+                        notificacionPersonalizada = row[TareasTable.notificacionPersonalizada],
                         isDeleted = row[TareasTable.isDeleted]
                     )
                 }
@@ -54,6 +55,7 @@ fun Route.tareasRoutes() {
                     it[idTablero] = tarea.idTableroPerteneciente
                     it[idUsuarioAsignado] = tarea.idUsuarioAsignado
                     it[fechaVencimiento] = tarea.fechaVencimiento
+                    it[notificacionPersonalizada] = tarea.notificacionPersonalizada
                     it[isDeleted] = tarea.isDeleted
                     it[updatedAt] = System.currentTimeMillis() / 1000
                 }
@@ -97,6 +99,7 @@ fun Route.tareasRoutes() {
                         it[idTablero] = tarea.idTableroPerteneciente
                         it[idUsuarioAsignado] = tarea.idUsuarioAsignado
                         it[fechaVencimiento] = tarea.fechaVencimiento
+                        it[notificacionPersonalizada] = tarea.notificacionPersonalizada
                         it[isDeleted] = tarea.isDeleted
                         it[updatedAt] = System.currentTimeMillis() / 1000
                     }

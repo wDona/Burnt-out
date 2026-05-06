@@ -68,6 +68,7 @@ fun CardTablero(tablero: Tablero, onClick: () -> Unit, onDelete: () -> Unit, onR
 
     ElevatedCard(
         modifier = Modifier.fillMaxWidth()
+
     ) {
         Box {
             Row(

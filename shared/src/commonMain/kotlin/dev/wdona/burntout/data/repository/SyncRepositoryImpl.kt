@@ -20,7 +20,8 @@ class SyncRepositoryImpl(
     private val usuarioLocal: UsuarioLocalDataSource,
     private val organizacionLocal: OrganizacionLocalDataSource,
     private val preguntaRespuestaLocal: PreguntaRespuestaLocalDataSource,
-    private val ajusteLocal: AjusteLocalDataSource
+    private val ajusteLocal: AjusteLocalDataSource,
+    private val onTareasSincronizadas: ((List<dev.wdona.burntout.shared.domain.Tarea>) -> Unit)? = null
 ) : SyncRepository {
 
     override suspend fun sync(): Boolean = withContext(Dispatchers.IO) {
@@ -43,6 +44,8 @@ class SyncRepositoryImpl(
             response.preguntas.forEach { preguntaRespuestaLocal.upsertPregunta(it) }
             response.tareas.forEach { tareaLocal.insertOrUpdateTarea(it) }
             response.subtareas.forEach { subtareaLocal.insertOrUpdateSubtarea(it) }
+            val tareasConFecha = response.tareas.filter { it.fechaVencimiento != null && !it.isDeleted }
+            if (tareasConFecha.isNotEmpty()) onTareasSincronizadas?.invoke(tareasConFecha)
             // Para respuestas, como son inmutables o se identifican por UUID, insertOrUpdate es seguro
             response.respuestas.forEach { preguntaRespuestaLocal.responderPregunta(it) }
             response.ajustes.forEach { ajusteLocal.insertOrUpdateAjuste(it) }

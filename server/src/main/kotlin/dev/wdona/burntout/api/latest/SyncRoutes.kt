@@ -28,8 +28,9 @@ fun Route.syncRoutes() {
                             estado = row[TareasTable.estado],
                             idTableroPerteneciente = row[TareasTable.idTablero],
                             idUsuarioAsignado = row[TareasTable.idUsuarioAsignado],
-                            idSubtareas = null, // Se puede poblar si es necesario, pero el cliente las recibirá por separado
+                            idSubtareas = null,
                             fechaVencimiento = row[TareasTable.fechaVencimiento],
+                            notificacionPersonalizada = row[TareasTable.notificacionPersonalizada],
                             isDeleted = row[TareasTable.isDeleted],
                             updatedAt = row[TareasTable.updatedAt]
                         )

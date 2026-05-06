@@ -68,6 +68,7 @@ CREATE TABLE TareaEntity (
     FK_ID_Tabl TEXT NOT NULL,
     FK_ID_Usuario INTEGER NOT NULL,
     Fecha_Vencimiento INTEGER,
+    Notificacion_Personalizada INTEGER,
     Is_Deleted INTEGER NOT NULL DEFAULT 0,
     Updated_At INTEGER NOT NULL DEFAULT 0,
     FOREIGN KEY(FK_ID_Tabl) REFERENCES TableroEntity(ID_Tabl),
@@ -164,12 +165,12 @@ INSERT OR IGNORE INTO PreguntaEntity(ID_Pregunta, Pregunta, Categoria, FK_ID_Org
 -- ====== TAREAS ======
 
 insertTarea:
-INSERT INTO TareaEntity(ID_Tarea, Titulo, Descripcion, Estado, FK_ID_Tabl, FK_ID_Usuario, Fecha_Vencimiento, Updated_At)
-VALUES(?, ?, ?, ?, ?, ?, ?, ?);
+INSERT INTO TareaEntity(ID_Tarea, Titulo, Descripcion, Estado, FK_ID_Tabl, FK_ID_Usuario, Fecha_Vencimiento, Notificacion_Personalizada, Updated_At)
+VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 upsertTarea:
-INSERT OR REPLACE INTO TareaEntity(ID_Tarea, Titulo, Descripcion, Estado, FK_ID_Tabl, FK_ID_Usuario, Fecha_Vencimiento, Is_Deleted, Updated_At)
-VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?);
+INSERT OR REPLACE INTO TareaEntity(ID_Tarea, Titulo, Descripcion, Estado, FK_ID_Tabl, FK_ID_Usuario, Fecha_Vencimiento, Notificacion_Personalizada, Is_Deleted, Updated_At)
+VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 getTareaById:
 SELECT * FROM TareaEntity WHERE ID_Tarea = ? AND Is_Deleted = 0;
@@ -178,7 +179,7 @@ getTareasByTablero:
 SELECT * FROM TareaEntity WHERE FK_ID_Tabl = ? AND Is_Deleted = 0;
 
 updateTareaById:
-UPDATE TareaEntity SET Titulo = ?, Descripcion = ?, Estado = ?, Fecha_Vencimiento = ?, Updated_At = ? WHERE ID_Tarea = ?;
+UPDATE TareaEntity SET Titulo = ?, Descripcion = ?, Estado = ?, Fecha_Vencimiento = ?, Notificacion_Personalizada = ?, Updated_At = ? WHERE ID_Tarea = ?;
 
 assignTareaToUsuario:
 UPDATE TareaEntity SET FK_ID_Usuario = ?, Updated_At = ? WHERE ID_Tarea = ?;

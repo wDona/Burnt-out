@@ -12,6 +12,7 @@ data class Tarea(
     val idUsuarioAsignado: Long,
     val idSubtareas: List<String>?,
     val fechaVencimiento: Long? = null,
+    val notificacionPersonalizada: Long? = null,
     val isDeleted: Boolean = false,
     val updatedAt: Long = 0L
 )
