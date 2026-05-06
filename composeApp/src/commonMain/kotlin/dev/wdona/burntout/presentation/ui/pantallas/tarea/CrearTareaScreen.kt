@@ -305,7 +305,7 @@ fun MenuCrearTareaContent(idTablero: String, tareasViewModel: TareasViewModel, o
                     expanded = estadoExpanded,
                     onDismissRequest = { estadoExpanded = false }
                 ) {
-                    TipoEstadoTarea.entries.forEach { estado ->
+                    TipoEstadoTarea.entries.filter { it != TipoEstadoTarea.COMPLETADA }.forEach { estado ->
                         val icon = when (estado) {
                             TipoEstadoTarea.PENDIENTE -> Icons.Default.RadioButtonUnchecked
                             TipoEstadoTarea.EN_PROCESO -> Icons.Default.MoreHoriz

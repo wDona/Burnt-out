@@ -9,16 +9,23 @@ import java.io.File
 
 actual class DatabaseDriverFactory(private val context: Context) {
     companion object {
-        private var driverInstance: SqlDriver? = null
+        internal var driverInstance: SqlDriver? = null
         private var appDatabaseInstance: AppDatabase? = null
+        internal var storedContext: Context? = null
+
+        fun resetDriver() {
+            driverInstance?.close()
+            driverInstance = null
+            appDatabaseInstance = null
+        }
     }
 
     actual fun createDriver(): SqlDriver {
+        storedContext = context.applicationContext
         if (driverInstance == null) {
             val databasePath = "burntout.db"
-            val dbFile = File(databasePath)
             driverInstance = AndroidSqliteDriver(AppDatabase.Schema, context, databasePath)
-            
+
             appDatabaseInstance = AppDatabase(driverInstance!!)
             if (appDatabaseInstance!!.appDatabaseQueries.getOrganizacionById(SettingsManager.getIdOrganizacionActual()).executeAsOneOrNull() == null) {
                 insertarDatosIniciales(appDatabaseInstance!!)
@@ -33,5 +40,17 @@ actual class DatabaseDriverFactory(private val context: Context) {
         database.appDatabaseQueries.insertEquipoBase()
         database.appDatabaseQueries.insertUsuarioBase()
         database.appDatabaseQueries.insertPreguntasBase()
+    }
+}
+
+actual fun eliminarBaseDatosLocal(): Boolean {
+    val ctx = DatabaseDriverFactory.storedContext ?: return false
+    return try {
+        DatabaseActions.cerrarDriver()
+        DatabaseDriverFactory.resetDriver()
+        ctx.deleteDatabase("burntout.db")
+    } catch (e: Exception) {
+        println("Error al eliminar base de datos: ${e.message}")
+        false
     }
 }

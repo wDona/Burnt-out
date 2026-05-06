@@ -48,4 +48,10 @@ object DatabaseActions {
         val driver = driver!!
         init(driver)
     }
+
+    fun cerrarDriver() {
+        database = null
+        driver?.close()
+        driver = null
+    }
 }

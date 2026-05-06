@@ -34,7 +34,7 @@ actual class NotificacionProgramador {
         }
         if (notificacionPersonalizada != null && notificacionPersonalizada > ahora) {
             val tarea = object : TimerTask() {
-                override fun run() = mostrarNotificacion("Recordatorio de tarea", "\"$titulo\" tiene una fecha de entrega próxima")
+                override fun run() = mostrarNotificacion("Recordatorio de tarea", "\"$titulo\" personalizado")
             }
             timer.schedule(tarea, Date(notificacionPersonalizada))
             nuevasTareas.add(tarea)

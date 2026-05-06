@@ -55,6 +55,7 @@ sqldelight {
     databases {
         create("AppDatabase") {
             packageName.set("dev.wdona.burntout.shared.db")
+            version = 2
             verifyMigrations.set(false)
         }
     }

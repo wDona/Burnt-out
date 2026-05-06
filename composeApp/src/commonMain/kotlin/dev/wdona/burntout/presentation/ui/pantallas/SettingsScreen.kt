@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
+import androidx.compose.material.icons.filled.DeleteForever
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -22,7 +24,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -37,6 +41,7 @@ import dev.wdona.burntout.presentation.ui.components.template.ScaffoldBase
 import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.AjustesViewModelFactory
 import dev.wdona.burntout.presentation.viewmodel.viewmodels.AjustesViewModel
 import dev.wdona.burntout.shared.db.DatabaseActions
+import dev.wdona.burntout.shared.db.eliminarBaseDatosLocal
 
 class SettingsScreen(val factory: AjustesViewModelFactory) : Screen {
     override val key: ScreenKey = uniqueScreenKey
@@ -51,15 +56,42 @@ class SettingsScreen(val factory: AjustesViewModelFactory) : Screen {
             onLogout = {
                 DatabaseActions.recreateDB()
                 navigator.popUntilRoot()
+            },
+            onDBEliminada = {
+                navigator.popUntilRoot()
             }
         )
     }
 }
 
 @Composable
-fun SettingsContent(viewModel: AjustesViewModel, onVolver: () -> Unit, onLogout: () -> Unit) {
+fun SettingsContent(viewModel: AjustesViewModel, onVolver: () -> Unit, onLogout: () -> Unit, onDBEliminada: () -> Unit = {}) {
     val ajustes by viewModel.ajustesUiState.collectAsStateWithLifecycle()
     val respuestasAnonimas by viewModel.respuestasAnonimas.collectAsStateWithLifecycle()
+    var mostrarDialogoEliminarDB by remember { mutableStateOf(false) }
+
+    if (mostrarDialogoEliminarDB) {
+        AlertDialog(
+            onDismissRequest = { mostrarDialogoEliminarDB = false },
+            icon = { Icon(Icons.Default.DeleteForever, contentDescription = null, tint = MaterialTheme.colorScheme.error) },
+            title = { Text("Eliminar base de datos local") },
+            text = { Text("Se eliminará el archivo de base de datos local. La aplicación se cerrará automáticamente.") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        mostrarDialogoEliminarDB = false
+                        viewModel.resetSettings()
+                        eliminarBaseDatosLocal()
+                        onDBEliminada()
+                    },
+                    colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                ) { Text("Eliminar") }
+            },
+            dismissButton = {
+                TextButton(onClick = { mostrarDialogoEliminarDB = false }) { Text("Cancelar") }
+            }
+        )
+    }
 
     ScaffoldBase(
         titulo = "Ajustes",
@@ -123,11 +155,24 @@ fun SettingsContent(viewModel: AjustesViewModel, onVolver: () -> Unit, onLogout:
             }
 
             TextButton(
+                onClick = { mostrarDialogoEliminarDB = true },
+                modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
+                colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.DeleteForever,
+                    contentDescription = null,
+                    modifier = Modifier.padding(end = 8.dp)
+                )
+                Text("Eliminar base de datos local")
+            }
+
+            TextButton(
                 onClick = {
                     viewModel.resetSettings()
                     onLogout()
                 },
-                modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
+                modifier = Modifier.fillMaxWidth(),
 //                border = BorderStroke(1.dp, MaterialTheme.colorScheme.error),
                 colors = ButtonDefaults.outlinedButtonColors(
                     contentColor = MaterialTheme.colorScheme.error

@@ -28,7 +28,10 @@ class TareaRepositoryImpl(
                 serverTareas.forEach { serverTarea ->
                     val localTarea = localMap[serverTarea.idTarea]
                     if (localTarea == null || serverTarea.updatedAt >= localTarea.updatedAt) {
-                        local.insertOrUpdateTarea(serverTarea)
+                        val tareaAGuardar = if (localTarea?.notificacionPersonalizada != null && serverTarea.notificacionPersonalizada == null)
+                            serverTarea.copy(notificacionPersonalizada = localTarea.notificacionPersonalizada)
+                        else serverTarea
+                        local.insertOrUpdateTarea(tareaAGuardar)
                     }
                 }
             } catch (e: Exception) {
@@ -48,11 +51,14 @@ class TareaRepositoryImpl(
         try {
             val tareaRemota = remote.getTareaById(idTarea, idTablero)
             if (tareaRemota != null) {
-                local.insertOrUpdateTarea(tareaRemota)
+                val tareaAGuardar = if (tareaLocal?.notificacionPersonalizada != null && tareaRemota.notificacionPersonalizada == null)
+                    tareaRemota.copy(notificacionPersonalizada = tareaLocal.notificacionPersonalizada)
+                else tareaRemota
+                local.insertOrUpdateTarea(tareaAGuardar)
+                return@withContext tareaAGuardar
             }
-            tareaRemota ?: tareaLocal
+            tareaLocal
         } catch (e: Exception) {
-            // Si el servidor responde 404 pero tenemos cache local, seguimos con ella.
             println("Servidor offline (getTareaById): ${e.message}")
             tareaLocal
         }
