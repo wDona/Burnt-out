@@ -23,9 +23,20 @@ class TareaRepositoryImpl(
     override suspend fun getTareasByTableroId(tableroId: String): List<Tarea> = withContext(NonCancellable + Dispatchers.IO) {
         if (!SettingsManager.isUsuarioInvitado()) {
             try {
+                val pendingOps = pendiente.getOperacionesPendientes()
+                val pendingDeleteIds = pendingOps
+                    .filter { it.tipoAccion == TipoAccion.ELIMINACION.getNombreAccion() && it.tablaAfectada == Entity.TAREA.getNombreEntity() }
+                    .map { it.idAfectado }
+                    .toSet()
+                val pendingCreateIds = pendingOps
+                    .filter { it.tipoAccion == TipoAccion.CREACION.getNombreAccion() && it.tablaAfectada == Entity.TAREA.getNombreEntity() }
+                    .map { it.idAfectado }
+                    .toSet()
                 val serverTareas = remote.getTareasByTablero(tableroId)
+                val remoteIds = serverTareas.map { it.idTarea }.toSet()
                 val localMap = local.getTareasByTablero(tableroId).associateBy { it.idTarea }
                 serverTareas.forEach { serverTarea ->
+                    if (serverTarea.idTarea in pendingDeleteIds) return@forEach
                     val localTarea = localMap[serverTarea.idTarea]
                     if (localTarea == null || serverTarea.updatedAt >= localTarea.updatedAt) {
                         val tareaAGuardar = if (localTarea?.notificacionPersonalizada != null && serverTarea.notificacionPersonalizada == null)
@@ -34,6 +45,10 @@ class TareaRepositoryImpl(
                         local.insertOrUpdateTarea(tareaAGuardar)
                     }
                 }
+                // Tarea deleted on another device: remove local tareas not returned by server
+                localMap.keys
+                    .filter { it !in remoteIds && it !in pendingCreateIds }
+                    .forEach { local.eliminarTarea(it) }
             } catch (e: Exception) {
                 println("Servidor offline (getTareas): ${e.message}")
             }

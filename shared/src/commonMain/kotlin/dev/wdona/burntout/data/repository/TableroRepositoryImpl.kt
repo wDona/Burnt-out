@@ -28,8 +28,30 @@ class TableroRepositoryImpl(
         mutex.withLock {
             if (!SettingsManager.isUsuarioInvitado()) {
                 try {
+                    val pendingOps = pendiente.getOperacionesPendientes()
+                    val pendingDeleteIds = pendingOps
+                        .filter {
+                            it.tipoAccion == TipoAccion.ELIMINACION.getNombreAccion() &&
+                            it.tablaAfectada == Entity.TABLERO.getNombreEntity()
+                        }
+                        .map { it.idAfectado }
+                        .toSet()
+                    val pendingCreateIds = pendingOps
+                        .filter {
+                            it.tipoAccion == TipoAccion.CREACION.getNombreAccion() &&
+                            it.tablaAfectada == Entity.TABLERO.getNombreEntity()
+                        }
+                        .map { it.idAfectado }
+                        .toSet()
                     val tableros = remote.getTablerosByOrg(idOrg, idEquipo)
-                    tableros.forEach { local.insertOrUpdateTablero(it) }
+                    val remoteIds = tableros.map { it.idTablero }.toSet()
+                    tableros
+                        .filter { it.idTablero !in pendingDeleteIds }
+                        .forEach { local.insertOrUpdateTablero(it) }
+                    // Board deleted on another device: remove local boards not returned by server
+                    local.getTablerosByOrg(idOrg)
+                        .filter { (it.idEquipo == null || it.idEquipo == idEquipo) && it.idTablero !in remoteIds && it.idTablero !in pendingCreateIds }
+                        .forEach { local.eliminarTablero(it.idTablero) }
                 } catch (e: Exception) {
                     println("Servidor offline (getTablerosByOrg): ${e.message}")
                 }

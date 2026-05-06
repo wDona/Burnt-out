@@ -30,7 +30,7 @@ class TareaRemoteDataSourceImpl(private val api: TareaApi) : TareaRemoteDataSour
     }
 
     override suspend fun eliminarTarea(tareaId: String): Boolean {
-        val response = api.eliminarTarea(tareaId)
-        return response.status.value in 200..299
+        val status = api.eliminarTarea(tareaId).status.value
+        return status in 200..299 || status == 404
     }
 }
