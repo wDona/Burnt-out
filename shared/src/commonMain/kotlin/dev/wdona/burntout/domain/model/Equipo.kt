@@ -11,4 +11,39 @@ data class Equipo(
     val idMiembros: List<Long>,
     val isDeleted: Boolean = false,
     val updatedAt: Long = 0L
-) // Puntuacion anadida
+) {
+    val nivel: Int
+        get() {
+            var n = 0
+            var rest = puntuacion ?: 0L
+            while (true) {
+                val cost = (n + 1) * 1000L
+                if (rest >= cost) {
+                    rest -= cost
+                    n++
+                } else {
+                    break
+                }
+            }
+            return n
+        }
+
+    val puntosRestantes: Long
+        get() {
+            var n = 0
+            var rest = puntuacion ?: 0L
+            while (true) {
+                val cost = (n + 1) * 1000L
+                if (rest >= cost) {
+                    rest -= cost
+                    n++
+                } else {
+                    break
+                }
+            }
+            return rest
+        }
+
+    val costoSiguienteNivel: Long
+        get() = (nivel + 1) * 1000L
+}

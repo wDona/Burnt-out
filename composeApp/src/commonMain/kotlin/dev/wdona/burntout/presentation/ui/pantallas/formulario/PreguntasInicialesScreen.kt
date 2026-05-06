@@ -184,10 +184,14 @@ fun PreguntasInicialesContent(onVolver: (() -> Unit)? = null, viewModel: Pregunt
 
 
 
-    val tiempo = if (((uiState.preguntas.size - nRespuestas) * tiempoPorPregunta) > 60f) {
-        "~${round(((uiState.preguntas.size - nRespuestas) * tiempoPorPregunta / 60f) * 100.0) / 100f} mins"
+    val totalSegundos = (uiState.preguntas.size - nRespuestas) * tiempoPorPregunta
+    val tiempo = if (totalSegundos >= 60) {
+        val minutos = totalSegundos / 60
+        val segundos = totalSegundos % 60
+        val segundosStr = if (segundos < 10) "0$segundos" else "$segundos"
+        "~$minutos:$segundosStr mins"
     } else {
-        "~${round((uiState.preguntas.size - nRespuestas) * tiempoPorPregunta * 100.0) / 100f} segs"
+        "~$totalSegundos segs"
     }
 
     val titulo = "Diario inicial"

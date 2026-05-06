@@ -106,8 +106,8 @@ class EquipoScreen(val factory: EquipoViewModelFactory, val perfilFactory: MiPer
 fun EquipoContent(viewModel: EquipoViewModel, esMiEquipo: Boolean, esAdminOrOwner: Boolean = false, onVolver: (() -> Unit)? = null, onClickAddUsuario: () -> Unit, onClickUsuario: (Long) -> Unit, perfilViewModel: PerfilViewModel) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    val titulo = if (uiState.isLoading) "" else (uiState.equipo?.titulo ?: "Mi equipo (off)")
-    val subtitulo = if (uiState.isLoading) "" else "" + (uiState.equipo?.puntuacion ?: "0") + "pts"
+    val titulo = if (uiState.isLoading) "" else (uiState.equipo?.titulo ?: "Offline")
+    val subtitulo = if (uiState.isLoading || uiState.equipo == null) "" else "Nivel ${uiState.equipo?.nivel} • ${uiState.equipo?.puntosRestantes}/${uiState.equipo?.costoSiguienteNivel} exp"
 
     ScaffoldBase(
         titulo = titulo,

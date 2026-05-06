@@ -42,7 +42,7 @@ fun EquipoCard(equipo: Equipo, onClick: () -> Unit) {
                 style = MaterialTheme.typography.titleMedium
             )
             Text(
-                text = "Puntos: ${equipo.puntuacion ?: 0}",
+                text = "Nvl: ${equipo.nivel} | ${equipo.puntosRestantes}/${equipo.costoSiguienteNivel} exp",
                 style = MaterialTheme.typography.bodyMedium
             )
         }
