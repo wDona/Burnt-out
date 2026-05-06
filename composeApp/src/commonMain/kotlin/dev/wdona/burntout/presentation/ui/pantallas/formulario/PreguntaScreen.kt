@@ -150,7 +150,7 @@ fun PreguntaContent(onVolver: (() -> Unit)? = null, viewModel: FormularioViewMod
                 "Siguiente pregunta"
             )
         },
-        textoFAB = "Siguiente pregunta",
+        textoFAB = "",
         fabModifier = Modifier
             .focusRequester(focusRequester)
             .onPreviewKeyEvent {

@@ -208,7 +208,7 @@ fun PreguntasInicialesContent(onVolver: (() -> Unit)? = null, viewModel: Pregunt
                 "Siguiente pregunta"
             )
         },
-//        textoFAB = "Siguiente", // TODO: PONER TEXTO DE TERMINAR EN LA ULTIMA
+        textoFAB = "", // TODO: PONER TEXTO DE TERMINAR EN LA ULTIMA
         fabModifier = Modifier
             .focusRequester(focusRequester)
             .onPreviewKeyEvent {

@@ -78,6 +78,7 @@ class TablerosScreen(
         ScaffoldBase(
             titulo = "Tableros",
             onFAB = onIrACrearTablero,
+            textoFAB = ""
         ) {
             if (listaTableros.isEmpty()) {
                 Box(

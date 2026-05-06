@@ -4,6 +4,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.MaterialTheme
@@ -22,22 +23,45 @@ fun FAB(
     val icon = iconFAB ?: { Icon(Icons.Default.Add, contentDescription = "Crear") }
 
     if (enabled) {
-        ExtendedFloatingActionButton(
-            onClick = onClick,
-            icon = { icon() },
-            text = { Text(textoBoton) },
-            shape = RoundedCornerShape(16.dp),
-            modifier = modifier
-        )
+        if (textoBoton.isEmpty()) {
+            FloatingActionButton(
+                onClick = onClick,
+                modifier = modifier,
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                icon()
+            }
+            return
+        } else {
+            ExtendedFloatingActionButton(
+                onClick = onClick,
+                icon = { icon() },
+                text = { Text(textoBoton) },
+                shape = RoundedCornerShape(16.dp),
+                modifier = modifier
+            )
+        }
     } else {
-        ExtendedFloatingActionButton(
-            onClick = {},
-            icon = { icon() },
-            text = { Text(textoBoton) },
-            shape = RoundedCornerShape(16.dp),
-            containerColor = MaterialTheme.colorScheme.surfaceVariant,
-            contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = modifier
-        )
+        if (textoBoton.isEmpty()) {
+            FloatingActionButton(
+                onClick = {},
+                modifier = modifier,
+                shape = RoundedCornerShape(16.dp),
+                containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+            ) {
+                icon()
+            }
+        } else {
+            ExtendedFloatingActionButton(
+                onClick = {},
+                icon = { icon() },
+                text = { Text(textoBoton) },
+                shape = RoundedCornerShape(16.dp),
+                containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = modifier
+            )
+        }
     }
 }
