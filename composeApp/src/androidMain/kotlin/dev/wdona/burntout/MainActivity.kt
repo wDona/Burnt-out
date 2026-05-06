@@ -1,9 +1,18 @@
 package dev.wdona.burntout
 
+import android.Manifest
+import android.app.AlarmManager
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -35,7 +44,25 @@ class MainActivity : ComponentActivity() {
         setContent {
             var isDatabaseReady by remember { mutableStateOf(false) }
             var databaseError by remember { mutableStateOf<String?>(null) }
-            
+
+            val notifLauncher = rememberLauncherForActivityResult(
+                ActivityResultContracts.RequestPermission()
+            ) { /* resultado ignorado, el usuario decidió */ }
+
+            LaunchedEffect(Unit) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    notifLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                }
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    val am = getSystemService(Context.ALARM_SERVICE) as AlarmManager
+                    if (!am.canScheduleExactAlarms()) {
+                        val intent = Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM,
+                            Uri.parse("package:$packageName"))
+                        startActivity(intent)
+                    }
+                }
+            }
+
             LaunchedEffect(Unit) {
                 try {
                     withContext(Dispatchers.IO) {
