@@ -64,6 +64,8 @@ import dev.wdona.burntout.presentation.ui.components.tarea.DialogConfirmacionBur
 import dev.wdona.burntout.presentation.ui.components.tarea.SelectorUsuarioConBurnout
 import dev.wdona.burntout.presentation.ui.components.tarea.nivelRequiereDialog
 import dev.wdona.burntout.presentation.ui.components.template.ScaffoldBase
+import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.OperacionesPendientesViewModelFactory
+import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.TablerosViewModelFactory
 import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.TareasViewModelFactory
 import dev.wdona.burntout.presentation.viewmodel.viewmodels.TareasViewModel
 import dev.wdona.burntout.shared.domain.Subtarea
@@ -73,18 +75,35 @@ import dev.wdona.burntout.shared.utils.SettingsManager
 import java.util.Calendar
 import java.util.TimeZone
 
-class TareaDetalleScreen(private val idTarea: String, private val idTablero: String, private val factory: TareasViewModelFactory) : Screen {
+class TareaDetalleScreen(
+    private val idTarea: String,
+    private val idTablero: String,
+    private val factory: TareasViewModelFactory,
+    private val tablerosViewModelFactory: TablerosViewModelFactory,
+    private val operacionesPendientesFactory: OperacionesPendientesViewModelFactory
+) : Screen {
     override val key: ScreenKey = uniqueScreenKey
 
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
         val viewModel = rememberScreenModel { factory.create() }
+        val syncViewModel = remember { operacionesPendientesFactory.create() }
+        val tablerosViewModel = remember { tablerosViewModelFactory.create() }
+        val syncTick by syncViewModel.syncTick.collectAsState()
+        val syncTickAlEntrar = remember { syncViewModel.syncTick.value }
 
         LaunchedEffect(idTarea, idTablero) {
             viewModel.cargarTareaPorId(idTarea, idTablero)
             viewModel.cargarMiembrosEquipo(SettingsManager.getIdEquipoActual())
             viewModel.cargarSubtareas(idTarea)
+            syncViewModel.sincronizarPorReconexion()
+        }
+
+        LaunchedEffect(syncTick) {
+            if (syncTick > syncTickAlEntrar && !tablerosViewModel.tableroExiste(idTablero)) {
+                navigator.pop()
+            }
         }
 
         TareaDetalleContent(

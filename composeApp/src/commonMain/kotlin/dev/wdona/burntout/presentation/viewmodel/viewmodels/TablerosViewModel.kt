@@ -54,4 +54,13 @@ class TablerosViewModel(private val repository: TableroRepository) : ScreenModel
             recargarTableros(idOrg, SettingsManager.getIdEquipoActual())
         }
     }
+
+    suspend fun tableroExiste(idTablero: String): Boolean {
+        return try {
+            repository.getTableroById(idTablero)
+            true
+        } catch (e: Exception) {
+            false
+        }
+    }
 }

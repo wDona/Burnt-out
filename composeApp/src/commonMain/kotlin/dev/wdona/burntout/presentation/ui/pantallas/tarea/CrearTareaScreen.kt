@@ -59,6 +59,8 @@ import dev.wdona.burntout.presentation.ui.components.tarea.DialogConfirmacionBur
 import dev.wdona.burntout.presentation.ui.components.tarea.SelectorUsuarioConBurnout
 import dev.wdona.burntout.presentation.ui.components.tarea.nivelRequiereDialog
 import dev.wdona.burntout.presentation.ui.components.template.ScaffoldBase
+import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.OperacionesPendientesViewModelFactory
+import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.TablerosViewModelFactory
 import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.TareasViewModelFactory
 import dev.wdona.burntout.presentation.viewmodel.viewmodels.TareasViewModel
 import dev.wdona.burntout.shared.domain.Subtarea
@@ -68,13 +70,32 @@ import dev.wdona.burntout.shared.utils.SettingsManager
 import java.util.Calendar
 import java.util.TimeZone
 
-class MenuCrearTareaScreen(val factory: TareasViewModelFactory, val idTablero: String) : Screen {
+class MenuCrearTareaScreen(
+    val factory: TareasViewModelFactory,
+    val idTablero: String,
+    val tablerosViewModelFactory: TablerosViewModelFactory,
+    val operacionesPendientesViewModelFactory: OperacionesPendientesViewModelFactory
+) : Screen {
     override val key: ScreenKey = uniqueScreenKey
 
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
         val viewModel: TareasViewModel = rememberScreenModel { factory.create() }
+        val syncViewModel = remember { operacionesPendientesViewModelFactory.create() }
+        val tablerosViewModel = remember { tablerosViewModelFactory.create() }
+        val syncTick by syncViewModel.syncTick.collectAsState()
+        val syncTickAlEntrar = remember { syncViewModel.syncTick.value }
+
+        LaunchedEffect(Unit) {
+            syncViewModel.sincronizarPorReconexion()
+        }
+
+        LaunchedEffect(syncTick) {
+            if (syncTick > syncTickAlEntrar && !tablerosViewModel.tableroExiste(idTablero)) {
+                navigator.pop()
+            }
+        }
 
         MenuCrearTareaContent(
             idTablero = idTablero,

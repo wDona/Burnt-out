@@ -58,7 +58,8 @@ class TablerosScreen(
                         idTablero = idTablero,
                         nombreTablero = nombreTablero,
                         tareasViewModelFactory = tareasViewModelFactory,
-                        operacionesPendientesViewModelFactory = operacionesPendientesViewModelFactory
+                        operacionesPendientesViewModelFactory = operacionesPendientesViewModelFactory,
+                        tablerosViewModelFactory = tableroFactory
                     )
                 )
             }

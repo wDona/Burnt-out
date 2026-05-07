@@ -30,6 +30,7 @@ import dev.wdona.burntout.presentation.ui.components.template.ScaffoldBase
 import dev.wdona.burntout.presentation.ui.pantallas.tarea.MenuCrearTareaScreen
 import dev.wdona.burntout.presentation.ui.pantallas.tarea.TareaDetalleScreen
 import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.OperacionesPendientesViewModelFactory
+import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.TablerosViewModelFactory
 import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.TareasViewModelFactory
 import dev.wdona.burntout.presentation.viewmodel.viewmodels.TareasViewModel
 import dev.wdona.burntout.shared.utils.SettingsManager
@@ -38,7 +39,8 @@ class DetalleTableroScreen(
     val idTablero: String,
     val nombreTablero: String,
     val tareasViewModelFactory: TareasViewModelFactory,
-    val operacionesPendientesViewModelFactory: OperacionesPendientesViewModelFactory
+    val operacionesPendientesViewModelFactory: OperacionesPendientesViewModelFactory,
+    val tablerosViewModelFactory: TablerosViewModelFactory
 ) : Screen {
     override val key: ScreenKey = uniqueScreenKey
 
@@ -47,7 +49,9 @@ class DetalleTableroScreen(
         val navigator = LocalNavigator.currentOrThrow
         val tareaViewModel = rememberScreenModel { tareasViewModelFactory.create() }
         val syncViewModel = remember { operacionesPendientesViewModelFactory.create() }
+        val tablerosViewModel = remember { tablerosViewModelFactory.create() }
         val syncTick by syncViewModel.syncTick.collectAsState()
+        val syncTickAlEntrar = remember { syncViewModel.syncTick.value }
 
         LaunchedEffect(Unit) {
             tareaViewModel.cargarTareas(idTablero)
@@ -56,7 +60,13 @@ class DetalleTableroScreen(
         }
 
         LaunchedEffect(syncTick) {
-            if (syncTick > 0L) tareaViewModel.cargarTareas(idTablero)
+            if (syncTick > syncTickAlEntrar) {
+                if (!tablerosViewModel.tableroExiste(idTablero)) {
+                    navigator.pop()
+                } else {
+                    tareaViewModel.cargarTareas(idTablero)
+                }
+            }
         }
 
         DetalleTableroContent(
@@ -69,11 +79,21 @@ class DetalleTableroScreen(
                     MenuCrearTareaScreen(
                         factory = tareasViewModelFactory,
                         idTablero = idTablero,
+                        tablerosViewModelFactory = tablerosViewModelFactory,
+                        operacionesPendientesViewModelFactory = operacionesPendientesViewModelFactory
                     )
                 )
             },
             onIrATarea = { idTarea, idTablero ->
-                navigator.push(TareaDetalleScreen(idTarea, idTablero, tareasViewModelFactory))
+                navigator.push(
+                    TareaDetalleScreen(
+                        idTarea,
+                        idTablero,
+                        tareasViewModelFactory,
+                        tablerosViewModelFactory,
+                        operacionesPendientesViewModelFactory
+                    )
+                )
             }
         )
     }
