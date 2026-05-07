@@ -77,11 +77,17 @@ class DetalleTableroScreen(
                     MenuCrearTareaScreen(
                         factory = tareasViewModelFactory,
                         idTablero = idTablero,
+                        tablerosViewModelFactory = tableroFactory,
+                        operacionesPendientesViewModelFactory = operacionesPendientesViewModelFactory
                     )
                 )
             },
             onIrATarea = { idTarea, idTablero ->
-                navigator.push(TareaDetalleScreen(idTarea, idTablero, tareasViewModelFactory))
+                navigator.push(TareaDetalleScreen(
+                    idTarea, idTablero, tareasViewModelFactory,
+                    tablerosViewModelFactory = tableroFactory,
+                    operacionesPendientesFactory = operacionesPendientesViewModelFactory
+                ))
             }
         )
     }
