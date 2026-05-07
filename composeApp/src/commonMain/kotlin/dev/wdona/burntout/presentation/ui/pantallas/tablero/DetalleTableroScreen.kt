@@ -40,7 +40,7 @@ class DetalleTableroScreen(
     val nombreTablero: String,
     val tareasViewModelFactory: TareasViewModelFactory,
     val operacionesPendientesViewModelFactory: OperacionesPendientesViewModelFactory,
-    val tablerosViewModelFactory: TablerosViewModelFactory
+    val tableroFactory: TablerosViewModelFactory
 ) : Screen {
     override val key: ScreenKey = uniqueScreenKey
 
@@ -48,10 +48,9 @@ class DetalleTableroScreen(
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
         val tareaViewModel = rememberScreenModel { tareasViewModelFactory.create() }
+        val tablerosViewModel = rememberScreenModel { tableroFactory.create() }
         val syncViewModel = remember { operacionesPendientesViewModelFactory.create() }
-        val tablerosViewModel = remember { tablerosViewModelFactory.create() }
         val syncTick by syncViewModel.syncTick.collectAsState()
-        val syncTickAlEntrar = remember { syncViewModel.syncTick.value }
 
         LaunchedEffect(Unit) {
             tareaViewModel.cargarTareas(idTablero)
@@ -60,11 +59,10 @@ class DetalleTableroScreen(
         }
 
         LaunchedEffect(syncTick) {
-            if (syncTick > syncTickAlEntrar) {
-                if (!tablerosViewModel.tableroExiste(idTablero)) {
+            if (syncTick > 0L) {
+                tareaViewModel.cargarTareas(idTablero)
+                if (!tablerosViewModel.existeTableroLocal(idTablero)) {
                     navigator.pop()
-                } else {
-                    tareaViewModel.cargarTareas(idTablero)
                 }
             }
         }
@@ -79,21 +77,11 @@ class DetalleTableroScreen(
                     MenuCrearTareaScreen(
                         factory = tareasViewModelFactory,
                         idTablero = idTablero,
-                        tablerosViewModelFactory = tablerosViewModelFactory,
-                        operacionesPendientesViewModelFactory = operacionesPendientesViewModelFactory
                     )
                 )
             },
             onIrATarea = { idTarea, idTablero ->
-                navigator.push(
-                    TareaDetalleScreen(
-                        idTarea,
-                        idTablero,
-                        tareasViewModelFactory,
-                        tablerosViewModelFactory,
-                        operacionesPendientesViewModelFactory
-                    )
-                )
+                navigator.push(TareaDetalleScreen(idTarea, idTablero, tareasViewModelFactory))
             }
         )
     }

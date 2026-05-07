@@ -8,9 +8,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.core.screen.ScreenKey
@@ -46,85 +44,58 @@ class PreMainScreen(
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
 
-        val settingsViewModel = rememberScreenModel { ajustesFactory.create() }
-        val uiState by settingsViewModel.ajustesUiState.collectAsStateWithLifecycle()
-
         val syncViewModel = rememberScreenModel { operacionesPendientesFactory.create() }
 
         LaunchedEffect(Unit) {
-            println("Sincronizando...")
             syncViewModel.sincronizarAlIniciar()
 
-            println("uistate: $uiState")
-            println("primerCuestionarioHecho: ${uiState.primerCuestionarioHecho}")
-            println("hoyHecho: ${uiState.hoyHecho}")
-            println("idEquipo: ${uiState.idEquipo}")
-            println("token: ${uiState.token}")
-        }
+            val primerCuestionarioHechoSync = SettingsManager.getPrimerCuestionarioHecho()
+            val hoyHechoSync = SettingsManager.esCuestionarioHoyHecho()
+            val idEquipoSync = SettingsManager.getIdEquipoActual()
 
-        Scaffold { paddingValues ->
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-                    .background(MaterialTheme.colorScheme.background)
-            )
-
-            LaunchedEffect(
-                uiState.primerCuestionarioHecho,
-                uiState.hoyHecho,
-                settingsViewModel.uiStateUsuarioActual,
-                uiState.idEquipo
-            ) {
-                // Usamos SettingsManager directamente para leer el estado de forma síncrona
-                // porque AjustesUiState puede tardar unos ms en emitir al cambiar de usuario
-                val primerCuestionarioHechoSync = SettingsManager.getPrimerCuestionarioHecho()
-                val hoyHechoSync = SettingsManager.esCuestionarioHoyHecho()
-
-                if (!primerCuestionarioHechoSync) {
-                    navigator.replace(
-                        PreguntasInicialesScreen(
-                            formularioFactory,
-                            nPreguntas = 22,
-                            tareaFactory = tareaFactory,
-                            equipoFactory = equipoFactory,
-                            perfilFactory = perfilFactory,
-                            tableroFactory = tableroFactory,
-                            ajustesFactory = ajustesFactory,
-                            leaderboardFactory = leaderboardFactory,
-                            operacionesPendientesFactory = operacionesPendientesFactory,
-                            idEquipo = uiState.idEquipo
-                        )
+            if (!primerCuestionarioHechoSync) {
+                navigator.replace(
+                    PreguntasInicialesScreen(
+                        formularioFactory,
+                        nPreguntas = 22,
+                        tareaFactory = tareaFactory,
+                        equipoFactory = equipoFactory,
+                        perfilFactory = perfilFactory,
+                        tableroFactory = tableroFactory,
+                        ajustesFactory = ajustesFactory,
+                        leaderboardFactory = leaderboardFactory,
+                        operacionesPendientesFactory = operacionesPendientesFactory,
+                        idEquipo = idEquipoSync
                     )
-                } else if (!hoyHechoSync) {
-                    navigator.replace(
-                        PreguntasInicialesScreen(
-                            formularioFactory,
-                            nPreguntas = 3,
-                            tareaFactory = tareaFactory,
-                            equipoFactory = equipoFactory,
-                            perfilFactory = perfilFactory,
-                            tableroFactory = tableroFactory,
-                            ajustesFactory = ajustesFactory,
-                            leaderboardFactory = leaderboardFactory,
-                            operacionesPendientesFactory = operacionesPendientesFactory,
-                            idEquipo = uiState.idEquipo
-                        )
+                )
+            } else if (!hoyHechoSync) {
+                navigator.replace(
+                    PreguntasInicialesScreen(
+                        formularioFactory,
+                        nPreguntas = 3,
+                        tareaFactory = tareaFactory,
+                        equipoFactory = equipoFactory,
+                        perfilFactory = perfilFactory,
+                        tableroFactory = tableroFactory,
+                        ajustesFactory = ajustesFactory,
+                        leaderboardFactory = leaderboardFactory,
+                        operacionesPendientesFactory = operacionesPendientesFactory,
+                        idEquipo = idEquipoSync
                     )
-                } else {
-                    navigator.replace(
-                        MainScreen(
-                            formularioFactory = formularioFactory,
-                            tareaFactory = tareaFactory,
-                            equipoFactory = equipoFactory,
-                            perfilFactory = perfilFactory,
-                            tableroFactory = tableroFactory,
-                            ajustesFactory = ajustesFactory,
-                            leaderboardFactory = leaderboardFactory,
-                            operacionesPendientesFactory = operacionesPendientesFactory,
-                        )
+                )
+            } else {
+                navigator.replace(
+                    MainScreen(
+                        formularioFactory = formularioFactory,
+                        tareaFactory = tareaFactory,
+                        equipoFactory = equipoFactory,
+                        perfilFactory = perfilFactory,
+                        tableroFactory = tableroFactory,
+                        ajustesFactory = ajustesFactory,
+                        leaderboardFactory = leaderboardFactory,
+                        operacionesPendientesFactory = operacionesPendientesFactory,
                     )
-                }
+                )
             }
         }
     }

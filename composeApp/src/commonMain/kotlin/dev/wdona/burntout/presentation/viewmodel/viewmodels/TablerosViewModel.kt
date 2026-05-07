@@ -17,6 +17,15 @@ class TablerosViewModel(private val repository: TableroRepository) : ScreenModel
     private val _listaTableros = MutableStateFlow<List<Tablero>>(emptyList())
     val listaTableros: StateFlow<List<Tablero>> = _listaTableros
 
+    suspend fun existeTableroLocal(idTablero: String): Boolean {
+        return try {
+            repository.getTableroById(idTablero)
+            true
+        } catch (e: Exception) {
+            false
+        }
+    }
+
     private suspend fun recargarTableros(idOrg: Long, idEquipo: Long) {
         _listaTableros.value = repository.getTablerosByEquipo(idOrg, idEquipo)
     }
