@@ -87,13 +87,12 @@ class MenuCrearTareaScreen(
         val syncTick by syncViewModel.syncTick.collectAsState()
         val syncTickAlEntrar = remember { syncViewModel.syncTick.value }
 
-        LaunchedEffect(Unit) {
-            syncViewModel.sincronizarPorReconexion()
-        }
-
         LaunchedEffect(syncTick) {
-            if (syncTick > syncTickAlEntrar && !tablerosViewModel.tableroExiste(idTablero)) {
-                navigator.pop()
+            if (syncTick > syncTickAlEntrar) {
+                kotlinx.coroutines.delay(500)
+                if (!tablerosViewModel.tableroExiste(idTablero)) {
+                    navigator.pop()
+                }
             }
         }
 

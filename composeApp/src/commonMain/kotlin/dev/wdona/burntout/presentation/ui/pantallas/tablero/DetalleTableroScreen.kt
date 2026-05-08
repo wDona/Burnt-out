@@ -51,6 +51,7 @@ class DetalleTableroScreen(
         val tablerosViewModel = rememberScreenModel { tableroFactory.create() }
         val syncViewModel = remember { operacionesPendientesViewModelFactory.create() }
         val syncTick by syncViewModel.syncTick.collectAsState()
+        val syncTickAlEntrar = remember { syncViewModel.syncTick.value }
 
         LaunchedEffect(Unit) {
             tareaViewModel.cargarTareas(idTablero)
@@ -59,8 +60,9 @@ class DetalleTableroScreen(
         }
 
         LaunchedEffect(syncTick) {
-            if (syncTick > 0L) {
+            if (syncTick > syncTickAlEntrar) {
                 tareaViewModel.cargarTareas(idTablero)
+                kotlinx.coroutines.delay(500)
                 if (!tablerosViewModel.existeTableroLocal(idTablero)) {
                     navigator.pop()
                 }
