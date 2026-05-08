@@ -42,9 +42,7 @@ class LoginViewModel(private val usuarioRepository: UsuarioRepository) : ScreenM
                 _uiState.update { it.copy(isLoading = false, success = true) }
             } catch (e: Exception) {
                 _uiState.update {
-                    val msg = e.message ?: "Error desconocido"
-                    val errorMsg = if (msg.contains("401")) "Usuario o contraseña incorrectos" else extractErrorText(msg)
-                    it.copy(isLoading = false, error = errorMsg)
+                    it.copy(isLoading = false, error = mapLoginError(e.message ?: ""))
                 }
             }
         }
@@ -78,11 +76,25 @@ class LoginViewModel(private val usuarioRepository: UsuarioRepository) : ScreenM
 
                 _uiState.update { it.copy(isLoading = false, success = true) }
             } catch (e: Exception) {
-                _uiState.update { it.copy(isLoading = false, error = extractErrorText(e.message ?: "Error desconocido")) }
+                _uiState.update { it.copy(isLoading = false, error = mapLoginError(e.message ?: "", isRegister = true)) }
             }
         }
     }
 
+    private fun mapLoginError(msg: String, isRegister: Boolean = false): String {
+        return when {
+            msg.contains("401") -> "Usuario o contraseña incorrectos"
+            msg.contains("409") && isRegister -> "Ya existe una cuenta con ese nombre de usuario"
+            msg.contains("403") -> "Cuenta bloqueada o sin permisos"
+            msg.contains("404") -> "Usuario no encontrado"
+            msg.contains("500") || msg.contains("502") || msg.contains("503") -> "Error del servidor. Intenta más tarde."
+            msg.contains("ConnectTimeout", ignoreCase = true) || msg.contains("SocketTimeout", ignoreCase = true) || msg.contains("timed out", ignoreCase = true) -> "Tiempo de espera agotado. Comprueba tu conexión."
+            msg.contains("UnresolvedAddress", ignoreCase = true) || msg.contains("Unable to resolve", ignoreCase = true) || msg.contains("No address", ignoreCase = true) -> "Sin conexión a internet."
+            msg.contains("Contraseña incorrecta") -> "Usuario o contraseña incorrectos"
+            else -> extractErrorText(msg)
+        }
+    }
+
     private fun extractErrorText(msg: String): String =
-        Regex("""Text:\s*"([^"]+)"""").find(msg)?.groupValues?.get(1) ?: msg
+        Regex("""Text:\s*"([^"]+)"""").find(msg)?.groupValues?.get(1) ?: "Error inesperado. Intenta más tarde."
 }
