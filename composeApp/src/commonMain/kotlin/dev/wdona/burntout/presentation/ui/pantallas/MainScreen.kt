@@ -14,6 +14,9 @@ import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.QuestionAnswer
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
@@ -23,6 +26,8 @@ import cafe.adriel.voyager.core.screen.uniqueScreenKey
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.transitions.CrossfadeTransition
 import cafe.adriel.voyager.navigator.tab.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.update
 import dev.wdona.burntout.presentation.ui.pantallas.equipo.EquipoScreen
 import dev.wdona.burntout.presentation.ui.pantallas.equipo.LeaderboardScreen
 import dev.wdona.burntout.presentation.ui.pantallas.formulario.PreguntaScreen
@@ -74,6 +79,10 @@ class MainScreen(
     }
 }
 
+private interface PopToRootTab : Tab {
+    fun requestPopToRoot()
+}
+
 @Composable
 private fun RowScope.TabNavigationItem(
     tab: Tab,
@@ -84,7 +93,9 @@ private fun RowScope.TabNavigationItem(
     NavigationBarItem(
         selected = isSelected,
         onClick = {
-            if (!isSelected) {
+            if (isSelected) {
+                (tab as? PopToRootTab)?.requestPopToRoot()
+            } else {
                 tabNavigator.current = tab
             }
         },
@@ -100,8 +111,12 @@ private class TablerosTab(
     val factory: TablerosViewModelFactory,
     val tareaFactory: TareasViewModelFactory,
     val operacionesPendientesFactory: OperacionesPendientesViewModelFactory
-) : Tab {
+) : PopToRootTab {
     override val key = "TablerosTab"
+    private val popSignal = MutableStateFlow(0)
+
+    override fun requestPopToRoot() { popSignal.update { it + 1 } }
+
     @get:Composable
     override val options: TabOptions
         get() = TabOptions(index = 0u, title = "Tableros", icon = rememberVectorPainter(Icons.Default.Home))
@@ -109,6 +124,8 @@ private class TablerosTab(
     @Composable
     override fun Content() {
         Navigator(TablerosScreen(factory, tareaFactory, operacionesPendientesFactory)) { navigator ->
+            val signal by popSignal.collectAsState()
+            LaunchedEffect(signal) { if (signal > 0) navigator.popUntilRoot() }
             CrossfadeTransition(navigator)
         }
     }
@@ -118,8 +135,12 @@ private class EquipoTab(
     val factory: EquipoViewModelFactory,
     val perfilFactory: MiPerfilViewModelFactory,
     val settingsFactory: AjustesViewModelFactory
-) : Tab {
+) : PopToRootTab {
     override val key = "EquipoTab"
+    private val popSignal = MutableStateFlow(0)
+
+    override fun requestPopToRoot() { popSignal.update { it + 1 } }
+
     @get:Composable
     override val options: TabOptions
         get() = TabOptions(index = 1u, title = "Equipo", icon = rememberVectorPainter(Icons.Default.Groups))
@@ -127,6 +148,8 @@ private class EquipoTab(
     @Composable
     override fun Content() {
         Navigator(EquipoScreen(factory, perfilFactory, settingsFactory, idEquipo = null)) { navigator ->
+            val signal by popSignal.collectAsState()
+            LaunchedEffect(signal) { if (signal > 0) navigator.popUntilRoot() }
             CrossfadeTransition(navigator)
         }
     }
@@ -137,8 +160,12 @@ private class LeaderboardTab(
     val settingsFactory: AjustesViewModelFactory,
     val equipoFactory: EquipoViewModelFactory,
     val perfilFactory: MiPerfilViewModelFactory
-) : Tab {
+) : PopToRootTab {
     override val key = "LeaderboardTab"
+    private val popSignal = MutableStateFlow(0)
+
+    override fun requestPopToRoot() { popSignal.update { it + 1 } }
+
     @get:Composable
     override val options: TabOptions
         get() = TabOptions(index = 2u, title = "Ranking", icon = rememberVectorPainter(Icons.Default.EmojiEvents))
@@ -151,6 +178,8 @@ private class LeaderboardTab(
             perfilFactory = perfilFactory,
             ajustesFactory = settingsFactory
         )) { navigator ->
+            val signal by popSignal.collectAsState()
+            LaunchedEffect(signal) { if (signal > 0) navigator.popUntilRoot() }
             CrossfadeTransition(navigator)
         }
     }
@@ -159,8 +188,12 @@ private class LeaderboardTab(
 private class PerfilTab(
     val factory: MiPerfilViewModelFactory,
     val ajustesFactory: AjustesViewModelFactory
-) : Tab {
+) : PopToRootTab {
     override val key = "PerfilTab"
+    private val popSignal = MutableStateFlow(0)
+
+    override fun requestPopToRoot() { popSignal.update { it + 1 } }
+
     @get:Composable
     override val options: TabOptions
         get() = TabOptions(index = 3u, title = "Perfil", icon = rememberVectorPainter(Icons.Default.AccountCircle))
@@ -168,6 +201,8 @@ private class PerfilTab(
     @Composable
     override fun Content() {
         Navigator(PerfilScreen(factory, ajustesFactory)) { navigator ->
+            val signal by popSignal.collectAsState()
+            LaunchedEffect(signal) { if (signal > 0) navigator.popUntilRoot() }
             CrossfadeTransition(navigator)
         }
     }
@@ -175,8 +210,12 @@ private class PerfilTab(
 
 private class PreguntasTab(
     val factory: FormularioViewModelFactory,
-) : Tab {
+) : PopToRootTab {
     override val key = "PreguntasTab"
+    private val popSignal = MutableStateFlow(0)
+
+    override fun requestPopToRoot() { popSignal.update { it + 1 } }
+
     @get:Composable
     override val options: TabOptions
         get() = TabOptions(index = 4u, title = "Diario", icon = rememberVectorPainter(Icons.Default.QuestionAnswer))
@@ -184,6 +223,8 @@ private class PreguntasTab(
     @Composable
     override fun Content() {
         Navigator(PreguntaScreen(factory)) { navigator ->
+            val signal by popSignal.collectAsState()
+            LaunchedEffect(signal) { if (signal > 0) navigator.popUntilRoot() }
             CrossfadeTransition(navigator)
         }
     }

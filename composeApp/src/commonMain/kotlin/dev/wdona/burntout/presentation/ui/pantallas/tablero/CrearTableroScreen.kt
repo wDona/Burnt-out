@@ -75,7 +75,8 @@ fun MenuCrearTableroContent(tablerosViewModel: TablerosViewModel, onVolver: () -
         titulo = "Crear Tablero",
         onVolver = onVolver,
         onFAB = ejecutarEnvio,
-        textoFAB = ""
+        textoFAB = "",
+        fabEnabled = textStateNombreTablero.isNotBlank()
     ) {
         Column(
             modifier = Modifier

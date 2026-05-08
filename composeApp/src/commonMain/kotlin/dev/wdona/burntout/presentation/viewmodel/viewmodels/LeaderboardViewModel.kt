@@ -82,4 +82,17 @@ class LeaderboardViewModel(
     fun clearInvitacion() {
         _uiState.update { it.copy(invitacionCode = null, invitacionError = null) }
     }
+
+    fun renombrarEquipo(equipo: Equipo, nuevoNombre: String) {
+        screenModelScope.launch {
+            try {
+                val equipoCompleto = repository.getEquipoById(equipo.idEquipo) ?: equipo
+                repository.actualizarEquipo(equipoCompleto.copy(titulo = nuevoNombre))
+                val equipos = repository.getEquiposByOrg(equipo.idOrganizacion).sortedByDescending { it.puntuacion }
+                _uiState.update { it.copy(leaderboard = equipos) }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(error = e.message) }
+            }
+        }
+    }
 }

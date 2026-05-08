@@ -21,6 +21,8 @@ import dev.wdona.burntout.presentation.ui.components.common.FilaTextoPlaceholder
 import dev.wdona.burntout.presentation.ui.components.equipo.CrearEquipoDialog
 import dev.wdona.burntout.presentation.ui.components.equipo.EquipoCard
 import dev.wdona.burntout.presentation.ui.components.equipo.InvitarOrgDialog
+import dev.wdona.burntout.presentation.ui.components.equipo.RenombrarEquipoDialog
+import dev.wdona.burntout.shared.domain.Equipo
 import dev.wdona.burntout.presentation.ui.components.template.ScaffoldBase
 import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.AjustesViewModelFactory
 import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.LeaderboardViewModelFactory
@@ -113,7 +115,20 @@ fun LeaderboardContent(
     val esInvitado = SettingsManager.isUsuarioInvitado()
     val esAdmin = SettingsManager.isAdminOrOwner()
 
+    var equipoParaRenombrar by remember { mutableStateOf<Equipo?>(null) }
+
     val titulo = if (isLoading) "" else "Leaderboard"
+
+    if (equipoParaRenombrar != null) {
+        RenombrarEquipoDialog(
+            nombreActual = equipoParaRenombrar!!.titulo,
+            onDismiss = { equipoParaRenombrar = null },
+            onConfirm = { nuevoNombre ->
+                leaderboardViewModel.renombrarEquipo(equipoParaRenombrar!!, nuevoNombre)
+                equipoParaRenombrar = null
+            }
+        )
+    }
 
     ScaffoldBase(
         titulo = titulo,
@@ -145,7 +160,8 @@ fun LeaderboardContent(
                 items(listaEquipos, key = { it.idEquipo }) { equipo ->
                     EquipoCard(
                         equipo,
-                        onClick = { onEquipoClick(equipo.idEquipo) }
+                        onClick = { onEquipoClick(equipo.idEquipo) },
+                        onRenombrar = if (esAdmin) { { equipoParaRenombrar = equipo } } else null
                     )
                 }
             }

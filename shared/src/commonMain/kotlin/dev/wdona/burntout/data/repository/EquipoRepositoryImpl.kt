@@ -54,6 +54,7 @@ class EquipoRepositoryImpl(
                 val miembros = remote.getMiembrosEquipo(idEquipo)
                 val equipoConMiembros = equipoRemoto.copy(idMiembros = miembros.map { it.idUsuario })
                 local.insertOrUpdateEquipo(equipoConMiembros)
+                return@withContext equipoConMiembros
             } catch (e: Exception) {
                 println("Error al sincronizar equipos")
             }

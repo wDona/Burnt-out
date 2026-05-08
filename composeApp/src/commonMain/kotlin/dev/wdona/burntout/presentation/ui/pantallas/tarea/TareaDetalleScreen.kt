@@ -295,7 +295,8 @@ fun TareaDetalleContent(viewModel: TareasViewModel, onVolver: () -> Unit) {
         titulo = "Editar Tarea: " + (tarea?.titulo ?: ""),
         onVolver = { onVolver() },
         onFAB = { ejecutarEnvio() },
-        textoFAB = "Editar Tarea"
+        textoFAB = "Editar Tarea",
+        fabEnabled = textStateNombreTarea.isNotBlank()
     ) {
         Column(
             modifier = Modifier.padding(horizontal = 16.dp).verticalScroll(rememberScrollState()),

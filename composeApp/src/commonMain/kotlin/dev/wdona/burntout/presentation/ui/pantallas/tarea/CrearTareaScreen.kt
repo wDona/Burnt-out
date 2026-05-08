@@ -292,7 +292,8 @@ fun MenuCrearTareaContent(idTablero: String, tareasViewModel: TareasViewModel, o
         titulo = "Nueva Tarea",
         onVolver = onVolver,
         onFAB = ejecutarEnvio,
-        textoFAB = "Crear Tarea"
+        textoFAB = "Crear Tarea",
+        fabEnabled = textStateNombreTarea.isNotBlank()
     ) {
         Column(
             modifier = Modifier.padding(horizontal = 16.dp).verticalScroll(rememberScrollState()),

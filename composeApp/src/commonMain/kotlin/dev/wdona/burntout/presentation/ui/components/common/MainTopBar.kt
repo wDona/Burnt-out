@@ -1,5 +1,6 @@
 package dev.wdona.burntout.presentation.ui.components.common
 
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.padding
@@ -31,20 +32,21 @@ fun MainTopBar(
     CenterAlignedTopAppBar(
         windowInsets = windowInsets,
         title = {
-            Row (
-                verticalAlignment = Alignment.Bottom,
-            ){
-                if (titleIcon != null) titleIcon()
-                Text(
-                    text = title,
-                    maxLines = 1,
-                    textAlign = TextAlign.Center,
-                )
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    if (titleIcon != null) titleIcon()
+                    Text(
+                        text = title,
+                        maxLines = 1,
+                        textAlign = TextAlign.Center,
+                    )
+                }
                 if (subtitle != null) Text(
                     text = subtitle,
                     maxLines = 1,
                     textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(start = 8.dp),
                     style = MaterialTheme.typography.titleSmall
                 )
             }

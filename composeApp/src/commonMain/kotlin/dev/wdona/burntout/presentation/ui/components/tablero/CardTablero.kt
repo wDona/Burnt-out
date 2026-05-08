@@ -26,8 +26,16 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.type
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import dev.wdona.burntout.shared.domain.Tablero
 
@@ -39,6 +47,13 @@ fun CardTablero(tablero: Tablero, onClick: () -> Unit, onDelete: () -> Unit, onR
     var nuevoNombre by remember { mutableStateOf(tablero.titulo) }
 
     if (showRenameDialog) {
+        fun confirmar() {
+            if (nuevoNombre.isNotBlank()) {
+                onRename(nuevoNombre.trim())
+                showRenameDialog = false
+            }
+        }
+
         AlertDialog(
             onDismissRequest = { showRenameDialog = false },
             title = { Text("Renombrar tablero") },
@@ -47,17 +62,20 @@ fun CardTablero(tablero: Tablero, onClick: () -> Unit, onDelete: () -> Unit, onR
                     value = nuevoNombre,
                     onValueChange = { nuevoNombre = it },
                     label = { Text("Nombre") },
-                    singleLine = true
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                    keyboardActions = KeyboardActions(onDone = { confirmar() }),
+                    modifier = Modifier.onKeyEvent { keyEvent ->
+                        if (keyEvent.key == Key.Enter && keyEvent.type == KeyEventType.KeyDown) {
+                            confirmar(); true
+                        } else false
+                    }
                 )
             },
             confirmButton = {
                 TextButton(
-                    onClick = {
-                        if (nuevoNombre.isNotBlank()) {
-                            onRename(nuevoNombre.trim())
-                        }
-                        showRenameDialog = false
-                    }
+                    onClick = ::confirmar,
+                    enabled = nuevoNombre.isNotBlank()
                 ) { Text("Guardar") }
             },
             dismissButton = {
