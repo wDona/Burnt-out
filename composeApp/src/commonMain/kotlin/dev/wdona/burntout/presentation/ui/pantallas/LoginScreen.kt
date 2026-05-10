@@ -149,13 +149,6 @@ fun LoginContent(
                     style = MaterialTheme.typography.titleLarge,
                     modifier = Modifier.padding(bottom = 16.dp)
                 )
-                if (!isLogin) {
-                    Text(
-                        style = MaterialTheme.typography.bodySmall.copy(color = BurntOutMaterialTheme.getWarningColor()),
-                        text = "No uses contrasenas privadas, \ncualquiera podra acceder a tu cuenta",
-                        modifier = Modifier.padding(bottom = 16.dp)
-                    )
-                }
 
                 AnimatedVisibility(!isLogin) {
                     OutlinedTextField(
