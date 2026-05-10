@@ -35,9 +35,10 @@ class LoginViewModel(private val usuarioRepository: UsuarioRepository) : ScreenM
         screenModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
             try {
-                val usuario = usuarioRepository.login(username, contrasena)
-                SettingsManager.setUsuarioActual(usuario)
-                settingsViewModel.cargarUsuarioActual(usuario)
+                val response = usuarioRepository.login(username, contrasena)
+                SettingsManager.setUsuarioActual(response.usuario)
+                SettingsManager.setTokenUsuario(response.token)
+                settingsViewModel.cargarUsuarioActual(response.usuario)
 
                 _uiState.update { it.copy(isLoading = false, success = true) }
             } catch (e: Exception) {
@@ -68,10 +69,11 @@ class LoginViewModel(private val usuarioRepository: UsuarioRepository) : ScreenM
                     nombreOrg = nombreOrg ?: "Org de $nombre",
                     codigoInvitacion = codigoInvitacion
                 )
-                val usuarioRegistrado = usuarioRepository.registrar(request)
+                val response = usuarioRepository.registrar(request)
 
-                SettingsManager.setUsuarioActual(usuarioRegistrado)
-                settingsViewModel.cargarUsuarioActual(usuarioRegistrado)
+                SettingsManager.setUsuarioActual(response.usuario)
+                SettingsManager.setTokenUsuario(response.token)
+                settingsViewModel.cargarUsuarioActual(response.usuario)
                 SettingsManager.setPrimerCuestionarioHecho(false)
 
                 _uiState.update { it.copy(isLoading = false, success = true) }

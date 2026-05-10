@@ -7,6 +7,8 @@ import kotlinx.coroutines.withContext
 import dev.wdona.burntout.db.tables.*
 import kotlinx.coroutines.NonCancellable
 import org.jetbrains.exposed.sql.SchemaUtils
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.less
+import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.selectAll
 
@@ -47,7 +49,8 @@ object DatabaseFactory {
         TablerosTable,
         TareasTable,
         SubtareasTable,
-        InvitacionesTable
+        InvitacionesTable,
+        SesionesTable
     )
 
     fun init() {
@@ -55,7 +58,13 @@ object DatabaseFactory {
         transaction {
             SchemaUtils.createMissingTablesAndColumns(*tables)
             insertDatosBase()
+            limpiarSesionesAntiguas()
         }
+    }
+
+    private fun limpiarSesionesAntiguas() {
+        val noventaDiasAtras = System.currentTimeMillis() / 1000 - 90L * 24 * 3600
+        SesionesTable.deleteWhere { SesionesTable.creadoEn less noventaDiasAtras }
     }
 
     private fun insertDatosBase() {

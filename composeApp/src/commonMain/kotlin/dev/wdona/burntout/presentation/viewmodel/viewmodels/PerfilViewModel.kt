@@ -67,7 +67,7 @@ class PerfilViewModel(private val repository: UsuarioRepository) : ScreenModel {
     fun login(username: String, contrasena: String, onResult: (Boolean) -> Unit) {
         screenModelScope.launch {
             try {
-                val user = repository.login(username, contrasena)
+                val user = repository.login(username, contrasena).usuario
                 _uiState.update { it.copy(usuario = user) }
                 onResult(true)
             } catch (e: Exception) {

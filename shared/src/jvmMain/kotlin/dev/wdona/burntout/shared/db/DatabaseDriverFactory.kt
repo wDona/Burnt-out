@@ -2,15 +2,16 @@ package dev.wdona.burntout.shared.db
 
 import app.cash.sqldelight.db.SqlDriver
 import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
-import dev.wdona.burntout.shared.db.AppDatabase
+import dev.wdona.burntout.shared.utils.SettingsManager
 import java.io.File
 import java.sql.DriverManager
 
 actual fun eliminarBaseDatosLocal(): Boolean {
     return try {
+        val host = SettingsManager.getHostActual()
         DatabaseActions.cerrarDriver()
         val userHome = System.getProperty("user.home")
-        val dbFile = File(userHome, ".burntout_app/burntout.db")
+        val dbFile = File(userHome, ".burntout_app/burntout_${sanitizeHost(host)}.db")
         val deleted = dbFile.delete()
         kotlin.system.exitProcess(0)
         deleted
@@ -21,24 +22,27 @@ actual fun eliminarBaseDatosLocal(): Boolean {
 }
 
 actual class DatabaseDriverFactory {
+    companion object {
+        private val driverMap = mutableMapOf<String, SqlDriver>()
+    }
 
-    // TODO: coger si existe el archivo o no o no
     actual fun createDriver(): SqlDriver {
+        val host = SettingsManager.getHostActual()
+        driverMap[host]?.let { return it }
+
         val userHome = System.getProperty("user.home")
         val appDataDir = File(userHome, ".burntout_app")
-        
         if (!appDataDir.exists()) {
             val created = appDataDir.mkdirs()
             if (!created) {
-                println("Fallo al crear el directorio de la app en ${appDataDir.absolutePath}, fallback en user.dir")
+                println("Fallo al crear directorio de la app en ${appDataDir.absolutePath}")
             }
         }
-        
         val finalDir = if (appDataDir.exists() && appDataDir.isDirectory) appDataDir else File(".")
 
-        val databaseFile = File(finalDir, "burntout.db")
+        val dbName = "burntout_${sanitizeHost(host)}.db"
+        val databaseFile = File(finalDir, dbName)
         val databasePath = databaseFile.absolutePath
-        
         val isNewDatabase = !databaseFile.exists()
         val driver: SqlDriver = JdbcSqliteDriver("jdbc:sqlite:$databasePath")
 
@@ -54,6 +58,7 @@ actual class DatabaseDriverFactory {
             aplicarMigracionesFaltantes(databasePath)
         }
 
+        driverMap[host] = driver
         return driver
     }
 

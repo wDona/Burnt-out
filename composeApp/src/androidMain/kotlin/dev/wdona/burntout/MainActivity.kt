@@ -64,6 +64,7 @@ class MainActivity : ComponentActivity() {
             }
 
             LaunchedEffect(Unit) {
+                DatabaseActions.driverFactory = { DatabaseDriverFactory(applicationContext).createDriver() }
                 try {
                     withContext(Dispatchers.IO) {
                         val driver = DatabaseDriverFactory(applicationContext).createDriver()

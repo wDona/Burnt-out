@@ -131,3 +131,10 @@ object SyncLogTable : Table() {
     val timestamp = long("timestamp")
     override val primaryKey = PrimaryKey(id)
 }
+
+object SesionesTable : Table() {
+    val token = varchar("token", 100)
+    val idUsuario = long("id_usuario").references(UsuariosTable.id)
+    val creadoEn = long("creado_en")
+    override val primaryKey = PrimaryKey(token)
+}

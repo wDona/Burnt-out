@@ -6,20 +6,25 @@ import dev.wdona.burntout.data.api.impl.UsuarioApiImpl
 import dev.wdona.burntout.data.dao.impl.AjusteDaoImpl
 import dev.wdona.burntout.data.dao.impl.EquipoDaoImpl
 import dev.wdona.burntout.data.dao.impl.OperacionPendienteDaoImpl
+import dev.wdona.burntout.data.dao.impl.UsuarioDaoImpl
 import dev.wdona.burntout.data.datasource.local.impl.AjusteLocalDataSourceImpl
 import dev.wdona.burntout.data.datasource.local.impl.EquipoLocalDataSourceImpl
 import dev.wdona.burntout.data.datasource.local.impl.OperacionPendienteLocalDataSourceImpl
+import dev.wdona.burntout.data.datasource.local.impl.UsuarioLocalDataSourceImpl
 import dev.wdona.burntout.data.datasource.remote.impl.AjusteRemoteDataSourceImpl
 import dev.wdona.burntout.data.datasource.remote.impl.EquipoRemoteDataSourceImpl
 import dev.wdona.burntout.data.datasource.remote.impl.UsuarioRemoteDataSourceImpl
 import dev.wdona.burntout.data.repository.AjusteRepositoryImpl
+import dev.wdona.burntout.data.repository.UsuarioRepositoryImpl
 import dev.wdona.burntout.domain.repository.AjusteRepository
+import dev.wdona.burntout.domain.repository.UsuarioRepository
 import dev.wdona.burntout.presentation.viewmodel.viewmodels.AjustesViewModel
-import dev.wdona.burntout.shared.db.DatabaseActions
+import dev.wdona.burntout.shared.db.AppDatabase
+import dev.wdona.burntout.shared.db.DatabaseDriverFactory
 
 actual class AjustesViewModelFactory {
     actual fun create(): AjustesViewModel {
-        val database = DatabaseActions.getDatabase()
+        val database = AppDatabase(DatabaseDriverFactory().createDriver())
 
         val dao = AjusteDaoImpl(database)
         val api = AjusteApiImpl()
@@ -37,6 +42,10 @@ actual class AjustesViewModelFactory {
         val usuarioApi = UsuarioApiImpl()
         val usuarioRemote = UsuarioRemoteDataSourceImpl(usuarioApi)
 
+        val usuarioDao = UsuarioDaoImpl(database)
+        val usuarioLocal = UsuarioLocalDataSourceImpl(usuarioDao)
+        val usuarioRepository = UsuarioRepositoryImpl(usuarioLocal, usuarioRemote, pendienteDataSource)
+
         val repository = AjusteRepositoryImpl(
             localDataSource,
             remoteDataSource,
@@ -46,14 +55,14 @@ actual class AjustesViewModelFactory {
             pendienteDataSource,
         )
 
-        return getInstance(repository)
+        return getInstance(repository, usuarioRepository)
     }
 
     companion object {
         private var instance: AjustesViewModel? = null
-        fun getInstance(repository: AjusteRepository): AjustesViewModel {
+        fun getInstance(repository: AjusteRepository, usuarioRepository: UsuarioRepository): AjustesViewModel {
             if (instance == null) {
-                instance = AjustesViewModel(repository)
+                instance = AjustesViewModel(repository, usuarioRepository)
             }
             return instance!!
         }

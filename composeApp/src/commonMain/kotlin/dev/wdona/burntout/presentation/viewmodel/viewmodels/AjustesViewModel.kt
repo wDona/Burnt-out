@@ -5,6 +5,7 @@ import cafe.adriel.voyager.core.model.screenModelScope
 import dev.wdona.burntout.AppInfo
 import dev.wdona.burntout.domain.model.Ajuste
 import dev.wdona.burntout.domain.repository.AjusteRepository
+import dev.wdona.burntout.domain.repository.UsuarioRepository
 import dev.wdona.burntout.shared.domain.Usuario
 import dev.wdona.burntout.shared.utils.SettingsManager
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -27,7 +28,10 @@ data class AjustesUiState(
     val respuestasAnonimas: Boolean = false
 )
 
-class AjustesViewModel(private val repository: AjusteRepository) : ScreenModel {
+class AjustesViewModel(
+    private val repository: AjusteRepository,
+    private val usuarioRepository: UsuarioRepository
+) : ScreenModel {
     
     val ajustesUiState = combine(
         SettingsManager.esUltimoCuestionarioHecho,
@@ -96,7 +100,14 @@ class AjustesViewModel(private val repository: AjusteRepository) : ScreenModel {
     }
 
     fun resetSettings() {
+        val token = SettingsManager.getTokenUsuario()
+        val invitado = SettingsManager.isUsuarioInvitado()
         SettingsManager.clearAll()
+        if (!invitado && token.isNotBlank()) {
+            screenModelScope.launch {
+                try { usuarioRepository.cerrarSesion(token) } catch (_: Exception) { }
+            }
+        }
     }
 
     fun salirDelEquipo() {

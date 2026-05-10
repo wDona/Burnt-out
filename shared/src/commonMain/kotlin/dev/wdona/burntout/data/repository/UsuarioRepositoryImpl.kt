@@ -7,6 +7,7 @@ import dev.wdona.burntout.data.datasource.remote.UsuarioRemoteDataSource
 import dev.wdona.burntout.domain.entity.Entity
 import dev.wdona.burntout.domain.model.TipoAccion
 import dev.wdona.burntout.domain.repository.UsuarioRepository
+import dev.wdona.burntout.shared.domain.LoginResponse
 import dev.wdona.burntout.shared.domain.RegistroRequest
 import dev.wdona.burntout.shared.domain.Usuario
 import dev.wdona.burntout.shared.utils.SettingsManager
@@ -25,10 +26,10 @@ class UsuarioRepositoryImpl(
 
     private val repositoryScope = CoroutineScope(Dispatchers.Default)
 
-    override suspend fun registrar(request: RegistroRequest): Usuario = withContext(NonCancellable + Dispatchers.IO) {
-        val usuario = remote.registrar(request)
-        local.insertOrUpdateUsuario(usuario)
-        usuario
+    override suspend fun registrar(request: RegistroRequest): LoginResponse = withContext(NonCancellable + Dispatchers.IO) {
+        val response = remote.registrar(request)
+        local.insertOrUpdateUsuario(response.usuario)
+        response
     }
 
     override suspend fun getUserById(idUsuario: Long): Usuario = withContext(NonCancellable + Dispatchers.IO) {
@@ -208,24 +209,33 @@ class UsuarioRepositoryImpl(
         }
     }
 
-    override suspend fun login(username: String, contrasena: String): Usuario = withContext(NonCancellable + Dispatchers.IO) {
-        try {
-            val usuario = remote.login(username, contrasena)
+    override suspend fun login(username: String, contrasena: String): LoginResponse = withContext(NonCancellable + Dispatchers.IO) {
+        val response = remote.login(username, contrasena)
+        local.insertOrUpdateUsuario(response.usuario)
+        response
+    }
 
-            // No eliminamos, insertOrUpdateUsuario (REPLACE) ya se encarga de actualizar
-            local.insertOrUpdateUsuario(usuario)
-            usuario
-        } catch (e: Exception) {
-            println("Error al iniciar sesión (login): ${e.message}")
+    override suspend fun cerrarSesion(token: String) {
+        withContext(NonCancellable + Dispatchers.IO) {
+            var exito = false
             try {
-                val usuarioLocal = local.getUsuarioByUsername(username)
-                if (usuarioLocal.password == contrasena) {
-                    return@withContext usuarioLocal
-                } else {
-                    throw Exception("Contraseña incorrecta")
+                exito = remote.cerrarSesion(token)
+            } catch (e: Exception) {
+                println("Servidor offline al cerrar sesión: ${e.message}")
+            }
+            if (!exito) {
+                try {
+                    pendiente.insertOperacionPendiente(
+                        TipoAccion.ELIMINACION.getNombreAccion(),
+                        Entity.SESION.getNombreEntity(),
+                        token,
+                        "",
+                        getCurrentTimestampSeconds(),
+                        0L
+                    )
+                } catch (e: Exception) {
+                    println("Error al registrar cierre de sesión pendiente: ${e.message}")
                 }
-            } catch (localE: Exception) {
-                throw e
             }
         }
     }

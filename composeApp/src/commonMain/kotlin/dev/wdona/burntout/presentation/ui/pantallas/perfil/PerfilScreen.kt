@@ -224,7 +224,7 @@ fun PerfilContent(
                     } else {
 //                        Text(usuario.username, style = MaterialTheme.typography.titleMedium)
 //                        Text(usuario.nombre, style = MaterialTheme.typography.bodyLarge)
-                        Text(usuario.descripcion ?: "Sin descripción", style = MaterialTheme.typography.bodyMedium)
+                        Text(usuario.descripcion?.ifBlank { "Sin descripción" } ?: "Sin descripción", style = MaterialTheme.typography.bodyMedium)
 
                         if (esPropioUsuario) {
                             TextButton(

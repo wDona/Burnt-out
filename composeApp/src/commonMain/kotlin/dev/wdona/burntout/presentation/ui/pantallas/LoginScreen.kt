@@ -16,6 +16,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SegmentedButton
@@ -92,6 +93,8 @@ fun LoginContent(
     var textStateCodigo by remember { mutableStateOf("") }
     var modificado by remember { mutableStateOf(false) }
     var isLogin by remember { mutableStateOf(true) }
+    var usarHostPersonalizado by remember { mutableStateOf(SettingsManager.isUsandoHostPersonalizado()) }
+    var hostPersonalizado by remember { mutableStateOf(SettingsManager.getHostPersonalizado()) }
 
 
     uiState.isLogin = isLogin
@@ -315,6 +318,36 @@ fun LoginContent(
                             text = "Entrar como invitado",
                         )
                     }
+                }
+
+                HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+
+                TextButton(
+                    onClick = {
+                        usarHostPersonalizado = !usarHostPersonalizado
+                        SettingsManager.setUsarHostPersonalizado(usarHostPersonalizado)
+                    }
+                ) {
+                    Text(
+                        text = if (usarHostPersonalizado) "Usar servidor por defecto" else "Usar otro servidor",
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+
+                AnimatedVisibility(usarHostPersonalizado) {
+                    OutlinedTextField(
+                        value = hostPersonalizado,
+                        onValueChange = {
+                            hostPersonalizado = it.trim()
+                            SettingsManager.setHostPersonalizado(it.trim())
+                        },
+                        label = { Text("Host del servidor") },
+                        placeholder = { Text("ej: 192.168.1.10") },
+                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                        keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true
+                    )
                 }
             }
         }

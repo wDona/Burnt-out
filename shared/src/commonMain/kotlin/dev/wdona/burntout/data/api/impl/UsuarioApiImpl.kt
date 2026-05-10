@@ -1,6 +1,7 @@
 package dev.wdona.burntout.data.api.impl
 
 import dev.wdona.burntout.data.api.UsuarioApi
+import dev.wdona.burntout.shared.domain.LoginResponse
 import dev.wdona.burntout.shared.domain.Usuario
 import dev.wdona.burntout.shared.network.ApiClient
 import dev.wdona.burntout.shared.utils.Logger
@@ -16,6 +17,7 @@ import io.ktor.http.contentType
 import io.ktor.http.isSuccess
 import io.ktor.http.HttpStatusCode
 import dev.wdona.burntout.shared.domain.RegistroRequest
+import dev.wdona.burntout.shared.utils.hashPasswordForTransport
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -30,18 +32,18 @@ class UsuarioApiImpl(private val client: HttpClient = ApiClient.client) : Usuari
     override suspend fun getUsuariosByOrg(idOrg: Long): List<Usuario> =
         client.get("usuarios?idOrg=$idOrg").body<List<Usuario>>().also { Logger.d(TAG, "getUsuariosByOrg: $it") }
 
-    override suspend fun registrar(request: RegistroRequest): Usuario =
+    override suspend fun registrar(request: RegistroRequest): LoginResponse =
         client.post("usuarios") {
             contentType(ContentType.Application.Json)
-            setBody(request)
-        }.body<Usuario>().also { Logger.d(TAG, "registrar: $it") }
+            setBody(request.copy(password = hashPasswordForTransport(request.password)))
+        }.body<LoginResponse>().also { Logger.d(TAG, "registrar: $it") }
 
     override suspend fun crearUsuario(usuario: Usuario): Long =
         client.post("usuarios") {
             contentType(ContentType.Application.Json)
             setBody(RegistroRequest(
                 username = usuario.username,
-                password = usuario.password,
+                password = hashPasswordForTransport(usuario.password),
                 nombre = usuario.nombre,
                 modo = "CREAR_ORG",
                 nombreOrg = "Org de ${usuario.nombre}"
@@ -70,11 +72,19 @@ class UsuarioApiImpl(private val client: HttpClient = ApiClient.client) : Usuari
             else response.body<Usuario>()
         }.also { Logger.d(TAG, "getUsuarioByUsername: $username, result=$it") }
 
-    override suspend fun login(username: String, contrasena: String): Usuario =
+    override suspend fun login(username: String, contrasena: String): LoginResponse =
         client.post("usuarios/login") {
             contentType(ContentType.Application.Json)
-            setBody(LoginRequest(username, contrasena))
-        }.body<Usuario>().also { Logger.d(TAG, "login: $it") }
+            setBody(LoginRequest(username, hashPasswordForTransport(contrasena)))
+        }.body<LoginResponse>().also { Logger.d(TAG, "login: $it") }
+
+    override suspend fun cerrarSesion(token: String): Boolean =
+        try {
+            client.delete("sesiones/$token").status.isSuccess().also { Logger.d(TAG, "cerrarSesion: $token success=$it") }
+        } catch (e: Exception) {
+            Logger.d(TAG, "cerrarSesion error: ${e.message}")
+            false
+        }
 
     override suspend fun getMiembrosEquipo(idEquipo: Long): List<Usuario> =
         client.get("equipos/$idEquipo/miembros").body<List<Usuario>>().also { Logger.d(TAG, "getMiembrosEquipo: $it") }

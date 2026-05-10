@@ -12,7 +12,8 @@ enum class Entity(private val customNombre: String? = null) {
     USER_TEAM("User_TeamEntity"),
     AJUSTE_USER("Ajuste_UserEntity"),
     RESPONDER("ResponderEntity"),
-    OPERACIONPENDIENTE("OperacionPendienteEntity");
+    OPERACIONPENDIENTE("OperacionPendienteEntity"),
+    SESION("SesionEntity");
 
     fun getNombreEntity(): String {
         return customNombre ?: this.name

@@ -2,11 +2,12 @@ package dev.wdona.burntout.data.datasource.remote.impl
 
 import dev.wdona.burntout.data.api.UsuarioApi
 import dev.wdona.burntout.data.datasource.remote.UsuarioRemoteDataSource
+import dev.wdona.burntout.shared.domain.LoginResponse
 import dev.wdona.burntout.shared.domain.RegistroRequest
 import dev.wdona.burntout.shared.domain.Usuario
 
 class UsuarioRemoteDataSourceImpl(private val usuarioApi: UsuarioApi) : UsuarioRemoteDataSource {
-    override suspend fun registrar(request: RegistroRequest): Usuario {
+    override suspend fun registrar(request: RegistroRequest): LoginResponse {
         return usuarioApi.registrar(request)
     }
 
@@ -34,8 +35,12 @@ class UsuarioRemoteDataSourceImpl(private val usuarioApi: UsuarioApi) : UsuarioR
         return usuarioApi.existeUsuario(username)
     }
 
-    override suspend fun login(username: String, contrasena: String): Usuario {
+    override suspend fun login(username: String, contrasena: String): LoginResponse {
         return usuarioApi.login(username, contrasena)
+    }
+
+    override suspend fun cerrarSesion(token: String): Boolean {
+        return usuarioApi.cerrarSesion(token)
     }
 
     override suspend fun getMiembrosEquipo(idEquipo: Long): List<Usuario> {

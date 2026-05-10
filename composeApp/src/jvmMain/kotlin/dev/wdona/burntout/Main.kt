@@ -33,6 +33,7 @@ fun main() = application {
     var databaseError by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(Unit) {
+        DatabaseActions.driverFactory = { DatabaseDriverFactory().createDriver() }
         try {
             withContext(Dispatchers.IO) {
                 val driver = DatabaseDriverFactory().createDriver()

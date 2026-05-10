@@ -7,7 +7,9 @@ import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.defaultRequest
 import io.ktor.http.ContentType
+import io.ktor.http.HttpHeaders
 import io.ktor.http.contentType
+import io.ktor.client.request.header
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 
@@ -29,8 +31,13 @@ object ApiClient {
         }
 
         defaultRequest {
-            url("http://$HOST:$SERVER_PORT/$API_PATH/")
+            val host = dev.wdona.burntout.shared.utils.SettingsManager.getHostActual()
+            url("http://$host:$SERVER_PORT/$API_PATH/")
             contentType(ContentType.Application.Json)
+            val token = dev.wdona.burntout.shared.utils.SettingsManager.getTokenUsuario()
+            if (token.isNotBlank()) {
+                header(HttpHeaders.Authorization, "Bearer $token")
+            }
         }
     }
 }

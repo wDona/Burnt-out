@@ -1,6 +1,7 @@
 package dev.wdona.burntout.shared.utils
 
 import dev.wdona.burntout.shared.domain.Usuario
+import dev.wdona.burntout.shared.network.HOST
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
@@ -18,6 +19,8 @@ object SettingsManager {
     private const val KEY_RIESGO_RP_USUARIO_ACTUAL = "riesgo_rp_usuario_actual"
     private const val KEY_SINCRONIZADO_EN_ESTA_APERTURA = "sincronizado_en_esta_apertura"
     private const val KEY_RESPUESTAS_ANONIMAS = "respuestas_anonimas"
+    private const val KEY_HOST_PERSONALIZADO = "host_personalizado"
+    private const val KEY_USAR_HOST_PERSONALIZADO = "usar_host_personalizado"
 
     private val KEY_LAST_SYNC_TIMESTAMP get() = "last_sync_timestamp_${_idUsuarioActualFlow.value}"
 
@@ -111,6 +114,15 @@ object SettingsManager {
     fun isAutenticado(): Boolean = _isAutenticadoFlow.value
     fun isUsuarioInvitado(): Boolean = getIdUsuarioActual() == Long.MIN_VALUE
 
+    fun getHostPersonalizado(): String = settings.getString(KEY_HOST_PERSONALIZADO, "")
+    fun setHostPersonalizado(host: String) = settings.putString(KEY_HOST_PERSONALIZADO, host)
+    fun isUsandoHostPersonalizado(): Boolean = settings.getBoolean(KEY_USAR_HOST_PERSONALIZADO, false)
+    fun setUsarHostPersonalizado(usar: Boolean) = settings.putBoolean(KEY_USAR_HOST_PERSONALIZADO, usar)
+
+    fun getHostActual(): String {
+        return if (isUsandoHostPersonalizado()) getHostPersonalizado().ifBlank { HOST } else HOST
+    }
+
     fun setTokenUsuario(token: String?) {
         val safeToken = token ?: ""
         settings.putString(KEY_TOKEN_USUARIO, safeToken)
@@ -156,7 +168,6 @@ object SettingsManager {
         
         setIdEquipoActual(usuario.idEquipo)
         setIdOrganizacionActual(usuario.idOrganizacion)
-        setTokenUsuario("token_${usuario.idUsuario}")
         setRolActual(when (usuario.rol) { "OWNER" -> 2L; "ADMIN" -> 1L; else -> 0L })
         
         settings.putLong(KEY_ID_USUARIO_ACTUAL, usuario.idUsuario)
@@ -186,7 +197,11 @@ object SettingsManager {
     }
 
     fun clearAll() {
+        val hostPersonalizado = getHostPersonalizado()
+        val usarHostPersonalizado = isUsandoHostPersonalizado()
         settings.clear()
+        if (hostPersonalizado.isNotBlank()) setHostPersonalizado(hostPersonalizado)
+        if (usarHostPersonalizado) setUsarHostPersonalizado(true)
         _idUsuarioActualFlow.value = Long.MIN_VALUE
         _nombreUsuarioFlow.value = ""
         _idEquipoActualFlow.value = Long.MIN_VALUE

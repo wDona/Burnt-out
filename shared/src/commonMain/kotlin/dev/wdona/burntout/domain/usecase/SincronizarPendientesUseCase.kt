@@ -77,6 +77,7 @@ class SincronizarPendientesUseCase(
             Entity.SUBTAREA.getNombreEntity() -> ejecutarSubtarea(op)
             Entity.ORGANIZACION.getNombreEntity() -> ejecutarOrganizacion(op)
             Entity.RESPONDER.getNombreEntity() -> ejecutarRespuesta(op)
+            Entity.SESION.getNombreEntity() -> ejecutarCerrarSesion(op)
             else -> true
         }
     }
@@ -198,6 +199,15 @@ class SincronizarPendientesUseCase(
             }
             TipoAccion.ELIMINACION.getNombreAccion() -> organizacionRemote.eliminarOrganizacion(op.idAfectado.toLong())
             else -> true
+        }
+    }
+
+    private suspend fun ejecutarCerrarSesion(op: OperacionPendiente): Boolean {
+        return try {
+            usuarioRemote.cerrarSesion(op.idAfectado)
+        } catch (e: Exception) {
+            println("Error al sincronizar cierre de sesión: ${e.message}")
+            false
         }
     }
 

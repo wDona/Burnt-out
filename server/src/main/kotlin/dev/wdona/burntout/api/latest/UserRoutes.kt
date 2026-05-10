@@ -8,6 +8,8 @@ import dev.wdona.burntout.db.tables.RespuestasTable
 import dev.wdona.burntout.db.tables.OrganizacionesTable
 import dev.wdona.burntout.db.tables.InvitacionesTable
 import dev.wdona.burntout.db.tables.PreguntasTable
+import dev.wdona.burntout.db.tables.SesionesTable
+import dev.wdona.burntout.shared.domain.LoginResponse
 import dev.wdona.burntout.shared.domain.Usuario
 import dev.wdona.burntout.shared.domain.RegistroRequest
 import io.ktor.http.HttpStatusCode
@@ -19,6 +21,10 @@ import kotlinx.serialization.Serializable
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.and
+import org.mindrot.jbcrypt.BCrypt
+
+private fun hashPassword(plain: String): String = BCrypt.hashpw(plain, BCrypt.gensalt())
+private fun String.isBcryptHash() = startsWith("\$2a\$") || startsWith("\$2b\$")
 @Serializable
 internal data class LoginRequest(val username: String, val contrasena: String)
 
@@ -67,7 +73,8 @@ fun Route.usuariosRoutes() {
                 "CREAR_ORG" -> {
                     val nombreOrg = request.nombreOrg?.takeIf { it.isNotBlank() } ?: "Org de ${request.nombre}"
                     val usuario = crearUsuarioConOrg(request, nombreOrg)
-                    call.respond(HttpStatusCode.Created, usuario)
+                    val token = crearSesion(usuario.idUsuario)
+                    call.respond(HttpStatusCode.Created, LoginResponse(usuario, token))
                 }
 
                 "UNIRSE" -> {
@@ -75,7 +82,8 @@ fun Route.usuariosRoutes() {
                         ?: return@post call.respond(HttpStatusCode.BadRequest, "Falta codigoInvitacion")
                     try {
                         val usuario = unirseConCodigo(request, codigo)
-                        call.respond(HttpStatusCode.Created, usuario)
+                        val token = crearSesion(usuario.idUsuario)
+                        call.respond(HttpStatusCode.Created, LoginResponse(usuario, token))
                     } catch (e: IllegalArgumentException) {
                         call.respond(HttpStatusCode.BadRequest, e.message ?: "Código inválido")
                     }
@@ -93,13 +101,23 @@ fun Route.usuariosRoutes() {
                 println("[LOGIN ERROR CAUSE] ${e.cause?.message}")
                 return@post call.respond(HttpStatusCode.BadRequest)
             }
-            println("[${call.request.origin.remoteHost}] POST /usuarios/login username=${request.username} password=${request.contrasena}")
+            println("[${call.request.origin.remoteHost}] POST /usuarios/login username=${request.username}")
             val usuario = dbQuery {
                 UsuariosTable.selectAll().where {
-                    (UsuariosTable.username eq request.username) and (UsuariosTable.password eq request.contrasena) and (UsuariosTable.isDeleted eq false)
+                    (UsuariosTable.username eq request.username) and (UsuariosTable.isDeleted eq false)
                 }.map { rowToUsuario(it) }.singleOrNull()
             } ?: return@post call.respond(HttpStatusCode.Unauthorized)
-            call.respond(usuario)
+
+            val storedPassword = usuario.password
+            val passwordMatch = if (storedPassword.isBcryptHash()) {
+                BCrypt.checkpw(request.contrasena, storedPassword)
+            } else {
+                false
+            }
+            if (!passwordMatch) return@post call.respond(HttpStatusCode.Unauthorized)
+
+            val token = crearSesion(usuario.idUsuario)
+            call.respond(LoginResponse(usuario, token))
         }
         get("/existe/{username}") {
             val username = call.parameters["username"] ?: return@get call.respond(HttpStatusCode.BadRequest)
@@ -125,10 +143,11 @@ fun Route.usuariosRoutes() {
                     ?: return@put call.respond(HttpStatusCode.BadRequest)
                 val usuario = call.receive<Usuario>()
                 println("[${call.request.origin.remoteHost}] PUT /usuarios/$id username=${usuario.username}")
+                val passwordToStore = if (usuario.password.isBcryptHash()) usuario.password else hashPassword(usuario.password)
                 val updatedCount = dbQuery {
                     UsuariosTable.update({ UsuariosTable.id eq id }) {
                         it[username] = usuario.username
-                        it[password] = usuario.password
+                        it[password] = passwordToStore
                         it[nombre] = usuario.nombre
                         it[riesgoBurnout] = usuario.riesgoBurnout
                         it[descripcion] = usuario.descripcion
@@ -207,6 +226,16 @@ fun Route.usuariosRoutes() {
     }
 }
 
+private suspend fun crearSesion(idUsuario: Long): String = dbQuery {
+    val token = java.util.UUID.randomUUID().toString()
+    SesionesTable.insert {
+        it[SesionesTable.token] = token
+        it[SesionesTable.idUsuario] = idUsuario
+        it[SesionesTable.creadoEn] = System.currentTimeMillis() / 1000
+    }
+    token
+}
+
 private suspend fun crearUsuarioConOrg(request: RegistroRequest, nombreOrg: String): Usuario = dbQuery {
     println("[SERVER] Creando organización: $nombreOrg")
     val idOrg = OrganizacionesTable.insert {
@@ -225,9 +254,10 @@ private suspend fun crearUsuarioConOrg(request: RegistroRequest, nombreOrg: Stri
     println("[SERVER] Equipo creado con ID: $idEquipo")
 
     println("[SERVER] Creando usuario OWNER: ${request.username}")
+    val hashedPassword = hashPassword(request.password)
     val idUsuario = UsuariosTable.insert {
         it[UsuariosTable.username] = request.username
-        it[UsuariosTable.password] = request.password
+        it[UsuariosTable.password] = hashedPassword
         it[UsuariosTable.nombre] = request.nombre
         it[UsuariosTable.riesgoBurnout] = -1.0
         it[UsuariosTable.descripcion] = ""
@@ -262,7 +292,7 @@ private suspend fun crearUsuarioConOrg(request: RegistroRequest, nombreOrg: Stri
     Usuario(
         idUsuario = idUsuario,
         username = request.username,
-        password = request.password,
+        password = hashedPassword,
         nombre = request.nombre,
         riesgoBurnout = -1.0,
         descripcion = "",
@@ -286,6 +316,8 @@ private suspend fun unirseConCodigo(request: RegistroRequest, codigo: String): U
     val idOrg = invRow[InvitacionesTable.idOrganizacion]
     val rolCodigo = invRow[InvitacionesTable.rol]
 
+    val hashedPassword = hashPassword(request.password)
+
     return dbQuery {
         val idEquipo = EquiposTable.insert {
             it[EquiposTable.titulo] = "Equipo de ${request.nombre}"
@@ -295,7 +327,7 @@ private suspend fun unirseConCodigo(request: RegistroRequest, codigo: String): U
 
         val idUsuario = UsuariosTable.insert {
             it[UsuariosTable.username] = request.username
-            it[UsuariosTable.password] = request.password
+            it[UsuariosTable.password] = hashedPassword
             it[UsuariosTable.nombre] = request.nombre
             it[UsuariosTable.riesgoBurnout] = -1.0
             it[UsuariosTable.descripcion] = ""
@@ -331,7 +363,7 @@ private suspend fun unirseConCodigo(request: RegistroRequest, codigo: String): U
         Usuario(
             idUsuario = idUsuario,
             username = request.username,
-            password = request.password,
+            password = hashedPassword,
             nombre = request.nombre,
             riesgoBurnout = -1.0,
             descripcion = "",
