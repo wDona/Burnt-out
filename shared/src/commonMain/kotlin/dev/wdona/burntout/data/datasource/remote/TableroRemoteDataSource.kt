@@ -8,4 +8,5 @@ interface TableroRemoteDataSource {
     suspend fun crearTablero(tablero: Tablero): String
     suspend fun actualizarTablero(tablero: Tablero): Boolean
     suspend fun eliminarTablero(idTablero: String): Boolean
+    suspend fun tableroExisteRemoto(idTablero: String): Boolean
 }

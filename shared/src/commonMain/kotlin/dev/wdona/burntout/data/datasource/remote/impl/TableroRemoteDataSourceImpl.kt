@@ -27,4 +27,8 @@ class TableroRemoteDataSourceImpl(private val tableroApi: TableroApi) : TableroR
         val status = tableroApi.eliminarTablero(idTablero).status.value
         return status in 200..299 || status == 404
     }
+
+    override suspend fun tableroExisteRemoto(idTablero: String): Boolean {
+        return tableroApi.tableroExisteRemoto(idTablero)
+    }
 }

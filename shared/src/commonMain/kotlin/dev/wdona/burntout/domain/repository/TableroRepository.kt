@@ -8,4 +8,5 @@ interface TableroRepository {
     suspend fun crearTablero(tablero: Tablero)
     suspend fun actualizarTablero(tablero: Tablero)
     suspend fun eliminarTablero(idTablero: String)
+    suspend fun tableroExisteRemoto(idTablero: String): Boolean
 }

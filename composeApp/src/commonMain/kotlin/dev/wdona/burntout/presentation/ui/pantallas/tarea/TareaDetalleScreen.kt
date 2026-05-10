@@ -101,7 +101,7 @@ class TareaDetalleScreen(
         }
 
         LaunchedEffect(syncTick) {
-            if (syncTick > syncTickAlEntrar && !tablerosViewModel.tableroExiste(idTablero)) {
+            if (syncTick > syncTickAlEntrar && !tablerosViewModel.tableroExisteEnRemoto(idTablero)) {
                 navigator.pop()
             }
         }

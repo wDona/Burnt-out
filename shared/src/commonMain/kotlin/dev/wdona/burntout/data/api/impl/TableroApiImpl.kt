@@ -10,7 +10,9 @@ import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.request.put
 import io.ktor.client.request.setBody
+import io.ktor.client.plugins.ClientRequestException
 import io.ktor.http.ContentType
+import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import io.ktor.client.statement.HttpResponse
 
@@ -35,4 +37,17 @@ class TableroApiImpl(private val client: HttpClient = ApiClient.client) : Tabler
 
     override suspend fun eliminarTablero(idTablero: String): HttpResponse =
         client.delete("tableros/$idTablero")
+
+    override suspend fun tableroExisteRemoto(idTablero: String): Boolean {
+        return try {
+            client.get("tableros/$idTablero")
+            true
+        } catch (e: ClientRequestException) {
+            // Solo confirmamos eliminación con un 404 explícito.
+            e.response.status != HttpStatusCode.NotFound
+        } catch (e: Exception) {
+            // Errores de red/servidor: asumir que sigue existiendo.
+            true
+        }
+    }
 }

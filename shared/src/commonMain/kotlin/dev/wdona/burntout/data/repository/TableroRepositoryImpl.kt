@@ -141,6 +141,11 @@ class TableroRepositoryImpl(
         }
     }
 
+    override suspend fun tableroExisteRemoto(idTablero: String): Boolean = withContext(NonCancellable + Dispatchers.IO) {
+        if (SettingsManager.isUsuarioInvitado()) return@withContext true
+        remote.tableroExisteRemoto(idTablero)
+    }
+
     override suspend fun eliminarTablero(idTablero: String) {
         withContext(NonCancellable + Dispatchers.IO) {
             mutex.withLock {

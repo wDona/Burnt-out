@@ -9,4 +9,5 @@ interface TableroApi {
     suspend fun crearTablero(tablero: Tablero): HttpResponse
     suspend fun actualizarTablero(tablero: Tablero): HttpResponse
     suspend fun eliminarTablero(idTablero: String): HttpResponse
+    suspend fun tableroExisteRemoto(idTablero: String): Boolean
 }

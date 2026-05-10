@@ -89,8 +89,7 @@ class MenuCrearTareaScreen(
 
         LaunchedEffect(syncTick) {
             if (syncTick > syncTickAlEntrar) {
-                kotlinx.coroutines.delay(500)
-                if (!tablerosViewModel.tableroExiste(idTablero)) {
+                if (!tablerosViewModel.tableroExisteEnRemoto(idTablero)) {
                     navigator.pop()
                 }
             }

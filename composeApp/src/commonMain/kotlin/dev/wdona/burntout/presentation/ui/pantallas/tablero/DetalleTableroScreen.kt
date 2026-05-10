@@ -62,8 +62,7 @@ class DetalleTableroScreen(
         LaunchedEffect(syncTick) {
             if (syncTick > syncTickAlEntrar) {
                 tareaViewModel.cargarTareas(idTablero)
-                kotlinx.coroutines.delay(500)
-                if (!tablerosViewModel.existeTableroLocal(idTablero)) {
+                if (!tablerosViewModel.tableroExisteEnRemoto(idTablero)) {
                     navigator.pop()
                 }
             }
