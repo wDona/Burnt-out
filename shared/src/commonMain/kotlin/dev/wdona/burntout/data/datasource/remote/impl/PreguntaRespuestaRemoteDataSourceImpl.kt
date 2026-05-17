@@ -38,15 +38,15 @@ class PreguntaRespuestaRemoteDataSourceImpl(private val api: PreguntaRespuestaAp
         return api.getRespuestasByPregunta(idPregunta)
     }
 
-    override suspend fun getRespuestasByIdUsuario(idUser: Long): List<Respuesta> {
-        return api.getRespuestasByIdUsuario(idUser)
+    override suspend fun getRespuestasByIdUsuario(idUsuario: Long): List<Respuesta> {
+        return api.getRespuestasByIdUsuario(idUsuario)
     }
 
-    override suspend fun getLastRespuestasByIdUsuario(idUser: Long): List<Respuesta> {
-        return api.getLastRespuestasByIdUsuario(idUser)
+    override suspend fun getLastRespuestasByIdUsuario(idUsuario: Long): List<Respuesta> {
+        return api.getLastRespuestasByIdUsuario(idUsuario)
     }
 
-    override suspend fun getRespuestasByIdUsuarioAndDate(idUser: Long, date: Long): List<Respuesta> {
-        return api.getRespuestasByIdUsuarioAndDate(idUser, date)
+    override suspend fun getRespuestasByIdUsuarioAndDate(idUsuario: Long, date: Long): List<Respuesta> {
+        return api.getRespuestasByIdUsuarioAndDate(idUsuario, date)
     }
 }

@@ -34,15 +34,15 @@ class PreguntaRespuestaLocalDataSourceImpl(private val dao: PreguntaRespuestaDao
         return dao.getRespuestasByPregunta(idPregunta)
     }
 
-    override suspend fun getRespuestasByIdUsuario(idUser: Long): List<Respuesta> {
-        return dao.getRespuestasByIdUsuario(idUser)
+    override suspend fun getRespuestasByIdUsuario(idUsuario: Long): List<Respuesta> {
+        return dao.getRespuestasByIdUsuario(idUsuario)
     }
 
-    override suspend fun getLastRespuestasByIdUsuario(idUser: Long): List<Respuesta> {
-        return dao.getLastRespuestasByIdUsuario(idUser)
+    override suspend fun getLastRespuestasByIdUsuario(idUsuario: Long): List<Respuesta> {
+        return dao.getLastRespuestasByIdUsuario(idUsuario)
     }
 
-    override suspend fun getRespuestasByIdUsuarioAndDate(idUser: Long, date: Long): List<Respuesta> {
-        return dao.getRespuestasByIdUsuarioAndDate(idUser, date)
+    override suspend fun getRespuestasByIdUsuarioAndDate(idUsuario: Long, date: Long): List<Respuesta> {
+        return dao.getRespuestasByIdUsuarioAndDate(idUsuario, date)
     }
 }

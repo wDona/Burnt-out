@@ -6,7 +6,7 @@ interface UsuarioLocalDataSource {
     suspend fun getUserById(idUsuario: Long): Usuario
     suspend fun getUsuariosByOrg(idOrg: Long): List<Usuario>
     suspend fun getUsuariosByEquipo(idEquipo: Long): List<Usuario>
-    suspend fun getUsuarioByUsername(username: String): Usuario
+    suspend fun getUsuarioByUsername(username: String): Usuario?
     suspend fun crearUsuario(usuario: Usuario): Long
     suspend fun actualizarUsuario(usuario: Usuario): Boolean
     suspend fun eliminarUsuario(idUsuario: Long): Boolean

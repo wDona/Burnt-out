@@ -94,7 +94,7 @@ class SincronizarPendientesUseCase(
             }
             TipoAccion.ELIMINACION.getNombreAccion() -> {
                 val regex = "\"idTarea\":\"([^\"]+)\"".toRegex()
-                val idTarea = regex.find(op.datosJson)?.groupValues?.get(1) ?: op.idAfectado.toString()
+                val idTarea = regex.find(op.datosJson)?.groupValues?.get(1) ?: op.idAfectado
                 tareaRemote.eliminarTarea(idTarea)
             }
             else -> true
