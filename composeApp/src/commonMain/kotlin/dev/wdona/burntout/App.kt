@@ -151,6 +151,10 @@ private fun SyncStatusObserver(
                 message = "Error sincronizando, revisa tu conexión a internet",
                 duration = SnackbarDuration.Long
             )
+            EstadoSync.RATE_LIMITED -> snackbarHostState.showSnackbar(
+                message = "¡Vas demasiado rápido!",
+                duration = SnackbarDuration.Short
+            )
         }
 
         if (estadoSync != EstadoSync.IDLE && estadoSync != EstadoSync.SINCRONIZANDO) {

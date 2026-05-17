@@ -38,6 +38,7 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
+    alias(libs.plugins.kotlinSerialization)
     // composeHotReload removido por incompatibilidad con Kotlin 2.1.0
 }
 

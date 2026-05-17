@@ -7,7 +7,7 @@ object RateLimiter {
 
     private val map = ConcurrentHashMap<String, Window>()
 
-    private const val MAX_REQUESTS = 120
+    private const val MAX_REQUESTS = 250
     private const val WINDOW_MS = 60_000L
 
     fun allow(ip: String): Boolean {

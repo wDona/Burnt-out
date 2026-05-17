@@ -3,10 +3,13 @@ package dev.wdona.burntout.data.repository
 import dev.wdona.burntout.data.api.SyncApi
 import dev.wdona.burntout.data.api.SyncPullRequest
 import dev.wdona.burntout.data.datasource.local.*
+import dev.wdona.burntout.domain.model.RateLimitedException
 import dev.wdona.burntout.domain.repository.SyncRepository
 import dev.wdona.burntout.domain.usecase.SincronizarPendientesUseCase
 import dev.wdona.burntout.shared.utils.Logger
 import dev.wdona.burntout.shared.utils.SettingsManager
+import io.ktor.client.plugins.ResponseException
+import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -67,6 +70,10 @@ class SyncRepositoryImpl(
 
             SettingsManager.setLastSyncTimestamp(response.serverTimestamp)
             true
+        } catch (e: ResponseException) {
+            if (e.response.status == HttpStatusCode.TooManyRequests) throw RateLimitedException()
+            println("Error en Pull Sync: ${e.message}")
+            false
         } catch (e: Exception) {
             println("Error en Pull Sync: ${e.message}")
             false

@@ -2,6 +2,7 @@ package dev.wdona.burntout.presentation.viewmodel.viewmodels
 
 import cafe.adriel.voyager.core.model.ScreenModel
 import dev.wdona.burntout.domain.model.OperacionPendiente
+import dev.wdona.burntout.domain.model.RateLimitedException
 import dev.wdona.burntout.domain.repository.OperacionesPendientesRepository
 import dev.wdona.burntout.domain.repository.SyncRepository
 import dev.wdona.burntout.domain.usecase.RefrescarDatosUseCase
@@ -14,7 +15,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-enum class EstadoSync { IDLE, SINCRONIZANDO, COMPLETADO, COMPLETADO_SIN_CAMBIOS, CON_ERRORES, CON_ERRORES_RECONECTAR }
+enum class EstadoSync { IDLE, SINCRONIZANDO, COMPLETADO, COMPLETADO_SIN_CAMBIOS, CON_ERRORES, CON_ERRORES_RECONECTAR, RATE_LIMITED }
 
 class OperacionesPendientesViewModel(
     private val repository: OperacionesPendientesRepository,
@@ -44,13 +45,17 @@ class OperacionesPendientesViewModel(
         appScope.launch {
             val hayPendientes = repository.getOperacionesPendientes().isNotEmpty()
             _estadoSync.value = EstadoSync.SINCRONIZANDO
-            val todoOk = syncRepository.sync()
-            if (todoOk) {
-                refrescarDatos()
-                _syncTick.value++
-                _estadoSync.value = if (hayPendientes) EstadoSync.COMPLETADO else EstadoSync.COMPLETADO_SIN_CAMBIOS
-            } else {
-                _estadoSync.value = EstadoSync.CON_ERRORES
+            try {
+                val todoOk = syncRepository.sync()
+                if (todoOk) {
+                    refrescarDatos()
+                    _syncTick.value++
+                    _estadoSync.value = if (hayPendientes) EstadoSync.COMPLETADO else EstadoSync.COMPLETADO_SIN_CAMBIOS
+                } else {
+                    _estadoSync.value = EstadoSync.CON_ERRORES
+                }
+            } catch (_: RateLimitedException) {
+                _estadoSync.value = EstadoSync.RATE_LIMITED
             }
         }
     }
@@ -61,13 +66,17 @@ class OperacionesPendientesViewModel(
         appScope.launch {
             val hayPendientes = repository.getOperacionesPendientes().isNotEmpty()
             _estadoSync.value = EstadoSync.SINCRONIZANDO
-            val todoOk = syncRepository.sync()
-            if (todoOk) {
-                refrescarDatos()
-                _syncTick.value++
-                _estadoSync.value = if (hayPendientes) EstadoSync.COMPLETADO else EstadoSync.COMPLETADO_SIN_CAMBIOS
-            } else {
-                _estadoSync.value = EstadoSync.CON_ERRORES_RECONECTAR
+            try {
+                val todoOk = syncRepository.sync()
+                if (todoOk) {
+                    refrescarDatos()
+                    _syncTick.value++
+                    _estadoSync.value = if (hayPendientes) EstadoSync.COMPLETADO else EstadoSync.COMPLETADO_SIN_CAMBIOS
+                } else {
+                    _estadoSync.value = EstadoSync.CON_ERRORES_RECONECTAR
+                }
+            } catch (_: RateLimitedException) {
+                _estadoSync.value = EstadoSync.RATE_LIMITED
             }
         }
     }
