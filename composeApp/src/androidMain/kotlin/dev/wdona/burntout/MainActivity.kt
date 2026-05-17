@@ -43,7 +43,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            var isDatabaseReady by remember { mutableStateOf(false) }
+            var isDatabaseReady by remember { mutableStateOf(DatabaseActions.isInitialized()) }
             var databaseError by remember { mutableStateOf<String?>(null) }
 
             val notifLauncher = rememberLauncherForActivityResult(
@@ -55,12 +55,14 @@ class MainActivity : ComponentActivity() {
                     notifLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
                 }
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                    val am = getSystemService(Context.ALARM_SERVICE) as AlarmManager
-                    if (!am.canScheduleExactAlarms()) {
-                        val intent = Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM,
-                            Uri.parse("package:$packageName"))
-                        startActivity(intent)
-                    }
+                    try {
+                        val am = getSystemService(Context.ALARM_SERVICE) as AlarmManager
+                        if (!am.canScheduleExactAlarms()) {
+                            val intent = Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM,
+                                Uri.parse("package:$packageName"))
+                            startActivity(intent)
+                        }
+                    } catch (_: Exception) { }
                 }
             }
 

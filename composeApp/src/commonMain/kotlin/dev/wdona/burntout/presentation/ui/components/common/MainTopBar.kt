@@ -14,6 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.material3.IconButton
 import dev.wdona.burntout.presentation.ui.components.equipo.SalirEquipoButton
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -26,6 +27,7 @@ fun MainTopBar(
     onAjustes: (() -> Unit)? = null,
     onSalirEquipo: (() -> Unit)? = null,
     onCrear: (() -> Unit)? = null,
+    iconCrear: @Composable (() -> Unit)? = null,
     onSaltar: (() -> Unit)? = null,
     windowInsets: WindowInsets = WindowInsets(0, 0, 0, 0)
 ) {
@@ -68,7 +70,11 @@ fun MainTopBar(
                 BotonAjustes { onAjustes() }
             }
             if (onCrear != null) {
-                BotonAnadir { onCrear() }
+                if (iconCrear != null) {
+                    IconButton(onClick = { onCrear() }) { iconCrear() }
+                } else {
+                    BotonAnadir { onCrear() }
+                }
             }
             if (onSalirEquipo != null) {
                 SalirEquipoButton { onSalirEquipo() }

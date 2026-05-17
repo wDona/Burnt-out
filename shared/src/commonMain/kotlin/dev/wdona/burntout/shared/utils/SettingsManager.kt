@@ -22,6 +22,7 @@ object SettingsManager {
     private const val KEY_HOST_PERSONALIZADO = "host_personalizado"
     private const val KEY_USAR_HOST_PERSONALIZADO = "usar_host_personalizado"
     private const val KEY_NOTIFICACIONES_ACTIVAS = "notificaciones_activas"
+    private const val KEY_ULTIMO_TAB = "ultimo_tab"
 
     private val KEY_LAST_SYNC_TIMESTAMP get() = "last_sync_timestamp_${_idUsuarioActualFlow.value}"
 
@@ -105,6 +106,8 @@ object SettingsManager {
     fun isRespuestasAnonimas(): Boolean = _respuestasAnonimasFlow.value
     fun isNotificacionesActivas(): Boolean = _notificacionesActivasFlow.value
     fun isAdminOrOwner(): Boolean = _rolActualFlow.value >= 1L
+    fun getUltimoTab(): String = settings.getString(KEY_ULTIMO_TAB, "TablerosTab")
+    fun setUltimoTab(tabKey: String) = settings.putString(KEY_ULTIMO_TAB, tabKey)
 
     fun getLastSyncTimestamp(): Long = _lastSyncTimestampFlow.value
     fun setLastSyncTimestamp(timestamp: Long) {

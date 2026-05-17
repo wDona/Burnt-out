@@ -56,7 +56,16 @@ class MainScreen(
         val perfilTab = remember { PerfilTab(perfilFactory, ajustesFactory) }
         val preguntasTab = remember { PreguntasTab(formularioFactory) }
 
-        TabNavigator(tablerosTab) { tabNavigator ->
+        val allTabs = remember { listOf<Tab>(tablerosTab, equipoTab, leaderboardTab, perfilTab, preguntasTab) }
+        val initialTab = remember {
+            val savedKey = SettingsManager.getUltimoTab()
+            allTabs.firstOrNull { it.key == savedKey } ?: tablerosTab
+        }
+
+        TabNavigator(initialTab) { tabNavigator ->
+            LaunchedEffect(tabNavigator.current.key) {
+                SettingsManager.setUltimoTab(tabNavigator.current.key)
+            }
             Scaffold(
                 content = { paddingValues ->
                     Box(modifier = Modifier.padding(paddingValues).fillMaxSize().background(MaterialTheme.colorScheme.background)) {

@@ -40,6 +40,8 @@ object DatabaseActions {
         }
     }
 
+    fun isInitialized(): Boolean = databases.containsKey(SettingsManager.getHostActual())
+
     fun getDatabase(): AppDatabase {
         val host = SettingsManager.getHostActual()
         if (!databases.containsKey(host)) {

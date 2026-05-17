@@ -44,10 +44,13 @@ class SyncRepositoryImpl(
             response.preguntas.forEach { preguntaRespuestaLocal.upsertPregunta(it) }
             response.tareas.forEach { tareaLocal.insertOrUpdateTarea(it) }
             response.subtareas.forEach { subtareaLocal.insertOrUpdateSubtarea(it) }
+
             val tareasConFecha = response.tareas.filter { it.fechaVencimiento != null && !it.isDeleted && it.idUsuarioAsignado == idUsuario }
+
             if (tareasConFecha.isNotEmpty() && SettingsManager.isNotificacionesActivas()) {
                 onTareasSincronizadas?.invoke(tareasConFecha)
             }
+
             // Para respuestas, como son inmutables o se identifican por UUID, insertOrUpdate es seguro
             response.respuestas.forEach { preguntaRespuestaLocal.responderPregunta(it) }
             response.ajustes.forEach { ajuste ->

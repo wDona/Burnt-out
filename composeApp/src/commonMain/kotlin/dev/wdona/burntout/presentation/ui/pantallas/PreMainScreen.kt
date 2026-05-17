@@ -65,7 +65,6 @@ class PreMainScreen(
                         ajustesFactory = ajustesFactory,
                         leaderboardFactory = leaderboardFactory,
                         operacionesPendientesFactory = operacionesPendientesFactory,
-                        idEquipo = idEquipoSync
                     )
                 )
             } else if (!hoyHechoSync) {
@@ -80,7 +79,6 @@ class PreMainScreen(
                         ajustesFactory = ajustesFactory,
                         leaderboardFactory = leaderboardFactory,
                         operacionesPendientesFactory = operacionesPendientesFactory,
-                        idEquipo = idEquipoSync
                     )
                 )
             } else {

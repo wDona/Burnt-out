@@ -24,9 +24,16 @@ actual class NetworkObserver actual constructor(context: Any?) {
             .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
             .build()
 
-        connectivityManager.registerNetworkCallback(request, callback)
-        val caps = connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork)
-        trySend(caps?.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) == true)
-        awaitClose { connectivityManager.unregisterNetworkCallback(callback) }
+        try {
+            connectivityManager.registerNetworkCallback(request, callback)
+            val caps = connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork)
+            trySend(caps?.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) == true)
+        } catch (_: Exception) {
+            trySend(false)
+        }
+
+        awaitClose {
+            try { connectivityManager.unregisterNetworkCallback(callback) } catch (_: Exception) { }
+        }
     }.distinctUntilChanged()
 }

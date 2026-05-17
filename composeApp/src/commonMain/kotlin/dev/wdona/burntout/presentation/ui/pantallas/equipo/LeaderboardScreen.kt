@@ -5,6 +5,7 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -134,6 +135,7 @@ fun LeaderboardContent(
         titulo = titulo,
         onVolver = onVolver,
         onCrear = if (!esInvitado) { { onCrearEquipoClick() } } else null,
+        iconCrear = { Icon(Icons.AutoMirrored.Filled.ExitToApp, contentDescription = "Salir") },
         onFAB = if (!esInvitado && esAdmin) { { onInvitarClick() } } else null,
         textoFAB = "Invitar",
         iconFAB = { Icon(Icons.Default.Share, contentDescription = "Invitar") }
