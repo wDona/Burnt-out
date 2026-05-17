@@ -83,4 +83,9 @@ class AjusteDaoImpl(appDatabase: AppDatabase) : AjusteDao {
             Updated_At = ajuste.updatedAt
         )
     }
+
+    override fun getAjusteByNombreYUsuario(nombre: String, idUsuario: Long): Ajuste? {
+        return queries.getAjusteByNombreYUsuario(idUsuario, nombre).executeAsOneOrNull()
+            ?.let { AjusteMapper.toDomain(it) }
+    }
 }

@@ -34,15 +34,17 @@ fun Route.ajustesRoutes() {
                 ?: return@post call.respond(HttpStatusCode.BadRequest)
             val ajuste = call.receive<Ajuste>()
             println("[${call.request.origin.remoteHost}] POST /ajustes/$idUsuario nombre=${ajuste.nombre}")
+            val now = System.currentTimeMillis() / 1000
             val nuevoId = dbQuery {
                 AjustesTable.insert {
                     it[AjustesTable.idUsuario] = idUsuario
                     it[nombre] = ajuste.nombre
                     it[valorAjuste] = ajuste.valorAjuste
                     it[isDeleted] = ajuste.isDeleted
+                    it[updatedAt] = now
                 }[AjustesTable.id]
             }
-            call.respond(HttpStatusCode.Created, Ajuste(nuevoId, idUsuario, ajuste.nombre, ajuste.valorAjuste, ajuste.isDeleted))
+            call.respond(HttpStatusCode.Created, Ajuste(nuevoId, idUsuario, ajuste.nombre, ajuste.valorAjuste, ajuste.isDeleted, now))
         }
         route("/{id}") {
             put {
@@ -52,15 +54,17 @@ fun Route.ajustesRoutes() {
                     ?: return@put call.respond(HttpStatusCode.BadRequest)
                 val ajuste = call.receive<Ajuste>()
                 println("[${call.request.origin.remoteHost}] PUT /ajustes/$idUsuario/$id nombre=${ajuste.nombre}")
+                val now = System.currentTimeMillis() / 1000
                 val updatedCount = dbQuery {
                     AjustesTable.update({ (AjustesTable.id eq id) and (AjustesTable.idUsuario eq idUsuario) }) {
                         it[nombre] = ajuste.nombre
                         it[valorAjuste] = ajuste.valorAjuste
                         it[isDeleted] = ajuste.isDeleted
+                        it[updatedAt] = now
                     }
                 }
                 if (updatedCount == 0) return@put call.respond(HttpStatusCode.NotFound)
-                call.respond(Ajuste(id, idUsuario, ajuste.nombre, ajuste.valorAjuste, ajuste.isDeleted))
+                call.respond(Ajuste(id, idUsuario, ajuste.nombre, ajuste.valorAjuste, ajuste.isDeleted, now))
             }
             delete {
                 val idUsuario = call.parameters["idUsuario"]?.toLongOrNull()

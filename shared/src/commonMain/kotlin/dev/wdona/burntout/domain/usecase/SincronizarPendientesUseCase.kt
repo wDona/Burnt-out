@@ -165,7 +165,11 @@ class SincronizarPendientesUseCase(
         return try {
             val ajuste = json.decodeFromString<Ajuste>(op.datosJson)
             val idUsuario = SettingsManager.getIdUsuarioActual()
-            ajusteRemote.modificarAjuste(idUsuario, ajuste)
+            if (op.tipoAccion == TipoAccion.CREACION.getNombreAccion()) {
+                ajusteRemote.anadirAjuste(idUsuario, ajuste)
+            } else {
+                ajusteRemote.modificarAjuste(idUsuario, ajuste)
+            }
             true
         } catch (_: Exception) {
             false

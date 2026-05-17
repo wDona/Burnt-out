@@ -10,6 +10,7 @@ import dev.wdona.burntout.domain.repository.AjusteRepository
 import dev.wdona.burntout.domain.model.TipoAccion
 import dev.wdona.burntout.data.datasource.mapper.AjusteMapper
 import dev.wdona.burntout.shared.utils.SettingsManager
+import dev.wdona.burntout.shared.utils.getCurrentTimestampSeconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
@@ -87,6 +88,53 @@ class AjusteRepositoryImpl(
                 )
             } catch (e: Exception) {
                 println("Error al registrar operación pendiente: ${e.message}")
+            }
+        }
+    }
+
+    override suspend fun guardarAjuste(nombre: String, valor: String, idUsuario: Long) {
+        val timestamp = getCurrentTimestampSeconds()
+        val existing = withContext(NonCancellable + Dispatchers.IO) {
+            localDataSource.getAjusteByNombreYUsuario(nombre, idUsuario)
+        }
+        val ajuste = existing?.copy(valorAjuste = valor, updatedAt = timestamp)
+            ?: Ajuste(idAjuste = null, idUsuario = idUsuario, nombre = nombre, valorAjuste = valor, updatedAt = timestamp)
+
+        withContext(NonCancellable + Dispatchers.IO) {
+            localDataSource.insertOrUpdateAjuste(ajuste)
+        }
+
+        if (SettingsManager.isUsuarioInvitado()) return
+
+        withContext(NonCancellable + Dispatchers.IO) {
+            var isSincronizado = false
+            var finalAjuste = ajuste
+            try {
+                finalAjuste = if (existing != null) {
+                    remoteDataSource.modificarAjuste(idUsuario, ajuste)
+                    ajuste
+                } else {
+                    val creado = remoteDataSource.anadirAjuste(idUsuario, ajuste)
+                    localDataSource.insertOrUpdateAjuste(creado)
+                    creado
+                }
+                isSincronizado = true
+            } catch (e: Exception) {
+                println("No se ha podido guardar ajuste remoto: ${e.message}")
+            }
+
+            val tipoAccion = if (existing != null) TipoAccion.ACTUALIZACION else TipoAccion.CREACION
+            try {
+                operacionesPendientesDatasource.insertOperacionPendiente(
+                    tipoAccion.getNombreAccion(),
+                    Entity.AJUSTE.getNombreEntity(),
+                    "" + finalAjuste.idAjuste,
+                    AjusteMapper.toJson(finalAjuste),
+                    System.currentTimeMillis(),
+                    if (isSincronizado) 1L else 0L
+                )
+            } catch (e: Exception) {
+                println("Error al registrar operación pendiente de ajuste: ${e.message}")
             }
         }
     }

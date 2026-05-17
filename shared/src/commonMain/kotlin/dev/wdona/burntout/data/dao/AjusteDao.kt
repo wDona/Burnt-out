@@ -9,4 +9,5 @@ interface AjusteDao {
     fun getAjustesByUsuario(idUsuario: Long): List<Ajuste>
     fun getAjusteByIdYUsuario(idAjuste: Long, idUsuario: Long): Ajuste?
     fun insertOrUpdateAjuste(ajuste: Ajuste)
+    fun getAjusteByNombreYUsuario(nombre: String, idUsuario: Long): Ajuste?
 }

@@ -5,12 +5,14 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import dev.wdona.burntout.shared.utils.SettingsManager
 
 actual class NotificacionProgramador(private val context: Context) {
 
     private val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
     actual fun programarNotificaciones(idTarea: String, titulo: String, fechaVencimiento: Long, notificacionPersonalizada: Long?) {
+        if (!SettingsManager.isNotificacionesActivas()) return
         val ahora = System.currentTimeMillis()
         val ms24h = 24 * 60 * 60 * 1000L
 

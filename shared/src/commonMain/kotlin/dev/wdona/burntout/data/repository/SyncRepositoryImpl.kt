@@ -45,10 +45,20 @@ class SyncRepositoryImpl(
             response.tareas.forEach { tareaLocal.insertOrUpdateTarea(it) }
             response.subtareas.forEach { subtareaLocal.insertOrUpdateSubtarea(it) }
             val tareasConFecha = response.tareas.filter { it.fechaVencimiento != null && !it.isDeleted && it.idUsuarioAsignado == idUsuario }
-            if (tareasConFecha.isNotEmpty()) onTareasSincronizadas?.invoke(tareasConFecha)
+            if (tareasConFecha.isNotEmpty() && SettingsManager.isNotificacionesActivas()) {
+                onTareasSincronizadas?.invoke(tareasConFecha)
+            }
             // Para respuestas, como son inmutables o se identifican por UUID, insertOrUpdate es seguro
             response.respuestas.forEach { preguntaRespuestaLocal.responderPregunta(it) }
-            response.ajustes.forEach { ajusteLocal.insertOrUpdateAjuste(it) }
+            response.ajustes.forEach { ajuste ->
+                ajusteLocal.insertOrUpdateAjuste(ajuste)
+                if (!ajuste.isDeleted) {
+                    when (ajuste.nombre) {
+                        "respuestas_anonimas" -> SettingsManager.setRespuestasAnonimas(ajuste.valorAjuste == "true")
+                        "notificaciones_activas" -> SettingsManager.setNotificacionesActivas(ajuste.valorAjuste == "true")
+                    }
+                }
+            }
 
             Logger.d("BurntOut Sync", "Pull Sync completado")
 

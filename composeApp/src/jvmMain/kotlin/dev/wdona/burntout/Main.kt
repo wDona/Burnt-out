@@ -20,15 +20,29 @@ import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowPlacement
 import androidx.compose.ui.window.WindowState
 import androidx.compose.ui.window.application
+import dev.wdona.burntout.daemon.DaemonConfigWriter
+import dev.wdona.burntout.daemon.DaemonLauncher
+import dev.wdona.burntout.daemon.DaemonRunner
 import dev.wdona.burntout.presentation.ui.theme.BurntOutMaterialTheme
 import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.*
 import dev.wdona.burntout.shared.db.DatabaseDriverFactory
 import dev.wdona.burntout.shared.db.DatabaseActions
+import dev.wdona.burntout.shared.utils.SettingsManager
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import androidx.compose.ui.res.painterResource
 
-fun main() = application {
+fun main(args: Array<String>) {
+    if (args.contains("--daemon")) {
+        DaemonRunner.run()
+        return
+    }
+    startApplication()
+}
+
+private fun startApplication() = application {
     var isDatabaseReady by remember { mutableStateOf(false) }
     var databaseError by remember { mutableStateOf<String?>(null) }
 
@@ -48,11 +62,28 @@ fun main() = application {
                     "Por favor, ve a la carpeta de usuario/.burntout_app y elimina el archivo 'burntout.db' para reiniciar la aplicación.\n\n" +
                     "Detalle: ${e.message}"
         }
+        if (isDatabaseReady) {
+            DaemonConfigWriter.write(
+                idUsuario = SettingsManager.getIdUsuarioActual(),
+                notificacionesActivas = SettingsManager.isNotificacionesActivas(),
+                host = SettingsManager.getHostActual()
+            )
+            DaemonLauncher.launchIfNeeded()
+            launch {
+                combine(
+                    SettingsManager.idUsuarioActualFlow,
+                    SettingsManager.notificacionesActivasFlow
+                ) { id, notif -> id to notif }
+                .collect { (id, notif) ->
+                    DaemonConfigWriter.write(id, notif, SettingsManager.getHostActual())
+                }
+            }
+        }
     }
 
     Window(
         onCloseRequest = ::exitApplication,
-        title = "Burn't out",
+        title = "Burn't Out",
         icon = painterResource("logoBurntOutIcon.png"),
         state = WindowState(placement = WindowPlacement.Floating,
         width = 800.dp,

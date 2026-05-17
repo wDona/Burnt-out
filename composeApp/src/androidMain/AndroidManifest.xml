@@ -18,6 +18,13 @@
         <receiver
             android:name=".notification.TareaVencimientoReceiver"
             android:exported="false" />
+        <receiver
+            android:name=".notification.BootCompletedReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
         <activity
             android:exported="true"
             android:name=".MainActivity">

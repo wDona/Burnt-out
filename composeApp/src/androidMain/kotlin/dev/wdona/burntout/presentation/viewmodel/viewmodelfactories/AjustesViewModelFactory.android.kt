@@ -20,14 +20,13 @@ import dev.wdona.burntout.data.repository.UsuarioRepositoryImpl
 import dev.wdona.burntout.domain.repository.AjusteRepository
 import dev.wdona.burntout.domain.repository.UsuarioRepository
 import dev.wdona.burntout.presentation.viewmodel.viewmodels.AjustesViewModel
-import dev.wdona.burntout.shared.db.DatabaseDriverFactory
-import dev.wdona.burntout.shared.db.AppDatabase
+import dev.wdona.burntout.notification.NotificacionProgramador
+import dev.wdona.burntout.shared.db.DatabaseActions
 import java.io.Serializable
 import kotlin.jvm.Transient
 actual class AjustesViewModelFactory(@Transient private val context: Context) : Serializable {
     actual fun create(): AjustesViewModel {
-        val driverFactory = DatabaseDriverFactory(context)
-        val database = AppDatabase(driverFactory.createDriver())
+        val database = DatabaseActions.getDatabase()
 
         val dao = AjusteDaoImpl(database)
         val api = AjusteApiImpl()
@@ -58,15 +57,44 @@ actual class AjustesViewModelFactory(@Transient private val context: Context) : 
             pendienteDataSource,
         )
 
-        return getInstance(repository, usuarioRepository)
+        val notificacionProgramador = NotificacionProgramador(context)
+        val onCancelarNotificaciones: (Long) -> Unit = { idUsuario ->
+            val ids = DatabaseActions.getDatabase()
+                .appDatabaseQueries.getTareasConFechaByUsuario(idUsuario)
+                .executeAsList().map { it.ID_Tarea }
+            ids.forEach { notificacionProgramador.cancelarNotificaciones(it) }
+        }
+        val onReprogramarNotificaciones: (Long) -> Unit = { idUsuario ->
+            val ahora = System.currentTimeMillis() / 1000
+            DatabaseActions.getDatabase()
+                .appDatabaseQueries.getTareasConFechaByUsuario(idUsuario)
+                .executeAsList()
+                .filter { (it.Fecha_Vencimiento ?: 0L) > ahora }
+                .forEach { tarea ->
+                    val fecha = tarea.Fecha_Vencimiento ?: return@forEach
+                    notificacionProgramador.programarNotificaciones(
+                        idTarea = tarea.ID_Tarea,
+                        titulo = tarea.Titulo,
+                        fechaVencimiento = fecha * 1000L,
+                        notificacionPersonalizada = tarea.Notificacion_Personalizada?.let { it * 1000L }
+                    )
+                }
+        }
+
+        return getInstance(repository, usuarioRepository, onCancelarNotificaciones, onReprogramarNotificaciones)
     }
 
     companion object {
         private var instance: AjustesViewModel? = null
 
-        fun getInstance(repository: AjusteRepository, usuarioRepository: UsuarioRepository): AjustesViewModel {
+        fun getInstance(
+            repository: AjusteRepository,
+            usuarioRepository: UsuarioRepository,
+            onCancelarNotificaciones: (Long) -> Unit = {},
+            onReprogramarNotificaciones: (Long) -> Unit = {}
+        ): AjustesViewModel {
             if (instance == null) {
-                instance = AjustesViewModel(repository, usuarioRepository)
+                instance = AjustesViewModel(repository, usuarioRepository, onCancelarNotificaciones, onReprogramarNotificaciones)
             }
             return instance!!
         }

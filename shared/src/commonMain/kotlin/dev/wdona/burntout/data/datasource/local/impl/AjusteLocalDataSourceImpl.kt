@@ -32,4 +32,7 @@ class AjusteLocalDataSourceImpl(private val dao: AjusteDao) : AjusteLocalDataSou
         dao.insertOrUpdateAjuste(ajuste)
     }
 
+    override suspend fun getAjusteByNombreYUsuario(nombre: String, idUsuario: Long): Ajuste? {
+        return dao.getAjusteByNombreYUsuario(nombre, idUsuario)
+    }
 }

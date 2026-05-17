@@ -47,14 +47,19 @@ actual class NotificacionProgramador {
         tareas.remove(idTarea)?.forEach { it.cancel() }
     }
 
+    fun cancelarTodasLasNotificaciones() {
+        tareas.keys.toList().forEach { cancelarNotificaciones(it) }
+    }
+
     private fun mostrarNotificacion(titulo: String, mensaje: String) {
         Thread {
             try {
                 if (SystemTray.isSupported()) {
                     val tray = SystemTray.getSystemTray()
-                    val img = NotificacionProgramador::class.java.getResourceAsStream("/logoBurntOutIcon.png")
-                        ?.let { ImageIO.read(it) }
-                        ?: BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB)
+                    val img = runCatching {
+                        NotificacionProgramador::class.java.getResourceAsStream("/logoBurntOutIcon.png")
+                            ?.let { ImageIO.read(it) }
+                    }.getOrNull() ?: BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB)
                     val icon = TrayIcon(img, "BurntOut")
                     icon.isImageAutoSize = true
                     tray.add(icon)

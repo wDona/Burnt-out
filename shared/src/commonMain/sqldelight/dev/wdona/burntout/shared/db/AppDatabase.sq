@@ -190,6 +190,9 @@ UPDATE TareaEntity SET Is_Deleted = 1, Updated_At = ? WHERE ID_Tarea = ?;
 deleteTareasByTablero:
 UPDATE TareaEntity SET Is_Deleted = 1, Updated_At = ? WHERE FK_ID_Tabl = ?;
 
+getTareasConFechaByUsuario:
+SELECT * FROM TareaEntity WHERE FK_ID_Usuario = ? AND Fecha_Vencimiento IS NOT NULL AND Is_Deleted = 0;
+
 -- ===== Operaciones Pendientes =====
 insertOperacionPendiente:
 INSERT INTO OperacionPendienteEntity(tipo_accion, tabla_afectada, id_afectado, datos_json, timestamp_creacion, sincronizado)
@@ -410,6 +413,9 @@ VALUES(?, ?, ?, ?, ?, ?);
 
 getAjustesByUsuario:
 SELECT * FROM AjusteEntity WHERE FK_ID_Usuario = ? AND Is_Deleted = 0;
+
+getAjusteByNombreYUsuario:
+SELECT * FROM AjusteEntity WHERE FK_ID_Usuario = ? AND Nombre_Ajuste = ? AND Is_Deleted = 0 LIMIT 1;
 
 -- ====== EQUIPOS - USUARIOS ======
 insertUserTeam:

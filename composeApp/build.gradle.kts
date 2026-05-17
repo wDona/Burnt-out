@@ -91,6 +91,8 @@ kotlin {
             implementation(compose.desktop.currentOs)
             implementation(libs.kotlinx.coroutinesSwing)
             implementation(libs.logback)
+            implementation(libs.ktor.serialization.kotlinx.json)
+            implementation(libs.sqlDelight.driver.sqlite)
         }
     }
 }
@@ -145,7 +147,7 @@ compose.desktop {
         nativeDistributions {
             // WIN - DEB - ARCH
             targetFormats(TargetFormat.Msi, TargetFormat.Deb, TargetFormat.Rpm)
-            packageName = "BurntOutApp"
+            packageName = "Burn't Out"
             packageVersion = appVersion
             
             modules("java.sql")
@@ -164,7 +166,7 @@ compose.desktop {
             windows {
                 shortcut = true
                 menu = true
-                menuGroup = "BurntOut"
+                menuGroup = "Burn't Out"
                 iconFile.set(project.file("src/jvmMain/resources/logoBurntOutIcon.ico"))
             }
         }

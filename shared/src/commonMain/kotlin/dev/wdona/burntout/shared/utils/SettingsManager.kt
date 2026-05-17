@@ -21,6 +21,7 @@ object SettingsManager {
     private const val KEY_RESPUESTAS_ANONIMAS = "respuestas_anonimas"
     private const val KEY_HOST_PERSONALIZADO = "host_personalizado"
     private const val KEY_USAR_HOST_PERSONALIZADO = "usar_host_personalizado"
+    private const val KEY_NOTIFICACIONES_ACTIVAS = "notificaciones_activas"
 
     private val KEY_LAST_SYNC_TIMESTAMP get() = "last_sync_timestamp_${_idUsuarioActualFlow.value}"
 
@@ -50,6 +51,9 @@ object SettingsManager {
 
     private val _respuestasAnonimasFlow = MutableStateFlow(settings.getBoolean(KEY_RESPUESTAS_ANONIMAS, false))
     val respuestasAnonimasFlow = _respuestasAnonimasFlow.asStateFlow()
+
+    private val _notificacionesActivasFlow = MutableStateFlow(settings.getBoolean(KEY_NOTIFICACIONES_ACTIVAS, true))
+    val notificacionesActivasFlow = _notificacionesActivasFlow.asStateFlow()
 
     private val _lastSyncTimestampFlow = MutableStateFlow(settings.getLong("last_sync_timestamp_${settings.getLong(KEY_ID_USUARIO_ACTUAL, Long.MIN_VALUE)}", 0L))
     val lastSyncTimestampFlow = _lastSyncTimestampFlow.asStateFlow()
@@ -99,6 +103,7 @@ object SettingsManager {
     }
     fun getSincronizadoEnEstaApertura(): Boolean = _sincronizadoEnEstaAperturaFlow.value
     fun isRespuestasAnonimas(): Boolean = _respuestasAnonimasFlow.value
+    fun isNotificacionesActivas(): Boolean = _notificacionesActivasFlow.value
     fun isAdminOrOwner(): Boolean = _rolActualFlow.value >= 1L
 
     fun getLastSyncTimestamp(): Long = _lastSyncTimestampFlow.value
@@ -110,6 +115,11 @@ object SettingsManager {
     fun setRespuestasAnonimas(anonimas: Boolean) {
         settings.putBoolean(KEY_RESPUESTAS_ANONIMAS, anonimas)
         _respuestasAnonimasFlow.value = anonimas
+    }
+
+    fun setNotificacionesActivas(activas: Boolean) {
+        settings.putBoolean(KEY_NOTIFICACIONES_ACTIVAS, activas)
+        _notificacionesActivasFlow.value = activas
     }
     fun isAutenticado(): Boolean = _isAutenticadoFlow.value
     fun isUsuarioInvitado(): Boolean = getIdUsuarioActual() == Long.MIN_VALUE
@@ -213,5 +223,6 @@ object SettingsManager {
         _lastSyncTimestampFlow.value = 0L
         _esUltimoCuestionarioHecho.value = false
         _cuestionarioHoyHechoFlow.value = false
+        _notificacionesActivasFlow.value = true
     }
 }

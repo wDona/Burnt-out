@@ -68,6 +68,7 @@ class SettingsScreen(val factory: AjustesViewModelFactory) : Screen {
 fun SettingsContent(viewModel: AjustesViewModel, onVolver: () -> Unit, onLogout: () -> Unit, onDBEliminada: () -> Unit = {}) {
     val ajustes by viewModel.ajustesUiState.collectAsStateWithLifecycle()
     val respuestasAnonimas by viewModel.respuestasAnonimas.collectAsStateWithLifecycle()
+    val notificacionesActivas by viewModel.notificacionesActivas.collectAsStateWithLifecycle()
     var mostrarDialogoEliminarDB by remember { mutableStateOf(false) }
 
     if (mostrarDialogoEliminarDB) {
@@ -131,6 +132,42 @@ fun SettingsContent(viewModel: AjustesViewModel, onVolver: () -> Unit, onLogout:
                         Switch(
                             checked = respuestasAnonimas,
                             onCheckedChange = { viewModel.toggleRespuestasAnonimas() },
+                            modifier = Modifier.padding(start = 12.dp)
+                        )
+                    }
+                }
+            }
+
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            ) {
+                Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+                    Text(
+                        text = "Notificaciones",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.padding(bottom = 4.dp)
+                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth().clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) { viewModel.toggleNotificacionesActivas() }.padding(vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = "Notificaciones activas",
+                                style = MaterialTheme.typography.bodyLarge
+                            )
+                            Text(
+                                text = "Recibir alertas de tareas con fecha de vencimiento",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        Switch(
+                            checked = notificacionesActivas,
+                            onCheckedChange = { viewModel.toggleNotificacionesActivas() },
                             modifier = Modifier.padding(start = 12.dp)
                         )
                     }

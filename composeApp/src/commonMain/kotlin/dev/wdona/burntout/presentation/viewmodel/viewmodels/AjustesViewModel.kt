@@ -30,7 +30,9 @@ data class AjustesUiState(
 
 class AjustesViewModel(
     private val repository: AjusteRepository,
-    private val usuarioRepository: UsuarioRepository
+    private val usuarioRepository: UsuarioRepository,
+    private val onCancelarNotificaciones: (idUsuario: Long) -> Unit = {},
+    private val onReprogramarNotificaciones: (idUsuario: Long) -> Unit = {}
 ) : ScreenModel {
     
     val ajustesUiState = combine(
@@ -93,21 +95,51 @@ class AjustesViewModel(
     private val _respuestasAnonimas = MutableStateFlow(SettingsManager.isRespuestasAnonimas())
     val respuestasAnonimas = _respuestasAnonimas.asStateFlow()
 
+    private val _notificacionesActivas = MutableStateFlow(SettingsManager.isNotificacionesActivas())
+    val notificacionesActivas = _notificacionesActivas.asStateFlow()
+
     fun toggleRespuestasAnonimas() {
         val nuevo = !_respuestasAnonimas.value
         SettingsManager.setRespuestasAnonimas(nuevo)
         _respuestasAnonimas.value = nuevo
+        val idUsuario = SettingsManager.getIdUsuarioActual()
+        if (idUsuario != Long.MIN_VALUE) {
+            screenModelScope.launch {
+                try { repository.guardarAjuste("respuestas_anonimas", nuevo.toString(), idUsuario) }
+                catch (_: Exception) { }
+            }
+        }
+    }
+
+    fun toggleNotificacionesActivas() {
+        val nuevo = !_notificacionesActivas.value
+        SettingsManager.setNotificacionesActivas(nuevo)
+        _notificacionesActivas.value = nuevo
+        val idUsuario = SettingsManager.getIdUsuarioActual()
+        screenModelScope.launch(kotlinx.coroutines.Dispatchers.IO) {
+            if (!nuevo) {
+                try { onCancelarNotificaciones(idUsuario) } catch (_: Exception) { }
+            } else if (idUsuario != Long.MIN_VALUE) {
+                try { onReprogramarNotificaciones(idUsuario) } catch (_: Exception) { }
+            }
+            if (idUsuario != Long.MIN_VALUE) {
+                try { repository.guardarAjuste("notificaciones_activas", nuevo.toString(), idUsuario) }
+                catch (_: Exception) { }
+            }
+        }
     }
 
     fun resetSettings() {
+        val idUsuario = SettingsManager.getIdUsuarioActual()
         val token = SettingsManager.getTokenUsuario()
         val invitado = SettingsManager.isUsuarioInvitado()
-        SettingsManager.clearAll()
-        if (!invitado && token.isNotBlank()) {
-            screenModelScope.launch {
+        screenModelScope.launch(kotlinx.coroutines.Dispatchers.IO) {
+            try { onCancelarNotificaciones(idUsuario) } catch (_: Exception) { }
+            if (!invitado && token.isNotBlank()) {
                 try { usuarioRepository.cerrarSesion(token) } catch (_: Exception) { }
             }
         }
+        SettingsManager.clearAll()
     }
 
     fun salirDelEquipo() {

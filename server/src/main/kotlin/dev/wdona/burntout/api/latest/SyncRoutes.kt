@@ -5,6 +5,7 @@ import dev.wdona.burntout.data.api.SyncResponse
 import dev.wdona.burntout.db.DatabaseFactory.dbQuery
 import dev.wdona.burntout.db.tables.*
 import dev.wdona.burntout.shared.domain.*
+import dev.wdona.burntout.domain.model.Ajuste
 import dev.wdona.burntout.domain.model.Respuesta
 import io.ktor.server.request.*
 import io.ktor.server.response.*
@@ -148,7 +149,18 @@ fun Route.syncRoutes() {
                     equipos = equipos,
                     usuarios = usuarios,
                     organizaciones = organizaciones,
-                    ajustes = emptyList(),
+                    ajustes = AjustesTable.selectAll()
+                        .where { (AjustesTable.idUsuario eq req.idUsuario) and (AjustesTable.updatedAt greater req.lastSyncTimestamp) }
+                        .map { row ->
+                            Ajuste(
+                                idAjuste = row[AjustesTable.id],
+                                idUsuario = row[AjustesTable.idUsuario],
+                                nombre = row[AjustesTable.nombre],
+                                valorAjuste = row[AjustesTable.valorAjuste],
+                                isDeleted = row[AjustesTable.isDeleted],
+                                updatedAt = row[AjustesTable.updatedAt]
+                            )
+                        },
                     serverTimestamp = serverTimestamp
                 )
             }
