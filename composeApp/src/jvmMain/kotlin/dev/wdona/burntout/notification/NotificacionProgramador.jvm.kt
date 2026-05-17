@@ -6,6 +6,7 @@ import java.awt.image.BufferedImage
 import java.util.Date
 import java.util.Timer
 import java.util.TimerTask
+import javax.imageio.ImageIO
 
 actual class NotificacionProgramador {
 
@@ -51,7 +52,9 @@ actual class NotificacionProgramador {
             try {
                 if (SystemTray.isSupported()) {
                     val tray = SystemTray.getSystemTray()
-                    val img = BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB)
+                    val img = NotificacionProgramador::class.java.getResourceAsStream("/logoBurntOutIcon.png")
+                        ?.let { ImageIO.read(it) }
+                        ?: BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB)
                     val icon = TrayIcon(img, "BurntOut")
                     icon.isImageAutoSize = true
                     tray.add(icon)

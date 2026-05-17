@@ -47,14 +47,13 @@ import dev.wdona.burntout.domain.repository.SyncRepository
 import dev.wdona.burntout.domain.usecase.RefrescarDatosUseCase
 import dev.wdona.burntout.domain.usecase.SincronizarPendientesUseCase
 import dev.wdona.burntout.presentation.viewmodel.viewmodels.OperacionesPendientesViewModel
-import dev.wdona.burntout.shared.db.AppDatabase
-import dev.wdona.burntout.shared.db.DatabaseDriverFactory
+import dev.wdona.burntout.shared.db.DatabaseActions
 import java.io.Serializable
 import kotlin.jvm.Transient
 
 actual class OperacionesPendientesViewModelFactory(@Transient private val context: Context) : Serializable {
     actual fun create(): OperacionesPendientesViewModel {
-        val database = AppDatabase(DatabaseDriverFactory(context).createDriver())
+        val database = DatabaseActions.getDatabase()
 
         val pendienteDao = OperacionPendienteDaoImpl(database)
         val pendienteDataSource = OperacionPendienteLocalDataSourceImpl(pendienteDao)

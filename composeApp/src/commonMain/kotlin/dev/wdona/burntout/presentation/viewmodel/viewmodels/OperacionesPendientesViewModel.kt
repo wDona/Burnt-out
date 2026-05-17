@@ -5,6 +5,7 @@ import dev.wdona.burntout.domain.model.OperacionPendiente
 import dev.wdona.burntout.domain.repository.OperacionesPendientesRepository
 import dev.wdona.burntout.domain.repository.SyncRepository
 import dev.wdona.burntout.domain.usecase.RefrescarDatosUseCase
+import dev.wdona.burntout.shared.utils.SettingsManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -36,6 +37,10 @@ class OperacionesPendientesViewModel(
     val syncTick: StateFlow<Long> = _syncTick.asStateFlow()
 
     fun sincronizarAlIniciar() {
+        if (SettingsManager.isUsuarioInvitado()) {
+            _estadoSync.value = EstadoSync.COMPLETADO_SIN_CAMBIOS
+            return
+        }
         appScope.launch {
             val hayPendientes = repository.getOperacionesPendientes().isNotEmpty()
             _estadoSync.value = EstadoSync.SINCRONIZANDO
@@ -51,6 +56,7 @@ class OperacionesPendientesViewModel(
     }
 
     fun sincronizarPorReconexion() {
+        if (SettingsManager.isUsuarioInvitado()) return
         if (_estadoSync.value == EstadoSync.SINCRONIZANDO) return
         appScope.launch {
             val hayPendientes = repository.getOperacionesPendientes().isNotEmpty()

@@ -7,6 +7,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import androidx.core.app.NotificationCompat
+import dev.wdona.burntout.R
 
 class TareaVencimientoReceiver : BroadcastReceiver() {
 
@@ -25,7 +26,7 @@ class TareaVencimientoReceiver : BroadcastReceiver() {
         }
 
         val notificacion = NotificationCompat.Builder(context, CANAL_ID)
-            .setSmallIcon(android.R.drawable.ic_dialog_alert)
+            .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setContentTitle(tituloNotif)
             .setContentText(cuerpo)
             .setPriority(NotificationCompat.PRIORITY_HIGH)

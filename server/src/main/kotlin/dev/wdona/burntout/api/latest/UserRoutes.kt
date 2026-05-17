@@ -63,7 +63,7 @@ fun Route.usuariosRoutes() {
             println("[${call.request.origin.remoteHost}] POST /usuarios username=${request.username} modo=${request.modo}")
 
             val existe = dbQuery {
-                UsuariosTable.selectAll().where { (UsuariosTable.username eq request.username) and (UsuariosTable.isDeleted eq false) }.count() > 0
+                UsuariosTable.selectAll().where { (UsuariosTable.username.lowerCase() eq request.username.lowercase()) and (UsuariosTable.isDeleted eq false) }.count() > 0
             }
             if (existe) {
                 return@post call.respond(HttpStatusCode.Conflict, "El nombre de usuario ya existe")
@@ -104,7 +104,7 @@ fun Route.usuariosRoutes() {
             println("[${call.request.origin.remoteHost}] POST /usuarios/login username=${request.username}")
             val usuario = dbQuery {
                 UsuariosTable.selectAll().where {
-                    (UsuariosTable.username eq request.username) and (UsuariosTable.isDeleted eq false)
+                    (UsuariosTable.username.lowerCase() eq request.username.lowercase()) and (UsuariosTable.isDeleted eq false)
                 }.map { rowToUsuario(it) }.singleOrNull()
             } ?: return@post call.respond(HttpStatusCode.Unauthorized)
 
@@ -123,7 +123,7 @@ fun Route.usuariosRoutes() {
             val username = call.parameters["username"] ?: return@get call.respond(HttpStatusCode.BadRequest)
             println("[${call.request.origin.remoteHost}] GET /usuarios/existe/$username")
             val existe = dbQuery {
-                UsuariosTable.selectAll().where { (UsuariosTable.username eq username) and (UsuariosTable.isDeleted eq false) }.count() > 0
+                UsuariosTable.selectAll().where { (UsuariosTable.username.lowerCase() eq username.lowercase()) and (UsuariosTable.isDeleted eq false) }.count() > 0
             }
             call.respond(existe)
         }
@@ -218,7 +218,7 @@ fun Route.usuariosRoutes() {
             val username = call.parameters["username"] ?: return@get call.respond(HttpStatusCode.BadRequest)
             println("[${call.request.origin.remoteHost}] GET /usuarios/username/$username")
             val usuario = dbQuery {
-                UsuariosTable.selectAll().where { (UsuariosTable.username eq username) and (UsuariosTable.isDeleted eq false) }
+                UsuariosTable.selectAll().where { (UsuariosTable.username.lowerCase() eq username.lowercase()) and (UsuariosTable.isDeleted eq false) }
                     .map { rowToUsuario(it) }.singleOrNull()
             } ?: return@get call.respond(HttpStatusCode.NotFound)
             call.respond(usuario)

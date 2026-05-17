@@ -328,7 +328,7 @@ fun PreguntasInicialesContent(onVolver: (() -> Unit)? = null, viewModel: Pregunt
                                                     2 -> "Algunas veces / Una vez al mes o menos"
                                                     3 -> "Regularmente / Pocas veces al mes"
                                                     4 -> "Bastantes veces / Una vez por semana"
-                                                    5 -> "Casi siempre / Pocas veces por semana"
+                                                    5 -> "Casi siempre / Algunas veces por semana"
                                                     6 -> "Siempre / Todos los días"
                                                     else -> "invalid"
                                                 }
