@@ -146,8 +146,8 @@ compose.desktop {
 
         nativeDistributions {
             // WIN - DEB - ARCH
-            targetFormats(TargetFormat.Msi, TargetFormat.Deb, TargetFormat.Rpm)
-            packageName = "Burn't Out"
+            targetFormats(TargetFormat.Msi, TargetFormat.Deb, TargetFormat.AppImage)
+            packageName = "Burnt Out"
             packageVersion = appVersion
             
             modules("java.sql")

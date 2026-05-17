@@ -91,6 +91,10 @@ jobs:
           java-version: '17'
           distribution: 'zulu'
           cache: 'gradle'
+      - name: Install dependencies for .deb packaging
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y fakeroot
       - name: Build Linux & Server
         run: |
           chmod +x gradlew
