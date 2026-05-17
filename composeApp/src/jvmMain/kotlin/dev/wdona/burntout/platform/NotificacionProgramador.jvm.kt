@@ -1,4 +1,4 @@
-package dev.wdona.burntout.notification
+package dev.wdona.burntout.platform
 
 import java.awt.SystemTray
 import java.awt.TrayIcon

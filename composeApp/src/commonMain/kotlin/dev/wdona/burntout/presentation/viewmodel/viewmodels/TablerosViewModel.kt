@@ -17,15 +17,10 @@ class TablerosViewModel(private val repository: TableroRepository) : ScreenModel
     private val _listaTableros = MutableStateFlow<List<Tablero>>(emptyList())
     val listaTableros: StateFlow<List<Tablero>> = _listaTableros
 
-    /**
-     * Confirma si el tablero sigue existiendo en el servidor.
-     * Devuelve true ante cualquier error de red o estado distinto de 404, para evitar
-     * sacar al usuario de la pantalla por fallos transitorios.
-     */
     suspend fun tableroExisteEnRemoto(idTablero: String): Boolean {
         return try {
             repository.tableroExisteRemoto(idTablero)
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             true
         }
     }
@@ -37,12 +32,6 @@ class TablerosViewModel(private val repository: TableroRepository) : ScreenModel
     fun cargarTableros(idOrg: Long, idEquipo: Long) {
         screenModelScope.launch {
             recargarTableros(idOrg, idEquipo)
-        }
-    }
-
-    fun cargarTableroPorId(idTablero: String) {
-        screenModelScope.launch {
-            _uiState.value = repository.getTableroById(idTablero)
         }
     }
 

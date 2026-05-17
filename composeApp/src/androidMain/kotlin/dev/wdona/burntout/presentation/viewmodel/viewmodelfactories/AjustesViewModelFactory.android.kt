@@ -1,4 +1,4 @@
-package dev.wdona.burntout.presentation.viewmodel.viewmodelfactories
+﻿package dev.wdona.burntout.presentation.viewmodel.viewmodelfactories
 
 import android.content.Context
 import dev.wdona.burntout.data.api.impl.AjusteApiImpl
@@ -20,7 +20,7 @@ import dev.wdona.burntout.data.repository.UsuarioRepositoryImpl
 import dev.wdona.burntout.domain.repository.AjusteRepository
 import dev.wdona.burntout.domain.repository.UsuarioRepository
 import dev.wdona.burntout.presentation.viewmodel.viewmodels.AjustesViewModel
-import dev.wdona.burntout.notification.NotificacionProgramador
+import dev.wdona.burntout.platform.NotificacionProgramador
 import dev.wdona.burntout.shared.db.DatabaseActions
 import java.io.Serializable
 import kotlin.jvm.Transient
@@ -58,20 +58,22 @@ actual class AjustesViewModelFactory(@Transient private val context: Context) : 
         )
 
         val notificacionProgramador = NotificacionProgramador(context)
+
         val onCancelarNotificaciones: (Long) -> Unit = { idUsuario ->
             val ids = DatabaseActions.getDatabase()
                 .appDatabaseQueries.getTareasConFechaByUsuario(idUsuario)
                 .executeAsList().map { it.ID_Tarea }
             ids.forEach { notificacionProgramador.cancelarNotificaciones(it) }
         }
+
         val onReprogramarNotificaciones: (Long) -> Unit = { idUsuario ->
             val ahora = System.currentTimeMillis() / 1000
             DatabaseActions.getDatabase()
                 .appDatabaseQueries.getTareasConFechaByUsuario(idUsuario)
                 .executeAsList()
-                .filter { (it.Fecha_Vencimiento ?: 0L) > ahora }
+                .filter { (it.Fecha_Vencimiento) > ahora }
                 .forEach { tarea ->
-                    val fecha = tarea.Fecha_Vencimiento ?: return@forEach
+                    val fecha = tarea.Fecha_Vencimiento
                     notificacionProgramador.programarNotificaciones(
                         idTarea = tarea.ID_Tarea,
                         titulo = tarea.Titulo,

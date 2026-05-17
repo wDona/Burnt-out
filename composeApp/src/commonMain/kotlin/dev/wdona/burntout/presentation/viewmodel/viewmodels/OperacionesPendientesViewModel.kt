@@ -21,7 +21,7 @@ class OperacionesPendientesViewModel(
     private val syncRepository: SyncRepository,
     private val refrescarDatos: RefrescarDatosUseCase
 ) : ScreenModel {
-    // Scope propio — Voyager cancela screenModelScope al salir de PreMainScreen,
+    // Scope propio - Voyager cancela screenModelScope al salir de PreMainScreen,
     // pero este persiste con el singleton para que sincronizarPorReconexion funcione desde cualquier pantalla.
     private val appScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 

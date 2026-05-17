@@ -1,19 +1,16 @@
 package dev.wdona.burntout.presentation.ui.pantallas.perfil
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CloudOff
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Person4
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
@@ -43,13 +40,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.unit.dp
-import dev.wdona.burntout.presentation.ui.pantallas.SettingsScreen
+import dev.wdona.burntout.presentation.ui.pantallas.ajustes.SettingsScreen
 import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.AjustesViewModelFactory
 import dev.wdona.burntout.presentation.ui.components.common.BateriaBurnout
 import dev.wdona.burntout.presentation.ui.components.common.FilaTextoPlaceholder
-import dev.wdona.burntout.presentation.ui.theme.BurntOutMaterialTheme
 import dev.wdona.burntout.presentation.viewmodel.viewmodels.AjustesViewModel
-import dev.wdona.burntout.shared.domain.Usuario
 import androidx.compose.runtime.collectAsState
 
 class PerfilScreen(val factory: MiPerfilViewModelFactory, val ajustesFactory: AjustesViewModelFactory, val onVolver: (() -> Unit)? = null, var idUsuario: Long? = null) : Screen {
@@ -74,7 +69,6 @@ class PerfilScreen(val factory: MiPerfilViewModelFactory, val ajustesFactory: Aj
             viewmodel,
             onAjustes = { navigator.push(SettingsScreen(ajustesFactory)) },
             onVolver = onVolver,
-            settingsViewModel,
             idUsuarioActual = idUsuarioActual
         )
     }
@@ -87,7 +81,6 @@ fun PerfilContent(
     viewModel: PerfilViewModel,
     onAjustes: () -> Unit,
     onVolver: (() -> Unit)? = null,
-    settingsViewModel: AjustesViewModel,
     idUsuarioActual: Long
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()

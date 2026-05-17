@@ -1,4 +1,4 @@
-package dev.wdona.burntout.notification
+package dev.wdona.burntout.platform
 
 expect class NotificacionProgramador {
     fun programarNotificaciones(idTarea: String, titulo: String, fechaVencimiento: Long, notificacionPersonalizada: Long? = null)

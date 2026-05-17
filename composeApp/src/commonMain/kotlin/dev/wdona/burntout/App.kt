@@ -24,6 +24,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.transitions.CrossfadeTransition
+import dev.wdona.burntout.platform.NetworkObserver
+import dev.wdona.burntout.platform.PressBackHandler
 import dev.wdona.burntout.presentation.ui.pantallas.LoginScreen
 import dev.wdona.burntout.presentation.ui.pantallas.PreMainScreen
 import dev.wdona.burntout.presentation.ui.theme.BurntOutMaterialTheme

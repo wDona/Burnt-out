@@ -10,14 +10,19 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.server.plugins.origin
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
-import io.ktor.server.routing.*
-import org.jetbrains.exposed.sql.*
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import io.ktor.server.routing.Route
+import io.ktor.server.routing.get
+import io.ktor.server.routing.post
+import io.ktor.server.routing.route
+import org.jetbrains.exposed.sql.and
+import org.jetbrains.exposed.sql.insert
+import org.jetbrains.exposed.sql.selectAll
 
 fun Route.invitacionesRoutes() {
     route("/invitaciones") {
         post {
             val request = call.receive<GenerarInvitacionRequest>()
+
             println("[${call.request.origin.remoteHost}] POST /invitaciones idAdmin=${request.idUsuarioAdmin}")
 
             val result = dbQuery {
@@ -27,11 +32,13 @@ fun Route.invitacionesRoutes() {
                     ?: return@dbQuery null to "Usuario no encontrado"
 
                 val adminRol = adminRow[UsuariosTable.rol]
+
                 if (adminRol != "ADMIN" && adminRol != "OWNER") {
                     return@dbQuery null to "Solo los admins pueden generar códigos"
                 }
 
                 val idOrg = adminRow[UsuariosTable.idOrganizacion]
+
                 val orgNombre = OrganizacionesTable.selectAll()
                     .where { (OrganizacionesTable.id eq idOrg) and (OrganizacionesTable.isDeleted eq false) }
                     .single()[OrganizacionesTable.nombre]
@@ -59,6 +66,7 @@ fun Route.invitacionesRoutes() {
             }
 
             val (invitacion, error) = result
+
             if (error != null) {
                 call.respond(HttpStatusCode.Forbidden, error)
             } else {
@@ -69,8 +77,10 @@ fun Route.invitacionesRoutes() {
         get {
             val idOrg = call.request.queryParameters["idOrg"]?.toLongOrNull()
                 ?: return@get call.respond(HttpStatusCode.BadRequest)
+
             val idAdmin = call.request.queryParameters["idUsuarioAdmin"]?.toLongOrNull()
                 ?: return@get call.respond(HttpStatusCode.BadRequest)
+
             println("[${call.request.origin.remoteHost}] GET /invitaciones idOrg=$idOrg idAdmin=$idAdmin")
 
             val result = dbQuery {
@@ -111,7 +121,9 @@ private fun generarCodigo(nombreOrg: String): String {
         .filter { it.isLetterOrDigit() }
         .take(8)
         .ifEmpty { "ORG" }
+
     val chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
     val suffix = (1..6).map { chars.random() }.joinToString("")
+
     return "$prefix-$suffix"
 }

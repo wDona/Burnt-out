@@ -1,4 +1,4 @@
-package dev.wdona.burntout
+package dev.wdona.burntout.platform
 
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -13,7 +13,7 @@ actual class NetworkObserver actual constructor(context: Any?) {
                 socket.connect(java.net.InetSocketAddress("8.8.8.8", 53), 1500)
                 socket.close()
                 true
-            } catch (e: Exception) { false }
+            } catch (_: Exception) { false }
             emit(connected)
             delay(2000)
         }

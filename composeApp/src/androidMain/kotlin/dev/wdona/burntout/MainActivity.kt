@@ -29,6 +29,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import dev.wdona.burntout.platform.NetworkObserver
 import dev.wdona.burntout.presentation.ui.theme.BurntOutMaterialTheme
 import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.*
 import dev.wdona.burntout.shared.db.DatabaseDriverFactory

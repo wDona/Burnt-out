@@ -19,33 +19,16 @@ fun Route.equiposRoutes() {
     route("/equipos") {
         get {
             val idOrg = call.request.queryParameters["idOrg"]?.toLongOrNull()
+
             println("[${call.request.origin.remoteHost}] GET /equipos idOrg=$idOrg")
-            val resultado = dbQuery {
-                val query = if (idOrg != null) {
-                    EquiposTable.selectAll().where { (EquiposTable.idOrganizacion eq idOrg) and (EquiposTable.isDeleted eq false) }
-                } else {
-                    EquiposTable.selectAll().where { EquiposTable.isDeleted eq false }
-                }
-                query.map { row ->
-                    val eqId = row[EquiposTable.id]
-                    val miembros = EquipoMiembrosTable
-                        .selectAll().where { EquipoMiembrosTable.idEquipo eq eqId }
-                        .map { it[EquipoMiembrosTable.idMiembro] }
-                    Equipo(
-                        idEquipo = eqId,
-                        titulo = row[EquiposTable.titulo],
-                        puntuacion = row[EquiposTable.puntuacion],
-                        idOrganizacion = row[EquiposTable.idOrganizacion],
-                        idMiembros = miembros,
-                        isDeleted = row[EquiposTable.isDeleted]
-                    )
-                }
-            }
-            call.respond(resultado)
+
+            call.respond(getEquipos(idOrg))
         }
         post {
             val equipo = call.receive<Equipo>()
+
             println("[${call.request.origin.remoteHost}] POST /equipos titulo=${equipo.titulo}")
+
             val nuevoId = dbQuery {
                 val id = EquiposTable.insert {
                     it[titulo] = equipo.titulo
@@ -54,88 +37,58 @@ fun Route.equiposRoutes() {
                     it[isDeleted] = equipo.isDeleted
                     it[updatedAt] = System.currentTimeMillis() / 1000
                 }[EquiposTable.id]
-                
-                equipo.idMiembros.forEach { idMiembroParam ->
-                    val userRow = UsuariosTable.selectAll().where { UsuariosTable.id eq idMiembroParam }.singleOrNull()
-                    val idEquipoAnterior = userRow?.get(UsuariosTable.idEquipo) ?: 0L
 
-                    EquipoMiembrosTable.deleteWhere { idMiembro eq idMiembroParam }
-                    
-                    EquipoMiembrosTable.insert {
-                        it[idEquipo] = id
-                        it[idMiembro] = idMiembroParam
-                    }
-                    
-                    UsuariosTable.update({ UsuariosTable.id eq idMiembroParam }) {
-                        it[idEquipo] = id
-                    }
-
-                    if (idEquipoAnterior > 0L && idEquipoAnterior != id) {
-                        val miembrosRestantes = EquipoMiembrosTable
-                            .selectAll().where { EquipoMiembrosTable.idEquipo eq idEquipoAnterior }
-                            .count()
-                        if (miembrosRestantes == 0L) {
-                            EquiposTable.update({ (EquiposTable.id eq idEquipoAnterior) and (EquiposTable.isDeleted eq false) }) {
-                                it[isDeleted] = true
-                            }
-                        }
-                    }
+                equipo.idMiembros.forEach { idMiembro ->
+                    val idEquipoAnterior = UsuariosTable.selectAll()
+                        .where { UsuariosTable.id eq idMiembro }
+                        .singleOrNull()?.get(UsuariosTable.idEquipo) ?: 0L
+                    transferirMiembro(idMiembro, id)
+                    limpiarEquipoVacioSiAplica(idEquipoAnterior, idEquipoDestino = id)
                 }
                 id
             }
             call.respond(HttpStatusCode.Created, equipo.copy(idEquipo = nuevoId))
         }
+
         route("/{id}") {
             get {
                 val id = call.parameters["id"]?.toLongOrNull()
                     ?: return@get call.respond(HttpStatusCode.BadRequest)
+
                 println("[${call.request.origin.remoteHost}] GET /equipos/$id")
-                val equipo = dbQuery {
-                    val row = EquiposTable.selectAll().where { (EquiposTable.id eq id) and (EquiposTable.isDeleted eq false) }.singleOrNull()
-                    if (row != null) {
-                        val miembros = EquipoMiembrosTable
-                            .selectAll().where { EquipoMiembrosTable.idEquipo eq id }
-                            .map { it[EquipoMiembrosTable.idMiembro] }
-                        
-                        println("Miembros del equipo $id: $miembros")
-                        
-                        Equipo(
-                            idEquipo = row[EquiposTable.id],
-                            titulo = row[EquiposTable.titulo],
-                            puntuacion = row[EquiposTable.puntuacion],
-                            idOrganizacion = row[EquiposTable.idOrganizacion],
-                            idMiembros = miembros,
-                            isDeleted = row[EquiposTable.isDeleted]
-                        )
-                    } else null
-                } ?: return@get call.respond(HttpStatusCode.NotFound)
+
+                val equipo = dbQuery { getEquipoConMiembros(id) } ?: return@get call.respond(HttpStatusCode.NotFound)
                 call.respond(equipo)
             }
             put {
                 val id = call.parameters["id"]?.toLongOrNull()
                     ?: return@put call.respond(HttpStatusCode.BadRequest)
+
                 val equipo = call.receive<Equipo>()
+
                 println("[${call.request.origin.remoteHost}] PUT /equipos/$id titulo=${equipo.titulo}")
+
                 val isSuccess = dbQuery {
-                    val updatedCount = EquiposTable.update({ EquiposTable.id eq id }) {
+                    val filasActualizadas = EquiposTable.update({ EquiposTable.id eq id }) {
                         it[titulo] = equipo.titulo
                         it[puntuacion] = equipo.puntuacion
                         it[idOrganizacion] = equipo.idOrganizacion
                         it[isDeleted] = equipo.isDeleted
                         it[updatedAt] = System.currentTimeMillis() / 1000
                     }
-                    if (updatedCount > 0) {
+
+                    if (filasActualizadas > 0) {
                         EquipoMiembrosTable.deleteWhere { EquipoMiembrosTable.idEquipo eq id }
+
                         equipo.idMiembros.forEach { mId ->
                             EquipoMiembrosTable.insert {
                                 it[idEquipo] = id
                                 it[idMiembro] = mId
                             }
                         }
+
                         true
-                    } else {
-                        false
-                    }
+                    } else false
                 }
                 if (!isSuccess) return@put call.respond(HttpStatusCode.NotFound)
                 call.respond(equipo.copy(idEquipo = id))
@@ -143,31 +96,41 @@ fun Route.equiposRoutes() {
             delete {
                 val id = call.parameters["id"]?.toLongOrNull()
                     ?: return@delete call.respond(HttpStatusCode.BadRequest)
+
                 println("[${call.request.origin.remoteHost}] DELETE /equipos/$id")
+
                 val deletedCount = dbQuery {
                     EquipoMiembrosTable.deleteWhere { EquipoMiembrosTable.idEquipo eq id }
+
                     EquiposTable.update({ (EquiposTable.id eq id) and (EquiposTable.isDeleted eq false) }) {
                         it[isDeleted] = true
                     }
                 }
+
                 if (deletedCount == 0) return@delete call.respond(HttpStatusCode.NotFound)
                 call.respond(HttpStatusCode.NoContent)
             }
             put("/puntuacion/{puntos}") {
                 val id = call.parameters["id"]?.toLongOrNull()
                     ?: return@put call.respond(HttpStatusCode.BadRequest)
+
                 val puntos = call.parameters["puntos"]?.toLongOrNull()
                     ?: return@put call.respond(HttpStatusCode.BadRequest)
+
                 println("[${call.request.origin.remoteHost}] PUT /equipos/$id/puntuacion/$puntos")
+
                 val updated = dbQuery {
                     val row = EquiposTable.selectAll()
                         .where { (EquiposTable.id eq id) and (EquiposTable.isDeleted eq false) }
                         .singleOrNull() ?: return@dbQuery 0
+
                     val nuevaPuntuacion = (row[EquiposTable.puntuacion] ?: 0L) + puntos
+
                     EquiposTable.update({ (EquiposTable.id eq id) and (EquiposTable.isDeleted eq false) }) {
                         it[EquiposTable.puntuacion] = nuevaPuntuacion
                     }
                 }
+
                 if (updated == 0) return@put call.respond(HttpStatusCode.NotFound)
                 call.respond(HttpStatusCode.OK)
             }
@@ -175,148 +138,185 @@ fun Route.equiposRoutes() {
                 get {
                     val id = call.parameters["id"]?.toLongOrNull()
                         ?: return@get call.respond(HttpStatusCode.BadRequest)
+
                     println("[${call.request.origin.remoteHost}] GET /equipos/$id/miembros")
-                    val miembros = dbQuery {
-                        val ids = EquipoMiembrosTable
-                            .selectAll().where { EquipoMiembrosTable.idEquipo eq id }
-                            .map { it[EquipoMiembrosTable.idMiembro] }
-                        if (ids.isEmpty()) emptyList<Usuario>()
-                        else UsuariosTable.selectAll().where { UsuariosTable.id inList ids }.map {
-                            Usuario(
-                                idUsuario = it[UsuariosTable.id],
-                                username = it[UsuariosTable.username],
-                                password = it[UsuariosTable.password],
-                                nombre = it[UsuariosTable.nombre],
-                                riesgoBurnout = it[UsuariosTable.riesgoBurnout],
-                                descripcion = it[UsuariosTable.descripcion],
-                                idOrganizacion = it[UsuariosTable.idOrganizacion],
-                                idEquipo = it[UsuariosTable.idEquipo],
-                                rol = it[UsuariosTable.rol],
-                                isDeleted = it[UsuariosTable.isDeleted]
-                            )
-                        }.filter { !it.isDeleted }
-                    }
+
                     val teamExists = dbQuery {
                         EquiposTable.selectAll().where { (EquiposTable.id eq id) and (EquiposTable.isDeleted eq false) }.count() > 0
                     }
-                    println("Miembros del equipo $id: $miembros")
 
                     if (!teamExists) return@get call.respond(HttpStatusCode.NotFound)
+
+                    val miembros = getMiembrosEquipo(id)
+
+                    println("Miembros del equipo $id: $miembros")
+
                     call.respond(miembros)
                 }
                 post("/{idUsuario}") {
                     val idEquipoNuevo = call.parameters["id"]?.toLongOrNull()
                         ?: return@post call.respond(HttpStatusCode.BadRequest)
+
                     val idUsuario = call.parameters["idUsuario"]?.toLongOrNull()
                         ?: return@post call.respond(HttpStatusCode.BadRequest)
 
                     println("[${call.request.origin.remoteHost}] POST /equipos/$idEquipoNuevo/miembros/$idUsuario")
 
                     val success = dbQuery {
-                        val teamExists = EquiposTable.selectAll().where { (EquiposTable.id eq idEquipoNuevo) and (EquiposTable.isDeleted eq false) }.count() > 0
-                        val userRow = UsuariosTable.selectAll().where { (UsuariosTable.id eq idUsuario) and (UsuariosTable.isDeleted eq false) }.singleOrNull()
+                        val teamExists = EquiposTable.selectAll()
+                            .where { (EquiposTable.id eq idEquipoNuevo) and (EquiposTable.isDeleted eq false) }.count() > 0
 
-                        if (teamExists && userRow != null) {
-                            val idEquipoAnterior = userRow[UsuariosTable.idEquipo]
+                        val userRow = UsuariosTable.selectAll()
+                            .where { (UsuariosTable.id eq idUsuario) and (UsuariosTable.isDeleted eq false) }.singleOrNull()
 
-                            EquipoMiembrosTable.deleteWhere { EquipoMiembrosTable.idMiembro eq idUsuario }
+                        if (!teamExists || userRow == null) return@dbQuery false
 
-                            EquipoMiembrosTable.insertIgnore {
-                                it[EquipoMiembrosTable.idEquipo] = idEquipoNuevo
-                                it[EquipoMiembrosTable.idMiembro] = idUsuario
-                            }
+                        val idEquipoAnterior = userRow[UsuariosTable.idEquipo]
 
-                            UsuariosTable.update({ UsuariosTable.id eq idUsuario }) {
-                                it[UsuariosTable.idEquipo] = idEquipoNuevo
-                            }
+                        transferirMiembro(idUsuario, idEquipoNuevo)
+                        limpiarEquipoVacioSiAplica(idEquipoAnterior, idEquipoDestino = idEquipoNuevo)
 
-                            if (idEquipoAnterior > 0L && idEquipoAnterior != idEquipoNuevo) {
-                                val remainingMembers = EquipoMiembrosTable
-                                    .selectAll().where { EquipoMiembrosTable.idEquipo eq idEquipoAnterior }
-                                    .count()
-                                if (remainingMembers == 0L) {
-                                    EquiposTable.update({ (EquiposTable.id eq idEquipoAnterior) and (EquiposTable.isDeleted eq false) }) {
-                                        it[isDeleted] = true
-                                    }
-                                    val tablerosMovidos = TablerosTable.update({
-                                        (TablerosTable.idEquipo eq idEquipoAnterior) and (TablerosTable.isDeleted eq false)
-                                    }) {
-                                        it[TablerosTable.idEquipo] = idEquipoNuevo
-                                    }
-                                    println("Equipo $idEquipoAnterior eliminado por quedarse sin miembros. $tablerosMovidos tableros movidos al equipo $idEquipoNuevo.")
-                                }
-                            }
-                            true
-                        } else {
-                            false
-                        }
+                        true
                     }
 
-                    if (success) {
-                        call.respond(HttpStatusCode.OK, "Usuario añadido al equipo y eliminado del anterior")
-                    } else {
-                        call.respond(HttpStatusCode.NotFound, "Equipo o Usuario no encontrado")
-                    }
+                    if (success) call.respond(HttpStatusCode.OK, "Usuario añadido al equipo y eliminado del anterior")
+                    else call.respond(HttpStatusCode.NotFound, "Equipo o Usuario no encontrado")
                 }
+
                 delete("/{idUsuario}") {
                     val idEquipo = call.parameters["id"]?.toLongOrNull()
                         ?: return@delete call.respond(HttpStatusCode.BadRequest)
+
                     val idUsuario = call.parameters["idUsuario"]?.toLongOrNull()
                         ?: return@delete call.respond(HttpStatusCode.BadRequest)
 
                     println("[${call.request.origin.remoteHost}] DELETE /equipos/$idEquipo/miembros/$idUsuario")
 
-                    val success = dbQuery {
-                        val userRow = UsuariosTable.selectAll().where { (UsuariosTable.id eq idUsuario) and (UsuariosTable.isDeleted eq false) }.singleOrNull()
-                        if (userRow != null) {
-                            val idOrg = userRow[UsuariosTable.idOrganizacion]
-                            val username = userRow[UsuariosTable.username]
+                    val success = dbQuery { expulsarMiembro(idUsuario, idEquipo) }
 
-                            EquipoMiembrosTable.deleteWhere { 
-                                (EquipoMiembrosTable.idEquipo eq idEquipo) and (EquipoMiembrosTable.idMiembro eq idUsuario)
-                            }
-
-                            val nuevoIdEquipo = EquiposTable.insert {
-                                it[EquiposTable.titulo] = "Equipo de $username"
-                                it[EquiposTable.puntuacion] = 0L
-                                it[EquiposTable.idOrganizacion] = idOrg
-                                it[EquiposTable.isDeleted] = false
-                            }[EquiposTable.id]
-
-                            EquipoMiembrosTable.insert {
-                                it[EquipoMiembrosTable.idEquipo] = nuevoIdEquipo
-                                it[EquipoMiembrosTable.idMiembro] = idUsuario
-                            }
-
-                            UsuariosTable.update({ UsuariosTable.id eq idUsuario }) {
-                                it[UsuariosTable.idEquipo] = nuevoIdEquipo
-                            }
-
-                            val restantes = EquipoMiembrosTable
-                                .selectAll().where { EquipoMiembrosTable.idEquipo eq idEquipo }
-                                .count()
-                            if (restantes == 0L) {
-                                EquiposTable.update({ (EquiposTable.id eq idEquipo) and (EquiposTable.isDeleted eq false) }) {
-                                    it[isDeleted] = true
-                                }
-                                val tablerosMovidos = TablerosTable.update({
-                                    (TablerosTable.idEquipo eq idEquipo) and (TablerosTable.isDeleted eq false)
-                                }) {
-                                    it[TablerosTable.idEquipo] = nuevoIdEquipo
-                                }
-                                println("Equipo $idEquipo eliminado por quedarse sin miembros. $tablerosMovidos tableros movidos al equipo $nuevoIdEquipo.")
-                            }
-                            true
-                        } else false
-                    }
-
-                    if (success) {
-                        call.respond(HttpStatusCode.OK, "Usuario movido a un nuevo equipo individual")
-                    } else {
-                        call.respond(HttpStatusCode.NotFound, "Usuario no encontrado")
-                    }
+                    if (success) call.respond(HttpStatusCode.OK, "Usuario movido a un nuevo equipo individual")
+                    else call.respond(HttpStatusCode.NotFound, "Usuario no encontrado")
                 }
             }
         }
     }
+}
+
+private fun ResultRow.toEquipo(miembros: List<Long>) = Equipo(
+    idEquipo = this[EquiposTable.id],
+    titulo = this[EquiposTable.titulo],
+    puntuacion = this[EquiposTable.puntuacion],
+    idOrganizacion = this[EquiposTable.idOrganizacion],
+    idMiembros = miembros,
+    isDeleted = this[EquiposTable.isDeleted]
+)
+
+private fun getMiembrosDeEquipo(idEquipo: Long): List<Long> =
+    EquipoMiembrosTable.selectAll().where { EquipoMiembrosTable.idEquipo eq idEquipo }
+        .map { it[EquipoMiembrosTable.idMiembro] }
+
+private fun getEquipoConMiembros(id: Long): Equipo? {
+    val row = EquiposTable.selectAll()
+        .where { (EquiposTable.id eq id) and (EquiposTable.isDeleted eq false) }
+        .singleOrNull() ?: return null
+
+    val miembros = getMiembrosDeEquipo(id)
+
+    println("Miembros del equipo $id: $miembros")
+
+    return row.toEquipo(miembros)
+}
+
+private suspend fun getEquipos(idOrg: Long?) = dbQuery {
+    val query = if (idOrg != null) {
+        EquiposTable.selectAll().where { (EquiposTable.idOrganizacion eq idOrg) and (EquiposTable.isDeleted eq false) }
+    } else {
+        EquiposTable.selectAll().where { EquiposTable.isDeleted eq false }
+    }
+    query.map { row -> row.toEquipo(getMiembrosDeEquipo(row[EquiposTable.id])) }
+}
+
+private suspend fun getMiembrosEquipo(idEquipo: Long): List<Usuario> = dbQuery {
+    val ids = getMiembrosDeEquipo(idEquipo)
+
+    if (ids.isEmpty()) return@dbQuery emptyList()
+
+    UsuariosTable.selectAll().where { UsuariosTable.id inList ids }.map {
+        Usuario(
+            idUsuario = it[UsuariosTable.id],
+            username = it[UsuariosTable.username],
+            password = it[UsuariosTable.password],
+            nombre = it[UsuariosTable.nombre],
+            riesgoBurnout = it[UsuariosTable.riesgoBurnout],
+            descripcion = it[UsuariosTable.descripcion],
+            idOrganizacion = it[UsuariosTable.idOrganizacion],
+            idEquipo = it[UsuariosTable.idEquipo],
+            rol = it[UsuariosTable.rol],
+            isDeleted = it[UsuariosTable.isDeleted]
+        )
+    }.filter { !it.isDeleted }
+}
+
+private fun transferirMiembro(idUsuario: Long, idEquipoNuevo: Long) {
+    EquipoMiembrosTable.deleteWhere { EquipoMiembrosTable.idMiembro eq idUsuario }
+
+    EquipoMiembrosTable.insertIgnore {
+        it[EquipoMiembrosTable.idEquipo] = idEquipoNuevo
+        it[EquipoMiembrosTable.idMiembro] = idUsuario
+    }
+
+    UsuariosTable.update({ UsuariosTable.id eq idUsuario }) {
+        it[UsuariosTable.idEquipo] = idEquipoNuevo
+    }
+}
+
+private fun limpiarEquipoVacioSiAplica(idEquipo: Long, idEquipoDestino: Long) {
+    if (idEquipo <= 0L || idEquipo == idEquipoDestino) return
+
+    val restantes = EquipoMiembrosTable.selectAll().where { EquipoMiembrosTable.idEquipo eq idEquipo }.count()
+
+    if (restantes == 0L) {
+        EquiposTable.update({ (EquiposTable.id eq idEquipo) and (EquiposTable.isDeleted eq false) }) {
+            it[isDeleted] = true
+        }
+
+        val tablerosMovidos = TablerosTable.update({
+            (TablerosTable.idEquipo eq idEquipo) and (TablerosTable.isDeleted eq false)
+        }) { it[TablerosTable.idEquipo] = idEquipoDestino }
+
+        println("Equipo $idEquipo eliminado por quedarse sin miembros. $tablerosMovidos tableros movidos al equipo $idEquipoDestino.")
+    }
+}
+
+private fun expulsarMiembro(idUsuario: Long, idEquipo: Long): Boolean {
+    val userRow = UsuariosTable.selectAll()
+        .where { (UsuariosTable.id eq idUsuario) and (UsuariosTable.isDeleted eq false) }
+        .singleOrNull() ?: return false
+
+    val idOrg = userRow[UsuariosTable.idOrganizacion]
+
+    val username = userRow[UsuariosTable.username]
+
+    EquipoMiembrosTable.deleteWhere {
+        (EquipoMiembrosTable.idEquipo eq idEquipo) and (EquipoMiembrosTable.idMiembro eq idUsuario)
+    }
+
+    val nuevoIdEquipo = EquiposTable.insert {
+        it[EquiposTable.titulo] = "Equipo de $username"
+        it[EquiposTable.puntuacion] = 0L
+        it[EquiposTable.idOrganizacion] = idOrg
+        it[EquiposTable.isDeleted] = false
+    }[EquiposTable.id]
+
+    EquipoMiembrosTable.insert {
+        it[EquipoMiembrosTable.idEquipo] = nuevoIdEquipo
+        it[EquipoMiembrosTable.idMiembro] = idUsuario
+    }
+
+    UsuariosTable.update({ UsuariosTable.id eq idUsuario }) {
+        it[UsuariosTable.idEquipo] = nuevoIdEquipo
+    }
+
+    limpiarEquipoVacioSiAplica(idEquipo, idEquipoDestino = nuevoIdEquipo)
+    return true
 }

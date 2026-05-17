@@ -3,6 +3,7 @@ package dev.wdona.burntout.notification
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import dev.wdona.burntout.platform.NotificacionProgramador
 import dev.wdona.burntout.shared.db.DatabaseActions
 import dev.wdona.burntout.shared.db.DatabaseDriverFactory
 import dev.wdona.burntout.shared.utils.SettingsManager
@@ -32,9 +33,9 @@ class BootCompletedReceiver : BroadcastReceiver() {
 
                 database.appDatabaseQueries.getTareasConFechaByUsuario(idUsuario)
                     .executeAsList()
-                    .filter { (it.Fecha_Vencimiento ?: 0L) > ahora }
+                    .filter { (it.Fecha_Vencimiento) > ahora }
                     .forEach { tarea ->
-                        val fecha = tarea.Fecha_Vencimiento ?: return@forEach
+                        val fecha = tarea.Fecha_Vencimiento
                         notificacionProgramador.programarNotificaciones(
                             idTarea = tarea.ID_Tarea,
                             titulo = tarea.Titulo,

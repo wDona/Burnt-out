@@ -28,9 +28,6 @@ class PerfilViewModel(private val repository: UsuarioRepository) : ScreenModel {
 
     private val resultadoBurnout = ResultadoBurnout(riesgoBurnoutCE, riesgoBurnoutD, riesgoBurnoutRP)
 
-    private val _listaUsuarios = MutableStateFlow<List<Usuario>>(emptyList())
-    val listaUsuarios: StateFlow<List<Usuario>> = _listaUsuarios.asStateFlow()
-
     fun cargarUsuario(idUsuario: Long) {
         screenModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
@@ -44,11 +41,6 @@ class PerfilViewModel(private val repository: UsuarioRepository) : ScreenModel {
         }
     }
 
-    fun cargarUsuariosPorOrg(idOrg: Long) {
-        screenModelScope.launch {
-            _listaUsuarios.value = repository.getUsuariosByOrg(idOrg)
-        }
-    }
 
     fun actualizarPerfil(usuario: Usuario) {
         screenModelScope.launch {

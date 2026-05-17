@@ -21,7 +21,6 @@ import kotlinx.coroutines.launch
 
 fun main() {
     embeddedServer(Netty, port = SERVER_PORT, host = "0.0.0.0") {
-        // Configuramos el servidor directamente aqui para evitar el crash del compilador K2 (FIR)
         install(ContentNegotiation) {
             json()
         }
@@ -43,7 +42,9 @@ fun main() {
 
             if (!esPublico) {
                 val authHeader = call.request.headers["Authorization"]
+
                 val token = authHeader?.removePrefix("Bearer ")?.trim()
+
                 if (token.isNullOrBlank()) {
                     println("[$ip] Sin token — 401")
                     call.respond(HttpStatusCode.Unauthorized, "Token requerido")
@@ -51,8 +52,6 @@ fun main() {
                 }
                 
                 val sesionValida = DatabaseFactory.dbQuery {
-                    // selectAll() y where se resuelven mediante el import org.jetbrains.exposed.sql.*
-                    // count() devuelve Long, comparamos con 0L explícito
                     SesionesTable.selectAll().where { SesionesTable.token eq token }.count() > 0L
                 }
                 
@@ -89,6 +88,7 @@ fun main() {
                     val comando = itTrimmed.split(" ")
                     val cmd = comando[0]
                     val args = if (comando.size > 1) comando.subList(1, comando.size) else emptyList()
+
                     comandoHandler(cmd, args)
                 }
             }

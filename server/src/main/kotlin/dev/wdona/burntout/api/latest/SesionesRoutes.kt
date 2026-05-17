@@ -13,9 +13,11 @@ fun Route.sesionesRoutes() {
         delete("/{token}") {
             val token = call.parameters["token"]
                 ?: return@delete call.respond(HttpStatusCode.BadRequest)
+
             dbQuery {
                 SesionesTable.deleteWhere { SesionesTable.token eq token }
             }
+
             call.respond(HttpStatusCode.NoContent)
         }
     }

@@ -24,17 +24,17 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun CrearEquipoDialog(defaultNombre: String, onDismiss: () -> Unit, onConfirm: (String) -> Unit) {
-    var nombre by remember { mutableStateOf(defaultNombre) }
+fun RenombrarEquipoDialog(nombreActual: String, onDismiss: () -> Unit, onConfirm: (String) -> Unit) {
+    var nombre by remember { mutableStateOf(nombreActual) }
 
     fun confirmar() { if (nombre.isNotBlank()) onConfirm(nombre) }
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Crear nuevo equipo") },
+        title = { Text("Renombrar equipo") },
         text = {
             Column {
-                Text("Introduce el nombre para tu nuevo equipo:")
+                Text("Introduce el nuevo nombre:")
                 Spacer(modifier = Modifier.height(8.dp))
                 OutlinedTextField(
                     value = nombre,
@@ -53,7 +53,7 @@ fun CrearEquipoDialog(defaultNombre: String, onDismiss: () -> Unit, onConfirm: (
         },
         confirmButton = {
             TextButton(onClick = ::confirmar, enabled = nombre.isNotBlank()) {
-                Text("Crear")
+                Text("Renombrar")
             }
         },
         dismissButton = {

@@ -1,4 +1,4 @@
-package dev.wdona.burntout.presentation.viewmodel.viewmodelfactories
+﻿package dev.wdona.burntout.presentation.viewmodel.viewmodelfactories
 
 import dev.wdona.burntout.data.api.impl.AjusteApiImpl
 import dev.wdona.burntout.data.api.impl.EquipoApiImpl
@@ -18,7 +18,7 @@ import dev.wdona.burntout.data.repository.AjusteRepositoryImpl
 import dev.wdona.burntout.data.repository.UsuarioRepositoryImpl
 import dev.wdona.burntout.domain.repository.AjusteRepository
 import dev.wdona.burntout.domain.repository.UsuarioRepository
-import dev.wdona.burntout.notification.NotificacionProgramador
+import dev.wdona.burntout.platform.NotificacionProgramador
 import dev.wdona.burntout.presentation.viewmodel.viewmodels.AjustesViewModel
 import dev.wdona.burntout.shared.db.DatabaseActions
 

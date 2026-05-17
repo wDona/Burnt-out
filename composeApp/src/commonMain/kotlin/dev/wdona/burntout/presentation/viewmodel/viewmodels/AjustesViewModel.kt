@@ -2,7 +2,7 @@ package dev.wdona.burntout.presentation.viewmodel.viewmodels
 
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
-import dev.wdona.burntout.AppInfo
+import dev.wdona.burntout.platform.AppInfo
 import dev.wdona.burntout.domain.model.Ajuste
 import dev.wdona.burntout.domain.repository.AjusteRepository
 import dev.wdona.burntout.domain.repository.UsuarioRepository
@@ -75,21 +75,8 @@ class AjustesViewModel(
     var _uiStateUsuarioActual = MutableStateFlow<Usuario?>(null)
     val uiStateUsuarioActual = _uiStateUsuarioActual.asStateFlow()
 
-    fun cargarAjustesUsuarioActual() {
-        assert(uiStateUsuarioActual.value != null)
-
-        screenModelScope.launch {
-            _listaAjustes.value = repository.getAjustesByUsuario(uiStateUsuarioActual.value!!.idUsuario)
-        }
-    }
-
     fun cargarUsuarioActual(usuario: Usuario) {
         _uiStateUsuarioActual.value = usuario
-    }
-
-    fun togglePrimeraEjecucion() {
-        val nuevoValor = !SettingsManager.getPrimerCuestionarioHecho()
-        SettingsManager.setPrimerCuestionarioHecho(nuevoValor)
     }
 
     private val _respuestasAnonimas = MutableStateFlow(SettingsManager.isRespuestasAnonimas())
@@ -140,15 +127,5 @@ class AjustesViewModel(
             }
         }
         SettingsManager.clearAll()
-    }
-
-    fun salirDelEquipo() {
-        screenModelScope.launch {
-            val idUsuario = SettingsManager.getIdUsuarioActual()
-            val idEquipo = SettingsManager.getIdEquipoActual()
-            if (idEquipo != 0L && idUsuario != 0L) {
-                repository.salirDelEquipo(idEquipo, idUsuario)
-            }
-        }
     }
 }

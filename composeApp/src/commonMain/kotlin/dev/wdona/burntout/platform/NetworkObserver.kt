@@ -1,4 +1,4 @@
-package dev.wdona.burntout
+package dev.wdona.burntout.platform
 
 import kotlinx.coroutines.flow.Flow
 

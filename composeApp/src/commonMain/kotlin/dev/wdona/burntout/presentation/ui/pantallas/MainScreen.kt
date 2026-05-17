@@ -125,6 +125,7 @@ private class TablerosTab(
     override fun Content() {
         Navigator(TablerosScreen(factory, tareaFactory, operacionesPendientesFactory)) { navigator ->
             val signal by popSignal.collectAsState()
+
             LaunchedEffect(signal) { if (signal > 0) navigator.popUntilRoot() }
             CrossfadeTransition(navigator)
         }

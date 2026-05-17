@@ -1,4 +1,4 @@
-package dev.wdona.burntout.presentation.viewmodel.viewmodelfactories
+﻿package dev.wdona.burntout.presentation.viewmodel.viewmodelfactories
 
 import android.content.Context
 import dev.wdona.burntout.data.api.impl.AjusteApiImpl
@@ -41,7 +41,7 @@ import dev.wdona.burntout.data.repository.EquipoRepositoryImpl
 import dev.wdona.burntout.data.repository.OperacionesPendientesRepositoryImpl
 import dev.wdona.burntout.data.repository.SyncRepositoryImpl
 import dev.wdona.burntout.data.repository.TableroRepositoryImpl
-import dev.wdona.burntout.notification.NotificacionProgramador
+import dev.wdona.burntout.platform.NotificacionProgramador
 import dev.wdona.burntout.domain.repository.OperacionesPendientesRepository
 import dev.wdona.burntout.domain.repository.SyncRepository
 import dev.wdona.burntout.domain.usecase.RefrescarDatosUseCase

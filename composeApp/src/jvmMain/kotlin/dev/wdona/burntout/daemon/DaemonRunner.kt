@@ -1,7 +1,7 @@
-package dev.wdona.burntout.daemon
+﻿package dev.wdona.burntout.daemon
 
 import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
-import dev.wdona.burntout.notification.NotificacionProgramador
+import dev.wdona.burntout.platform.NotificacionProgramador
 import dev.wdona.burntout.shared.db.AppDatabase
 import kotlinx.serialization.json.Json
 import java.io.File
@@ -20,6 +20,7 @@ object DaemonRunner {
             try {
                 if (configFile.exists()) {
                     val modified = configFile.lastModified()
+
                     if (modified != lastConfigModified) {
                         lastConfigModified = modified
                         val config = try {
@@ -37,6 +38,7 @@ object DaemonRunner {
             } catch (e: Exception) {
                 println("[BurntOut Daemon] Error en ciclo: ${e.message}")
             }
+
             Thread.sleep(30_000)
         }
     }
@@ -76,6 +78,7 @@ object DaemonRunner {
                     notificacionPersonalizada = tarea.Notificacion_Personalizada?.let { it * 1000L }
                 )
             }
+
             println("[BurntOut Daemon] ${tareas.size} notificaciones programadas para usuario ${config.idUsuario}")
         } catch (e: Exception) {
             println("[BurntOut Daemon] Error reprogramando: ${e.message}")

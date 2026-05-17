@@ -1,4 +1,4 @@
-package dev.wdona.burntout
+package dev.wdona.burntout.platform
 
 import android.content.Context
 import android.net.ConnectivityManager

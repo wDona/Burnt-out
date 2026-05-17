@@ -11,6 +11,7 @@ object DaemonLauncher {
             println("[BurntOut] Daemon ya en ejecución (PID: ${pidFile.readText().trim()})")
             return
         }
+
         try {
             val javaCmd = ProcessHandle.current().info().command().orElse("java")
             val classpath = System.getProperty("java.class.path")
@@ -18,8 +19,11 @@ object DaemonLauncher {
                 .redirectOutput(ProcessBuilder.Redirect.DISCARD)
                 .redirectError(ProcessBuilder.Redirect.DISCARD)
                 .start()
+
             pidFile.parentFile?.mkdirs()
+
             pidFile.writeText(process.pid().toString())
+
             println("[BurntOut] Daemon lanzado con PID ${process.pid()}")
         } catch (e: Exception) {
             println("[BurntOut] No se pudo lanzar daemon: ${e.message}")
