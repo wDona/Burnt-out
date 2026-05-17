@@ -122,7 +122,8 @@ private class TablerosTab(
     val operacionesPendientesFactory: OperacionesPendientesViewModelFactory
 ) : PopToRootTab {
     override val key = "TablerosTab"
-    private val popSignal = MutableStateFlow(0)
+
+    companion object { val popSignal = MutableStateFlow(0) }
 
     override fun requestPopToRoot() { popSignal.update { it + 1 } }
 
@@ -147,7 +148,8 @@ private class EquipoTab(
     val settingsFactory: AjustesViewModelFactory
 ) : PopToRootTab {
     override val key = "EquipoTab"
-    private val popSignal = MutableStateFlow(0)
+
+    companion object { val popSignal = MutableStateFlow(0) }
 
     override fun requestPopToRoot() { popSignal.update { it + 1 } }
 
@@ -172,7 +174,8 @@ private class LeaderboardTab(
     val perfilFactory: MiPerfilViewModelFactory
 ) : PopToRootTab {
     override val key = "LeaderboardTab"
-    private val popSignal = MutableStateFlow(0)
+
+    companion object { val popSignal = MutableStateFlow(0) }
 
     override fun requestPopToRoot() { popSignal.update { it + 1 } }
 
@@ -200,7 +203,8 @@ private class PerfilTab(
     val ajustesFactory: AjustesViewModelFactory
 ) : PopToRootTab {
     override val key = "PerfilTab"
-    private val popSignal = MutableStateFlow(0)
+
+    companion object { val popSignal = MutableStateFlow(0) }
 
     override fun requestPopToRoot() { popSignal.update { it + 1 } }
 
@@ -222,7 +226,8 @@ private class PreguntasTab(
     val factory: FormularioViewModelFactory,
 ) : PopToRootTab {
     override val key = "PreguntasTab"
-    private val popSignal = MutableStateFlow(0)
+
+    companion object { val popSignal = MutableStateFlow(0) }
 
     override fun requestPopToRoot() { popSignal.update { it + 1 } }
 
