@@ -64,9 +64,9 @@ actual class AjustesViewModelFactory {
             DatabaseActions.getDatabase()
                 .appDatabaseQueries.getTareasConFechaByUsuario(idUsuario)
                 .executeAsList()
-                .filter { (it.Fecha_Vencimiento ?: 0L) > ahora }
+                .filter { it.Fecha_Vencimiento > ahora }
                 .forEach { tarea ->
-                    val fecha = tarea.Fecha_Vencimiento ?: return@forEach
+                    val fecha = tarea.Fecha_Vencimiento
                     notificacionProgramador.programarNotificaciones(
                         idTarea = tarea.ID_Tarea,
                         titulo = tarea.Titulo,

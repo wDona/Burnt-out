@@ -50,13 +50,15 @@ object DatabaseFactory {
         TareasTable,
         SubtareasTable,
         InvitacionesTable,
-        SesionesTable
+        SesionesTable,
+        SyncLogTable
     )
 
     fun init() {
         Database.connect("jdbc:sqlite:server.db", driver = "org.sqlite.JDBC")
         transaction {
-            SchemaUtils.createMissingTablesAndColumns(*tables)
+            SchemaUtils.create(*tables)
+            
             insertDatosBase()
             limpiarSesionesAntiguas()
         }
@@ -95,7 +97,7 @@ object DatabaseFactory {
     suspend fun clearDB() {
         dbQuery {
             SchemaUtils.drop(*tables)
-            SchemaUtils.createMissingTablesAndColumns(*tables)
+            SchemaUtils.create(*tables)
             insertDatosBase()
         }
     }

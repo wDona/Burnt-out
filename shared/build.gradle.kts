@@ -8,13 +8,23 @@ plugins {
 }
 
 kotlin {
+    jvmToolchain(17)
+
+    compilerOptions {
+        freeCompilerArgs.add("-Xexpect-actual-classes")
+    }
+
     androidTarget {
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_11)
         }
     }
     
-    jvm()
+    jvm {
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_11)
+        }
+    }
     
     sourceSets {
         commonMain.dependencies {
@@ -34,20 +44,22 @@ kotlin {
         jvmMain.dependencies {
             implementation(libs.ktor.client.cio)
             implementation(libs.sqlDelight.driver.sqlite)
-            implementation("org.xerial:sqlite-jdbc:3.45.3.0")
+            implementation(libs.sqlite.jdbc)
         }
     }
 }
 
 android {
     namespace = "dev.wdona.burntout.shared"
-    compileSdk = libs.versions.android.compileSdk.get().toInt()
+    compileSdk = 36
+    
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
+    
     defaultConfig {
-        minSdk = libs.versions.android.minSdk.get().toInt()
+        minSdk = 26
     }
 }
 

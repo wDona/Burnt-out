@@ -63,12 +63,12 @@ object DaemonRunner {
             val tareas = database.appDatabaseQueries
                 .getTareasConFechaByUsuario(config.idUsuario)
                 .executeAsList()
-                .filter { (it.Fecha_Vencimiento ?: 0L) > ahora }
+                .filter { it.Fecha_Vencimiento > ahora }
 
             driver.close()
 
             tareas.forEach { tarea ->
-                val fecha = tarea.Fecha_Vencimiento ?: return@forEach
+                val fecha = tarea.Fecha_Vencimiento
                 programador.programarNotificaciones(
                     idTarea = tarea.ID_Tarea,
                     titulo = tarea.Titulo,

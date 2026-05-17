@@ -15,20 +15,26 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.ClipEntry
+import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import dev.wdona.burntout.presentation.viewmodel.viewmodels.LeaderboardUiState
+import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun InvitarOrgDialog(
     uiState: LeaderboardUiState,
     onGenerar: (rol: String) -> Unit,
     onDismiss: () -> Unit
 ) {
-    val clipboardManager = LocalClipboardManager.current
+    val clipboard = LocalClipboard.current
+    val scope = rememberCoroutineScope()
     var rolSeleccionado by remember { mutableStateOf("MEMBER") }
 
     val esperandoAccion = !uiState.isGenerandoInvitacion
@@ -59,7 +65,9 @@ fun InvitarOrgDialog(
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         TextButton(onClick = {
-                            clipboardManager.setText(AnnotatedString(uiState.invitacionCode))
+                            scope.launch {
+                                clipboard.setClipEntry(ClipEntry(AnnotatedString(uiState.invitacionCode)))
+                            }
                         }) {
                             Text("Copiar código")
                         }

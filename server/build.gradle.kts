@@ -7,6 +7,7 @@ plugins {
 
 group = "dev.wdona.burntout"
 version = "1.0.0"
+
 application {
     mainClass.set("dev.wdona.burntout.ApplicationKt")
     
@@ -17,15 +18,15 @@ application {
 dependencies {
     implementation(projects.shared)
     implementation(libs.logback)
-    implementation(libs.ktor.serverCore)
-    implementation(libs.ktor.serverNetty)
-    implementation("io.ktor:ktor-server-content-negotiation:3.3.3")
-    implementation("io.ktor:ktor-serialization-kotlinx-json:3.3.3")
+    implementation(libs.ktor.server.core)
+    implementation(libs.ktor.server.netty)
+    implementation(libs.ktor.server.content.negotiation)
+    implementation(libs.ktor.serialization.kotlinx.json)
     implementation(libs.exposed.core)
     implementation(libs.exposed.dao)
     implementation(libs.exposed.jdbc)
     implementation(libs.sqlite.jdbc)
-    implementation("org.mindrot:jbcrypt:0.4")
-    testImplementation(libs.ktor.serverTestHost)
+    implementation(libs.jbcrypt)
+    testImplementation(libs.ktor.server.test.host)
     testImplementation(libs.kotlin.testJunit)
 }

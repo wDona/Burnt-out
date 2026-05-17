@@ -1,4 +1,3 @@
-import org.gradle.kotlin.dsl.implementation
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.gradle.api.provider.ValueSource
@@ -22,7 +21,7 @@ abstract class GitVersionValueSource : ValueSource<String, ValueSourceParameters
             val majorPart = count / 100
             val minorPart = String.format("%02d", count % 100)
             "1.$majorPart.$minorPart"
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             "1.0.0"
         }
     }
@@ -39,11 +38,15 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
-    alias(libs.plugins.composeHotReload)
+    // composeHotReload removido por incompatibilidad con Kotlin 2.1.0
 }
 
 kotlin {
     jvmToolchain(17)
+    
+    compilerOptions {
+        freeCompilerArgs.add("-Xexpect-actual-classes")
+    }
 
     androidTarget {
         compilerOptions {
@@ -99,12 +102,12 @@ kotlin {
 
 android {
     namespace = "dev.wdona.burntout"
-    compileSdkVersion(libs.versions.android.compileSdk.get().toInt())
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "dev.wdona.burntout"
-        minSdk = libs.versions.android.minSdk.get().toInt()
-        targetSdk = libs.versions.android.targetSdk.get().toInt()
+        minSdk = 26
+        targetSdk = 36
         versionCode = 1
         versionName = appVersion
     }
@@ -146,8 +149,8 @@ compose.desktop {
 
         nativeDistributions {
             // WIN - DEB - ARCH
-            targetFormats(TargetFormat.Msi, TargetFormat.Deb, TargetFormat.AppImage)
-            packageName = "Burnt Out"
+            targetFormats(TargetFormat.Msi, TargetFormat.Deb, TargetFormat.Rpm)
+            packageName = "BurntOut"
             packageVersion = appVersion
             
             modules("java.sql")
@@ -166,7 +169,7 @@ compose.desktop {
             windows {
                 shortcut = true
                 menu = true
-                menuGroup = "Burn't Out"
+                menuGroup = "BurntOut"
                 iconFile.set(project.file("src/jvmMain/resources/logoBurntOutIcon.ico"))
             }
         }
