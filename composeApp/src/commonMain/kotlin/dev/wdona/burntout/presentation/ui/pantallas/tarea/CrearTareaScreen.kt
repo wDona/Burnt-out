@@ -36,7 +36,6 @@ import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -47,6 +46,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.core.screen.ScreenKey
@@ -84,7 +84,7 @@ class MenuCrearTareaScreen(
         val viewModel: TareasViewModel = rememberScreenModel { factory.create() }
         val syncViewModel = remember { operacionesPendientesViewModelFactory.create() }
         val tablerosViewModel = remember { tablerosViewModelFactory.create() }
-        val syncTick by syncViewModel.syncTick.collectAsState()
+        val syncTick by syncViewModel.syncTick.collectAsStateWithLifecycle()
         val syncTickAlEntrar = remember { syncViewModel.syncTick.value }
 
         LaunchedEffect(syncTick) {
@@ -121,7 +121,7 @@ fun MenuCrearTareaContent(idTablero: String, tareasViewModel: TareasViewModel, o
     var estadoExpanded by remember { mutableStateOf(false) }
     var estadoSelected by remember { mutableStateOf(TipoEstadoTarea.PENDIENTE) }
 
-    val miembros by tareasViewModel.miembros.collectAsState()
+    val miembros by tareasViewModel.miembros.collectAsStateWithLifecycle()
     var usuarioSeleccionado by remember { mutableStateOf<Usuario?>(null) }
     var mostrarDialogBurnout by remember { mutableStateOf(false) }
 

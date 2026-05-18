@@ -45,7 +45,6 @@ import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.AjustesViewM
 import dev.wdona.burntout.presentation.ui.components.common.BateriaBurnout
 import dev.wdona.burntout.presentation.ui.components.common.FilaTextoPlaceholder
 import dev.wdona.burntout.presentation.viewmodel.viewmodels.AjustesViewModel
-import androidx.compose.runtime.collectAsState
 
 class PerfilScreen(val factory: MiPerfilViewModelFactory, val ajustesFactory: AjustesViewModelFactory, val onVolver: (() -> Unit)? = null, var idUsuario: Long? = null) : Screen {
 
@@ -58,7 +57,7 @@ class PerfilScreen(val factory: MiPerfilViewModelFactory, val ajustesFactory: Aj
         val viewmodel = rememberScreenModel { factory.create() }
         val settingsViewModel = rememberScreenModel { ajustesFactory.create() }
 
-        val idUsuarioActual by SettingsManager.idUsuarioActualFlow.collectAsState()
+        val idUsuarioActual by SettingsManager.idUsuarioActualFlow.collectAsStateWithLifecycle()
         val targetId = idUsuario ?: idUsuarioActual
 
         LaunchedEffect(targetId) {

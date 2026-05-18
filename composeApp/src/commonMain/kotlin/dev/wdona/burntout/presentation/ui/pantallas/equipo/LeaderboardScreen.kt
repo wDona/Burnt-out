@@ -48,7 +48,7 @@ class LeaderboardScreen(
         val viewModel = rememberScreenModel { factory.create() }
         val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-        val idUsuarioActual by SettingsManager.idUsuarioActualFlow.collectAsState()
+        val idUsuarioActual by SettingsManager.idUsuarioActualFlow.collectAsStateWithLifecycle()
         val nombreUsuario = SettingsManager.getNombreUsuario()
 
         var mostrarCrearEquipoDialog by remember { mutableStateOf(false) }

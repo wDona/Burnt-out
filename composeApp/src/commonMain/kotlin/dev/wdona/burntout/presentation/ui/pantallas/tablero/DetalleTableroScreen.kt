@@ -12,7 +12,6 @@ import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -50,7 +49,7 @@ class DetalleTableroScreen(
         val tareaViewModel = rememberScreenModel { tareasViewModelFactory.create() }
         val tablerosViewModel = rememberScreenModel { tableroFactory.create() }
         val syncViewModel = remember { operacionesPendientesViewModelFactory.create() }
-        val syncTick by syncViewModel.syncTick.collectAsState()
+        val syncTick by syncViewModel.syncTick.collectAsStateWithLifecycle()
         val syncTickAlEntrar = remember { syncViewModel.syncTick.value }
 
         LaunchedEffect(Unit) {
@@ -105,7 +104,7 @@ fun DetalleTableroContent(
     onIrATarea: (String, String) -> Unit,
 ) {
     val listaTareas by tareasViewModel.listaTareas.collectAsStateWithLifecycle()
-    val miembros by tareasViewModel.miembros.collectAsState()
+    val miembros by tareasViewModel.miembros.collectAsStateWithLifecycle()
 
     ScaffoldBase(
         titulo = nombreTablero,

@@ -31,7 +31,6 @@ import dev.wdona.burntout.presentation.ui.components.common.FilaTextoPlaceholder
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Icon
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -48,7 +47,7 @@ class EquipoScreen(val factory: EquipoViewModelFactory, val perfilFactory: MiPer
         val viewModel = rememberScreenModel { factory.create() }
         val perfilViewModel = rememberScreenModel { perfilFactory.create() }
 
-        val idEquipoActual by SettingsManager.idEquipoActualFlow.collectAsState()
+        val idEquipoActual by SettingsManager.idEquipoActualFlow.collectAsStateWithLifecycle()
         val targetIdEquipo = idEquipo ?: idEquipoActual
 
         val esMiEquipo = targetIdEquipo == idEquipoActual && !SettingsManager.isUsuarioInvitado()
@@ -60,7 +59,7 @@ class EquipoScreen(val factory: EquipoViewModelFactory, val perfilFactory: MiPer
             viewModel.cargarMiembrosEquipo(targetIdEquipo)
         }
         
-        val uiState by viewModel.uiState.collectAsState()
+        val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
         LaunchedEffect(uiState.userAddedSuccess) {
             if (uiState.userAddedSuccess) {

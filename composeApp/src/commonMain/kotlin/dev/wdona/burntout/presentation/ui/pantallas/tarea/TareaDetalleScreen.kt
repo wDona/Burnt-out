@@ -41,7 +41,6 @@ import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -90,7 +89,7 @@ class TareaDetalleScreen(
         val viewModel = rememberScreenModel { factory.create() }
         val syncViewModel = remember { operacionesPendientesFactory.create() }
         val tablerosViewModel = remember { tablerosViewModelFactory.create() }
-        val syncTick by syncViewModel.syncTick.collectAsState()
+        val syncTick by syncViewModel.syncTick.collectAsStateWithLifecycle()
         val syncTickAlEntrar = remember { syncViewModel.syncTick.value }
 
         LaunchedEffect(idTarea, idTablero) {
@@ -117,8 +116,8 @@ class TareaDetalleScreen(
 @Composable
 fun TareaDetalleContent(viewModel: TareasViewModel, onVolver: () -> Unit) {
     val tarea by viewModel.uiState.collectAsStateWithLifecycle()
-    val miembros by viewModel.miembros.collectAsState()
-    val subtareas by viewModel.subtareas.collectAsState()
+    val miembros by viewModel.miembros.collectAsStateWithLifecycle()
+    val subtareas by viewModel.subtareas.collectAsStateWithLifecycle()
 
     var textStateNombreTarea by remember { mutableStateOf("") }
     var textStateDescripcion by remember { mutableStateOf("") }

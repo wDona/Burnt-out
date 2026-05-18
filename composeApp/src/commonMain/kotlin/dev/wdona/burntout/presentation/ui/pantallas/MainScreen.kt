@@ -15,11 +15,11 @@ import androidx.compose.material.icons.filled.QuestionAnswer
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.core.screen.ScreenKey
 import cafe.adriel.voyager.core.screen.uniqueScreenKey
@@ -134,7 +134,7 @@ private class TablerosTab(
     @Composable
     override fun Content() {
         Navigator(TablerosScreen(factory, tareaFactory, operacionesPendientesFactory)) { navigator ->
-            val signal by popSignal.collectAsState()
+            val signal by popSignal.collectAsStateWithLifecycle()
 
             LaunchedEffect(signal) { if (signal > 0) navigator.popUntilRoot() }
             CrossfadeTransition(navigator)
@@ -160,7 +160,7 @@ private class EquipoTab(
     @Composable
     override fun Content() {
         Navigator(EquipoScreen(factory, perfilFactory, settingsFactory, idEquipo = null)) { navigator ->
-            val signal by popSignal.collectAsState()
+            val signal by popSignal.collectAsStateWithLifecycle()
             LaunchedEffect(signal) { if (signal > 0) navigator.popUntilRoot() }
             CrossfadeTransition(navigator)
         }
@@ -191,7 +191,7 @@ private class LeaderboardTab(
             perfilFactory = perfilFactory,
             ajustesFactory = settingsFactory
         )) { navigator ->
-            val signal by popSignal.collectAsState()
+            val signal by popSignal.collectAsStateWithLifecycle()
             LaunchedEffect(signal) { if (signal > 0) navigator.popUntilRoot() }
             CrossfadeTransition(navigator)
         }
@@ -215,7 +215,7 @@ private class PerfilTab(
     @Composable
     override fun Content() {
         Navigator(PerfilScreen(factory, ajustesFactory)) { navigator ->
-            val signal by popSignal.collectAsState()
+            val signal by popSignal.collectAsStateWithLifecycle()
             LaunchedEffect(signal) { if (signal > 0) navigator.popUntilRoot() }
             CrossfadeTransition(navigator)
         }
@@ -238,7 +238,7 @@ private class PreguntasTab(
     @Composable
     override fun Content() {
         Navigator(PreguntaScreen(factory)) { navigator ->
-            val signal by popSignal.collectAsState()
+            val signal by popSignal.collectAsStateWithLifecycle()
             LaunchedEffect(signal) { if (signal > 0) navigator.popUntilRoot() }
             CrossfadeTransition(navigator)
         }
