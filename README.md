@@ -21,7 +21,7 @@ yay -S burnt-out
 ## ¿Qué es el burnout? 
 El burnout es un estado de agotamiento crónico causado **principalmente** por el estrés sostenido en el trabajo. Afecta a nivel emocional, actitudinal y a la percepción de logro personal. En muchos casos sus síntomas pasan desapercibidos hasta que están muy avanzados.
 
-[![Aprender mas](https://img.shields.io/badge/Aprender%20mas-📄-blue?style=for-the-badge)](https://docs.google.com/document/d/18-xCaPPE7kGjMz0NHPk7Fg39yHhOqnHPIx9ZnB0ufzU/edit?usp=sharing) 
+[![Aprender mas](https://img.shields.io/badge/Aprender%20mas-📄-blue?style=for-the-badge)](https://wdona.dev/blogs/sindrome-burn-out) 
 
 > **Nota:** Esta aplicación no ha sido desarrollada ni consultada con profesionales de la psicología. Consulte con un profesional antes de tomar decisiones basadas en la información aportada.
 
@@ -41,27 +41,38 @@ El riesgo se calcula a partir del Inventario de Burnout de Maslach (MBI), que mi
 
 Las respuestas se recogen en escala de 0 a 6 (de "Nunca" a "Siempre"). La encuesta completa de 22 preguntas se realiza en el onboarding y se repite periódicamente. Para el seguimiento diario se usa un micro-check de 3 preguntas para evitar fatiga de encuesta.
 
-El resultado se expone al usuario como un `Int` entre `0` y `100`, como riesgo global haciendo la media de las tres. *La subescala RP es inversa: puntuación baja en las preguntas = riesgo alto.*
+El resultado se almacena como un `Double` entre `0.0` y `1.0`, como riesgo global haciendo la media de las tres. En la UI se muestra multiplicado por 100 (porcentaje). *La subescala RP es inversa: puntuación baja en las preguntas = riesgo alto.*
 
 ---
 
 ## Integración con tareas
 
-El nivel de riesgo de cada usuario afecta directamente a la asignación de tareas. 
+El nivel de riesgo de cada usuario afecta directamente a la asignación de tareas.
 
-- Se considera riesgo bajo cuando no se identifican suficientes rasgos de burnout.
+### Niveles de riesgo
 
-- Se considera medio cuando se empiezan a identificar algunos rasgos de burnout.
+El riesgo se comunica visualmente mediante un icono de batería con color asociado:
 
-- Se considera alto cuando se identifican bastantes rasgos de burnout y/o se puede considerar que el usuario esta en burnout 
+| Rango (`riesgoBurnout`) | Nivel | Color |
+|:---|:---|:---|
+| `< 0` | Datos insuficientes | Gris |
+| `≤ 0.10` | Sin riesgo | Verde |
+| `≤ 0.25` | Riesgo bajo | Verde claro |
+| `≤ 0.40` | Riesgo moderado | Amarillo |
+| `≤ 0.55` | Riesgo alto | Naranja |
+| `≤ 0.65` | Riesgo muy alto | Naranja oscuro |
+| `≤ 0.80` | Burnout leve | Rojo oscuro |
+| `≤ 0.90` | Burnout moderado | Rojo |
+| `> 0.90` | Burnout grave | Rojo error |
 
-| Nivel de riesgo | Comportamiento al asignar tarea |
+### Comportamiento al asignar tareas
+
+| Umbral | Comportamiento |
 |:---|:---|
-| **Bajo** | Sin restricciones |
-| **Medio** | Aviso informativo al manager |
-| **Alto** | Confirmación obligatoria alarmante antes de asignar |
+| `riesgo > 0.40` | Aviso inline bajo el selector: *"⚠ Cuidado, este usuario tiene [nivel]"* |
+| `riesgo > 0.80` | Diálogo de confirmación obligatorio: *"Soy consciente de que le asigno una tarea a un trabajador con burnout"* |
 
-Las tarjetas también muestran un indicador visual junto al avatar del usuario según su riesgo, y al asignar tareas se priorizan los usuarios con menor carga.
+El icono de batería aparece en el selector de usuario al crear/editar tareas y en las tarjetas del tablero.
 
 ---
 
