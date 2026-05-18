@@ -35,6 +35,7 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import dev.wdona.burntout.presentation.ui.components.ajustes.FilaInfo
 import dev.wdona.burntout.presentation.ui.components.ajustes.FilaToggleAjuste
 import dev.wdona.burntout.presentation.ui.components.ajustes.SeccionAjustesCard
+import dev.wdona.burntout.presentation.ui.components.common.DialogoConfirmacionEliminar
 import dev.wdona.burntout.presentation.ui.components.template.ScaffoldBase
 import dev.wdona.burntout.presentation.viewmodel.viewmodelfactories.AjustesViewModelFactory
 import dev.wdona.burntout.presentation.viewmodel.viewmodels.AjustesViewModel
@@ -68,9 +69,7 @@ fun SettingsContent(viewModel: AjustesViewModel, onVolver: () -> Unit, onLogout:
     val cuentaEliminada by viewModel.cuentaEliminada.collectAsStateWithLifecycle()
 
     var mostrarDialogoEliminarDB by remember { mutableStateOf(false) }
-    var mostrarEliminarCuenta1 by remember { mutableStateOf(false) }
-    var mostrarEliminarCuenta2 by remember { mutableStateOf(false) }
-    var textoEliminarCuenta by remember { mutableStateOf("") }
+    var mostrarEliminarCuenta by remember { mutableStateOf(false) }
 
     LaunchedEffect(cuentaEliminada) {
         if (cuentaEliminada) {
@@ -91,66 +90,17 @@ fun SettingsContent(viewModel: AjustesViewModel, onVolver: () -> Unit, onLogout:
         )
     }
 
-    if (mostrarEliminarCuenta1) {
-        AlertDialog(
-            onDismissRequest = { mostrarEliminarCuenta1 = false },
-            title = { Text("¿Eliminar tu cuenta?") },
-            text = { Text("¿Seguro que lo quieres eliminar? Esta acción es irrecuperable. Toda su información se perderá.") },
-            confirmButton = {
-                TextButton(onClick = {
-                    mostrarEliminarCuenta1 = false
-                    mostrarEliminarCuenta2 = true
-                }) { Text("Continuar", color = MaterialTheme.colorScheme.error) }
-            },
-            dismissButton = {
-                TextButton(onClick = { mostrarEliminarCuenta1 = false }) { Text("Cancelar") }
-            }
-        )
-    }
-
-    if (mostrarEliminarCuenta2) {
+    if (mostrarEliminarCuenta) {
         val username = ajustes.nombreUsuario
-        val textoEsperado = "eliminar $username"
-        AlertDialog(
-            onDismissRequest = {
-                mostrarEliminarCuenta2 = false
-                textoEliminarCuenta = ""
+        DialogoConfirmacionEliminar(
+            username = username,
+            tituloInicial = "¿Eliminar tu cuenta?",
+            onConfirmar = {
+                viewModel.eliminarCuentaPropia()
+                mostrarEliminarCuenta = false
             },
-            title = { Text("Confirmar eliminación") },
-            text = {
-                Column {
-                    Text("Escribe \"eliminar $username\" para confirmar:")
-                    OutlinedTextField(
-                        value = textoEliminarCuenta,
-                        onValueChange = { textoEliminarCuenta = it },
-                        singleLine = true,
-                        modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
-                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-                        keyboardActions = KeyboardActions(onDone = {
-                            if (textoEliminarCuenta == textoEsperado) {
-                                viewModel.eliminarCuentaPropia()
-                                textoEliminarCuenta = ""
-                                mostrarEliminarCuenta2 = false
-                            }
-                        })
-                    )
-                }
-            },
-            confirmButton = {
-                TextButton(
-                    enabled = textoEliminarCuenta == textoEsperado,
-                    onClick = {
-                        viewModel.eliminarCuentaPropia()
-                        textoEliminarCuenta = ""
-                        mostrarEliminarCuenta2 = false
-                    }
-                ) { Text("Eliminar", color = MaterialTheme.colorScheme.error) }
-            },
-            dismissButton = {
-                TextButton(onClick = {
-                    mostrarEliminarCuenta2 = false
-                    textoEliminarCuenta = ""
-                }) { Text("Cancelar") }
+            onDismiss = {
+                mostrarEliminarCuenta = false
             }
         )
     }
@@ -193,7 +143,7 @@ fun SettingsContent(viewModel: AjustesViewModel, onVolver: () -> Unit, onLogout:
 
             if (ajustes.idUsuario != Long.MIN_VALUE) {
                 TextButton(
-                    onClick = { mostrarEliminarCuenta1 = true },
+                    onClick = { mostrarEliminarCuenta = true },
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
                 ) {

@@ -42,6 +42,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import dev.wdona.burntout.presentation.ui.components.common.DialogoConfirmacionEliminar
 import dev.wdona.burntout.presentation.ui.components.equipo.AnadirUsuarioDialog
 import dev.wdona.burntout.shared.domain.Usuario
 import dev.wdona.burntout.shared.utils.SettingsManager
@@ -63,9 +64,6 @@ class EquipoScreen(val factory: EquipoViewModelFactory, val perfilFactory: MiPer
 
         var mostrarAnadirUsuarioDialog by remember { mutableStateOf(false) }
         var miembroAEliminar by remember { mutableStateOf<Usuario?>(null) }
-        var mostrarConfirmacion1 by remember { mutableStateOf(false) }
-        var mostrarConfirmacion2 by remember { mutableStateOf(false) }
-        var textoConfirmacion by remember { mutableStateOf("") }
 
         LaunchedEffect(targetIdEquipo) {
             viewModel.cargarEquipoPorId(targetIdEquipo)
@@ -84,9 +82,6 @@ class EquipoScreen(val factory: EquipoViewModelFactory, val perfilFactory: MiPer
         LaunchedEffect(uiState.usuarioEliminadoExitoso) {
             if (uiState.usuarioEliminadoExitoso) {
                 miembroAEliminar = null
-                mostrarConfirmacion1 = false
-                mostrarConfirmacion2 = false
-                textoConfirmacion = ""
                 viewModel.resetUsuarioEliminadoExitoso()
             }
         }
@@ -105,72 +100,15 @@ class EquipoScreen(val factory: EquipoViewModelFactory, val perfilFactory: MiPer
             )
         }
 
-        if (mostrarConfirmacion1 && miembroAEliminar != null) {
-            AlertDialog(
-                onDismissRequest = {
-                    mostrarConfirmacion1 = false
+        if (miembroAEliminar != null) {
+            DialogoConfirmacionEliminar(
+                username = miembroAEliminar!!.username,
+                tituloInicial = "¿Eliminar usuario?",
+                onConfirmar = {
+                    miembroAEliminar?.let { viewModel.eliminarUsuario(it.idUsuario) }
+                },
+                onDismiss = {
                     miembroAEliminar = null
-                },
-                title = { Text("¿Eliminar usuario?") },
-                text = { Text("¿Seguro que lo quieres eliminar? Esta acción es irrecuperable. Toda su información se perderá.") },
-                confirmButton = {
-                    TextButton(onClick = {
-                        mostrarConfirmacion1 = false
-                        mostrarConfirmacion2 = true
-                    }) { Text("Continuar", color = MaterialTheme.colorScheme.error) }
-                },
-                dismissButton = {
-                    TextButton(onClick = {
-                        mostrarConfirmacion1 = false
-                        miembroAEliminar = null
-                    }) { Text("Cancelar") }
-                }
-            )
-        }
-
-        if (mostrarConfirmacion2 && miembroAEliminar != null) {
-            val username = miembroAEliminar!!.username
-            val textoEsperado = "eliminar $username"
-            AlertDialog(
-                onDismissRequest = {
-                    mostrarConfirmacion2 = false
-                    miembroAEliminar = null
-                    textoConfirmacion = ""
-                },
-                title = { Text("Confirmar eliminación") },
-                text = {
-                    Column {
-                        Text("Escribe \"eliminar $username\" para confirmar:")
-                        OutlinedTextField(
-                            value = textoConfirmacion,
-                            onValueChange = { textoConfirmacion = it },
-                            singleLine = true,
-                            modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
-                            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-                            keyboardActions = KeyboardActions(onDone = {
-                                if (textoConfirmacion == textoEsperado) {
-                                    miembroAEliminar?.let { viewModel.eliminarUsuario(it.idUsuario) }
-                                    textoConfirmacion = ""
-                                }
-                            })
-                        )
-                    }
-                },
-                confirmButton = {
-                    TextButton(
-                        enabled = textoConfirmacion == textoEsperado,
-                        onClick = {
-                            miembroAEliminar?.let { viewModel.eliminarUsuario(it.idUsuario) }
-                            textoConfirmacion = ""
-                        }
-                    ) { Text("Eliminar", color = MaterialTheme.colorScheme.error) }
-                },
-                dismissButton = {
-                    TextButton(onClick = {
-                        mostrarConfirmacion2 = false
-                        miembroAEliminar = null
-                        textoConfirmacion = ""
-                    }) { Text("Cancelar") }
                 }
             )
         }
@@ -191,7 +129,6 @@ class EquipoScreen(val factory: EquipoViewModelFactory, val perfilFactory: MiPer
             },
             onEliminarUsuario = if (puedeEliminarUsuarios) { miembro ->
                 miembroAEliminar = miembro
-                mostrarConfirmacion1 = true
             } else null,
             perfilViewModel
         )
