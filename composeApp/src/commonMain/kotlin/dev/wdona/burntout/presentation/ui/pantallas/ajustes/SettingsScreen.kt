@@ -73,7 +73,6 @@ fun SettingsContent(viewModel: AjustesViewModel, onVolver: () -> Unit, onLogout:
 
     LaunchedEffect(cuentaEliminada) {
         if (cuentaEliminada) {
-            eliminarBaseDatosLocal()
             onLogout()
         }
     }
