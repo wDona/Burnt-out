@@ -8,6 +8,7 @@ import dev.wdona.burntout.domain.repository.AjusteRepository
 import dev.wdona.burntout.domain.repository.UsuarioRepository
 import dev.wdona.burntout.shared.domain.Usuario
 import dev.wdona.burntout.shared.utils.SettingsManager
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -120,12 +121,26 @@ class AjustesViewModel(
         val idUsuario = SettingsManager.getIdUsuarioActual()
         val token = SettingsManager.getTokenUsuario()
         val invitado = SettingsManager.isUsuarioInvitado()
-        screenModelScope.launch(kotlinx.coroutines.Dispatchers.IO) {
+        screenModelScope.launch(Dispatchers.IO) {
             try { onCancelarNotificaciones(idUsuario) } catch (_: Exception) { }
             if (!invitado && token.isNotBlank()) {
                 try { usuarioRepository.cerrarSesion(token) } catch (_: Exception) { }
             }
         }
         SettingsManager.clearAll()
+    }
+
+    private val _cuentaEliminada = MutableStateFlow(false)
+    val cuentaEliminada = _cuentaEliminada.asStateFlow()
+
+    fun eliminarCuentaPropia() {
+        val idUsuario = SettingsManager.getIdUsuarioActual()
+        if (idUsuario == Long.MIN_VALUE) return
+        screenModelScope.launch(Dispatchers.IO) {
+            try { onCancelarNotificaciones(idUsuario) } catch (_: Exception) { }
+            try { usuarioRepository.eliminarUsuario(idUsuario) } catch (_: Exception) { }
+            SettingsManager.clearAll()
+            _cuentaEliminada.value = true
+        }
     }
 }

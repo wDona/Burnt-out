@@ -20,7 +20,8 @@ enum class EstadoSync { IDLE, SINCRONIZANDO, COMPLETADO, COMPLETADO_SIN_CAMBIOS,
 class OperacionesPendientesViewModel(
     private val repository: OperacionesPendientesRepository,
     private val syncRepository: SyncRepository,
-    private val refrescarDatos: RefrescarDatosUseCase
+    private val refrescarDatos: RefrescarDatosUseCase,
+    private val verificarUsuarioActivo: suspend () -> Boolean = { true }
 ) : ScreenModel {
     // Scope propio - Voyager cancela screenModelScope al salir de PreMainScreen,
     // pero este persiste con el singleton para que sincronizarPorReconexion funcione desde cualquier pantalla.
@@ -43,6 +44,11 @@ class OperacionesPendientesViewModel(
             return
         }
         appScope.launch {
+            if (!verificarUsuarioActivo()) {
+                SettingsManager.clearAll()
+                _estadoSync.value = EstadoSync.COMPLETADO_SIN_CAMBIOS
+                return@launch
+            }
             val hayPendientes = repository.getOperacionesPendientes().isNotEmpty()
             _estadoSync.value = EstadoSync.SINCRONIZANDO
             try {
@@ -64,6 +70,10 @@ class OperacionesPendientesViewModel(
         if (SettingsManager.isUsuarioInvitado()) return
         if (_estadoSync.value == EstadoSync.SINCRONIZANDO) return
         appScope.launch {
+            if (!verificarUsuarioActivo()) {
+                SettingsManager.clearAll()
+                return@launch
+            }
             val hayPendientes = repository.getOperacionesPendientes().isNotEmpty()
             _estadoSync.value = EstadoSync.SINCRONIZANDO
             try {

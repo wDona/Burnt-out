@@ -136,10 +136,6 @@ private fun SyncStatusObserver(
         snackbarHostState.currentSnackbarData?.dismiss()
         when (estadoSync) {
             EstadoSync.SINCRONIZANDO -> {}
-//                snackbarHostState.showSnackbar(
-//                message = "Sincronizando cambios...",
-//                duration = SnackbarDuration.Indefinite
-//            )
             EstadoSync.COMPLETADO -> {}
             EstadoSync.COMPLETADO_SIN_CAMBIOS -> {}
             EstadoSync.CON_ERRORES -> snackbarHostState.showSnackbar(

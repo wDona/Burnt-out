@@ -55,24 +55,4 @@ class PerfilViewModel(private val repository: UsuarioRepository) : ScreenModel {
             _uiState.update { it.copy(usuario = null) }
         }
     }
-
-    fun login(username: String, contrasena: String, onResult: (Boolean) -> Unit) {
-        screenModelScope.launch {
-            try {
-                val user = repository.login(username, contrasena).usuario
-                _uiState.update { it.copy(usuario = user) }
-                onResult(true)
-            } catch (e: Exception) {
-                println("Error en login: ${e.message}")
-                onResult(false)
-            }
-        }
-    }
-
-    fun actualizarRiesgo(idUsuario: Long) {
-        screenModelScope.launch {
-            // repository.updateRiesgoBurnout(idUsuario, resultadoBurnout.riesgoTotal)
-            cargarUsuario(idUsuario)
-        }
-    }
 }

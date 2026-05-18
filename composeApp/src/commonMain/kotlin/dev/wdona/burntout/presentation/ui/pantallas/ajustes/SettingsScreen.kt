@@ -4,6 +4,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.DeleteForever
@@ -11,14 +13,17 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.model.rememberScreenModel
@@ -60,7 +65,19 @@ fun SettingsContent(viewModel: AjustesViewModel, onVolver: () -> Unit, onLogout:
     val ajustes by viewModel.ajustesUiState.collectAsStateWithLifecycle()
     val respuestasAnonimas by viewModel.respuestasAnonimas.collectAsStateWithLifecycle()
     val notificacionesActivas by viewModel.notificacionesActivas.collectAsStateWithLifecycle()
+    val cuentaEliminada by viewModel.cuentaEliminada.collectAsStateWithLifecycle()
+
     var mostrarDialogoEliminarDB by remember { mutableStateOf(false) }
+    var mostrarEliminarCuenta1 by remember { mutableStateOf(false) }
+    var mostrarEliminarCuenta2 by remember { mutableStateOf(false) }
+    var textoEliminarCuenta by remember { mutableStateOf("") }
+
+    LaunchedEffect(cuentaEliminada) {
+        if (cuentaEliminada) {
+            eliminarBaseDatosLocal()
+            onLogout()
+        }
+    }
 
     if (mostrarDialogoEliminarDB) {
         DialogEliminarDB(
@@ -71,6 +88,70 @@ fun SettingsContent(viewModel: AjustesViewModel, onVolver: () -> Unit, onLogout:
                 onDBEliminada()
             },
             onDismiss = { mostrarDialogoEliminarDB = false }
+        )
+    }
+
+    if (mostrarEliminarCuenta1) {
+        AlertDialog(
+            onDismissRequest = { mostrarEliminarCuenta1 = false },
+            title = { Text("¿Eliminar tu cuenta?") },
+            text = { Text("¿Seguro que lo quieres eliminar? Esta acción es irrecuperable. Toda su información se perderá.") },
+            confirmButton = {
+                TextButton(onClick = {
+                    mostrarEliminarCuenta1 = false
+                    mostrarEliminarCuenta2 = true
+                }) { Text("Continuar", color = MaterialTheme.colorScheme.error) }
+            },
+            dismissButton = {
+                TextButton(onClick = { mostrarEliminarCuenta1 = false }) { Text("Cancelar") }
+            }
+        )
+    }
+
+    if (mostrarEliminarCuenta2) {
+        val username = ajustes.nombreUsuario
+        val textoEsperado = "eliminar $username"
+        AlertDialog(
+            onDismissRequest = {
+                mostrarEliminarCuenta2 = false
+                textoEliminarCuenta = ""
+            },
+            title = { Text("Confirmar eliminación") },
+            text = {
+                Column {
+                    Text("Escribe \"eliminar $username\" para confirmar:")
+                    OutlinedTextField(
+                        value = textoEliminarCuenta,
+                        onValueChange = { textoEliminarCuenta = it },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                        keyboardActions = KeyboardActions(onDone = {
+                            if (textoEliminarCuenta == textoEsperado) {
+                                viewModel.eliminarCuentaPropia()
+                                textoEliminarCuenta = ""
+                                mostrarEliminarCuenta2 = false
+                            }
+                        })
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    enabled = textoEliminarCuenta == textoEsperado,
+                    onClick = {
+                        viewModel.eliminarCuentaPropia()
+                        textoEliminarCuenta = ""
+                        mostrarEliminarCuenta2 = false
+                    }
+                ) { Text("Eliminar", color = MaterialTheme.colorScheme.error) }
+            },
+            dismissButton = {
+                TextButton(onClick = {
+                    mostrarEliminarCuenta2 = false
+                    textoEliminarCuenta = ""
+                }) { Text("Cancelar") }
+            }
         )
     }
 
@@ -108,6 +189,17 @@ fun SettingsContent(viewModel: AjustesViewModel, onVolver: () -> Unit, onLogout:
             ) {
                 Icon(Icons.Default.DeleteForever, contentDescription = null, modifier = Modifier.padding(end = 8.dp))
                 Text("Eliminar base de datos local")
+            }
+
+            if (ajustes.idUsuario != Long.MIN_VALUE) {
+                TextButton(
+                    onClick = { mostrarEliminarCuenta1 = true },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                ) {
+                    Icon(Icons.Default.DeleteForever, contentDescription = null, modifier = Modifier.padding(end = 8.dp))
+                    Text("Eliminar mi cuenta")
+                }
             }
 
             TextButton(

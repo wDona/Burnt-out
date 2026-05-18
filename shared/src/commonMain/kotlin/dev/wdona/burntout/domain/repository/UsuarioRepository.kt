@@ -12,6 +12,7 @@ interface UsuarioRepository {
     suspend fun crearUsuario(usuario: Usuario)
     suspend fun actualizarUsuario(usuario: Usuario)
     suspend fun eliminarUsuario(idUsuario: Long)
+    suspend fun eliminarUsuarioComoAdmin(idAdmin: Long, idUsuario: Long): Boolean
     suspend fun updateRiesgoBurnout(idUsuario: Long, riesgo: Double)
     suspend fun existeUsuario(username: String): Boolean
     suspend fun getUsuarioByUsername(username: String): Usuario?

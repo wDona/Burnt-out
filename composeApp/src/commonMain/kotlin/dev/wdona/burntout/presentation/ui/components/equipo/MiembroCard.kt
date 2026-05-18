@@ -35,12 +35,14 @@ fun MiembroCard(
     miembro: Usuario,
     onClick: () -> Unit,
     esAdminOrOwner: Boolean = false,
-    onCambiarRol: ((String) -> Unit)? = null
+    onCambiarRol: ((String) -> Unit)? = null,
+    onEliminar: (() -> Unit)? = null
 ) {
     var menuExpanded by remember { mutableStateOf(false) }
     val esOwner = miembro.rol == "OWNER"
     val esAdmin = miembro.rol == "ADMIN"
-    val puedeGestionar = esAdminOrOwner && !esOwner && onCambiarRol != null
+    val puedeEliminar = esAdminOrOwner && !esOwner && onEliminar != null
+    val puedeGestionar = (esAdminOrOwner && !esOwner && onCambiarRol != null) || puedeEliminar
 
     Row(
         modifier = Modifier
@@ -99,20 +101,31 @@ fun MiembroCard(
                     Icon(Icons.Default.MoreVert, contentDescription = "Opciones de rol")
                 }
                 DropdownMenu(expanded = menuExpanded, onDismissRequest = { menuExpanded = false }) {
-                    if (esAdmin) {
+                    if (onCambiarRol != null) {
+                        if (esAdmin) {
+                            DropdownMenuItem(
+                                text = { Text("Quitar admin") },
+                                onClick = {
+                                    menuExpanded = false
+                                    onCambiarRol("MEMBER")
+                                }
+                            )
+                        } else {
+                            DropdownMenuItem(
+                                text = { Text("Hacer admin") },
+                                onClick = {
+                                    menuExpanded = false
+                                    onCambiarRol("ADMIN")
+                                }
+                            )
+                        }
+                    }
+                    if (puedeEliminar) {
                         DropdownMenuItem(
-                            text = { Text("Quitar admin") },
+                            text = { Text("Eliminar usuario", color = MaterialTheme.colorScheme.error) },
                             onClick = {
                                 menuExpanded = false
-                                onCambiarRol("MEMBER")
-                            }
-                        )
-                    } else {
-                        DropdownMenuItem(
-                            text = { Text("Hacer admin") },
-                            onClick = {
-                                menuExpanded = false
-                                onCambiarRol("ADMIN")
+                                onEliminar?.invoke()
                             }
                         )
                     }

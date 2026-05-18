@@ -77,22 +77,6 @@ class FormularioViewModel(
         _uiState.update { it.copy(preguntaActual = siguiente) }
     }
 
-    fun cargarRespuesta(idPregunta: Long) {
-        screenModelScope.launch {
-             // Maybe loading here?
-             val respuestas = repository.getRespuestasByPregunta(idPregunta)
-             _uiState.update { it.copy(respuestas = it.respuestas + respuestas) }
-        }
-    }
-
-    fun cargarRespuestasByIdUsuario(idUsuario: Long) {
-        screenModelScope.launch {
-            val respuestas = repository.getRespuestasByIdUsuario(idUsuario)
-             _uiState.update { it.copy(respuestas = respuestas) }
-             seleccionarSiguientePreguntaSinResponder()
-        }
-    }
-
     fun cargarRespuestasByIdUsuario(idUsuario: Long, date: Long) {
         screenModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }

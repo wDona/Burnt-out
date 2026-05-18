@@ -11,6 +11,7 @@ interface UsuarioApi {
     suspend fun crearUsuario(usuario: Usuario): Long
     suspend fun actualizarUsuario(usuario: Usuario): Boolean
     suspend fun eliminarUsuario(idUsuario: Long): Boolean
+    suspend fun eliminarUsuarioComoAdmin(idAdmin: Long, idUsuario: Long): Boolean
     suspend fun existeUsuario(username: String): Boolean
     suspend fun getUsuarioByUsername(username: String): Usuario?
     suspend fun login(username: String, contrasena: String): LoginResponse

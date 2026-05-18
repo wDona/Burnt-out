@@ -96,34 +96,6 @@ class PreguntasInicialesViewModel(
         _uiState.update { it.copy(preguntaActual = siguiente) }
     }
 
-    fun cargarRespuesta(idPregunta: Long) {
-        screenModelScope.launch {
-            val respuestas = repository.getRespuestasByPregunta(idPregunta)
-            _uiState.update { it.copy(respuestas = it.respuestas + respuestas) }
-        }
-    }
-
-    fun cargarRespuestasByIdUsuario(idUsuario: Long) {
-        screenModelScope.launch {
-            val respuestas = repository.getRespuestasByIdUsuario(idUsuario)
-            _uiState.update { it.copy(respuestas = respuestas) }
-            seleccionarSiguientePreguntaSinResponder()
-        }
-    }
-
-    fun cargarRespuestasByIdUsuario(idUsuario: Long, date: Long) {
-        screenModelScope.launch {
-            _uiState.update { it.copy(isLoading = true) }
-            try {
-                val respuestas = repository.getRespuestasByIdUsuarioAndDate(idUsuario, date)
-                _uiState.update { it.copy(respuestas = respuestas, isLoading = false) }
-                seleccionarSiguientePreguntaSinResponder()
-            } catch (e: Exception) {
-                _uiState.update { it.copy(isLoading = false, error = e.message) }
-            }
-        }
-    }
-
     fun responderPregunta(respuesta: Respuesta) {
         println("ViewModel: Recibida peticion de responder pregunta ${respuesta.idPregunta}, valor ${respuesta.respuesta}")
         screenModelScope.launch {

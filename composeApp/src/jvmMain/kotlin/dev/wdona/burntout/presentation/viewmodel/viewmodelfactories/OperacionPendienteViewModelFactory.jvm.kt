@@ -47,6 +47,7 @@ import dev.wdona.burntout.domain.usecase.RefrescarDatosUseCase
 import dev.wdona.burntout.domain.usecase.SincronizarPendientesUseCase
 import dev.wdona.burntout.presentation.viewmodel.viewmodels.OperacionesPendientesViewModel
 import dev.wdona.burntout.shared.db.DatabaseActions
+import dev.wdona.burntout.shared.utils.SettingsManager
 
 actual class OperacionesPendientesViewModelFactory {
     actual fun create(): OperacionesPendientesViewModel {
@@ -115,7 +116,16 @@ actual class OperacionesPendientesViewModelFactory {
 
         val refrescarDatos = RefrescarDatosUseCase(tableroRepo, equipoRepo, ajusteRepo)
 
-        return getInstance(pendientesRepository, syncRepository, refrescarDatos)
+        val verificarUsuarioActivo: suspend () -> Boolean = {
+            try {
+                val id = SettingsManager.getIdUsuarioActual()
+                if (id == Long.MIN_VALUE) true else !usuarioRemote.getUserById(id).isDeleted
+            } catch (_: Exception) {
+                true
+            }
+        }
+
+        return getInstance(pendientesRepository, syncRepository, refrescarDatos, verificarUsuarioActivo)
     }
 
     companion object {
@@ -123,10 +133,11 @@ actual class OperacionesPendientesViewModelFactory {
         fun getInstance(
             repository: OperacionesPendientesRepository,
             syncRepository: SyncRepository,
-            refrescarDatos: RefrescarDatosUseCase
+            refrescarDatos: RefrescarDatosUseCase,
+            verificarUsuarioActivo: suspend () -> Boolean = { true }
         ): OperacionesPendientesViewModel {
             if (instance == null) {
-                instance = OperacionesPendientesViewModel(repository, syncRepository, refrescarDatos)
+                instance = OperacionesPendientesViewModel(repository, syncRepository, refrescarDatos, verificarUsuarioActivo)
             }
             return instance!!
         }

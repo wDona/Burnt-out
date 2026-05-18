@@ -1,6 +1,7 @@
 package dev.wdona.burntout.api.latest
 import dev.wdona.burntout.db.DatabaseFactory
 import dev.wdona.burntout.db.DatabaseFactory.dbQuery
+import dev.wdona.burntout.db.tables.AjustesTable
 import dev.wdona.burntout.db.tables.EquipoMiembrosTable
 import dev.wdona.burntout.db.tables.EquiposTable
 import dev.wdona.burntout.db.tables.InvitacionesTable
@@ -8,6 +9,9 @@ import dev.wdona.burntout.db.tables.OrganizacionesTable
 import dev.wdona.burntout.db.tables.PreguntasTable
 import dev.wdona.burntout.db.tables.RespuestasTable
 import dev.wdona.burntout.db.tables.SesionesTable
+import dev.wdona.burntout.db.tables.SubtareasTable
+import dev.wdona.burntout.db.tables.TablerosTable
+import dev.wdona.burntout.db.tables.TareasTable
 import dev.wdona.burntout.db.tables.UsuariosTable
 import dev.wdona.burntout.shared.domain.LoginResponse
 import dev.wdona.burntout.shared.domain.RegistroRequest
@@ -24,8 +28,11 @@ import io.ktor.server.routing.put
 import io.ktor.server.routing.route
 import kotlinx.serialization.Serializable
 import org.jetbrains.exposed.sql.ResultRow
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.inList
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.andWhere
+import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.lowerCase
 import org.jetbrains.exposed.sql.selectAll
@@ -205,17 +212,148 @@ fun Route.usuariosRoutes() {
                 val id = call.parameters["id"]?.toLongOrNull()
                     ?: return@delete call.respond(HttpStatusCode.BadRequest)
 
-                println("[${call.request.origin.remoteHost}] DELETE /usuarios/$id")
+                val idAdmin = call.request.queryParameters["idAdmin"]?.toLongOrNull()
 
-                val deletedCount = dbQuery {
-                    UsuariosTable.update({ (UsuariosTable.id eq id) and (UsuariosTable.isDeleted eq false) }) {
-                        it[isDeleted] = true
+                println("[${call.request.origin.remoteHost}] DELETE /usuarios/$id idAdmin=$idAdmin")
+
+                val result = dbQuery {
+                    val targetRow = UsuariosTable.selectAll()
+                        .where { (UsuariosTable.id eq id) and (UsuariosTable.isDeleted eq false) }
+                        .singleOrNull()
+                        ?: return@dbQuery HttpStatusCode.NotFound to "Usuario no encontrado"
+
+                    if (idAdmin != null && idAdmin != id) {
+                        val adminRow = UsuariosTable.selectAll()
+                            .where { (UsuariosTable.id eq idAdmin) and (UsuariosTable.isDeleted eq false) }
+                            .singleOrNull()
+                            ?: return@dbQuery HttpStatusCode.Forbidden to "Admin no encontrado"
+
+                        val adminRol = adminRow[UsuariosTable.rol]
+                        if (adminRol != "ADMIN" && adminRol != "OWNER") {
+                            return@dbQuery HttpStatusCode.Forbidden to "Sin permisos para eliminar usuarios"
+                        }
+
+                        if (targetRow[UsuariosTable.rol] == "OWNER") {
+                            return@dbQuery HttpStatusCode.Forbidden to "No se puede eliminar al OWNER"
+                        }
+
+                        if (targetRow[UsuariosTable.idOrganizacion] != adminRow[UsuariosTable.idOrganizacion]) {
+                            return@dbQuery HttpStatusCode.Forbidden to "El usuario no pertenece a tu organización"
+                        }
                     }
+
+                    val orgId = targetRow[UsuariosTable.idOrganizacion]
+                    val now = System.currentTimeMillis() / 1000
+
+                    val otrosActivosEnOrg = UsuariosTable.selectAll()
+                        .where { (UsuariosTable.idOrganizacion eq orgId) and (UsuariosTable.isDeleted eq false) }
+                        .count() - 1  // -1 porque el usuario actual todavía no está marcado
+
+                    UsuariosTable.update({ UsuariosTable.id eq id }) {
+                        it[isDeleted] = true
+                        it[username] = "__deleted_${id}"
+                        it[updatedAt] = now
+                    }
+
+                    TareasTable.update({ (TareasTable.idUsuarioAsignado eq id) and (TareasTable.isDeleted eq false) }) {
+                        it[idUsuarioAsignado] = Long.MIN_VALUE
+                    }
+
+                    SesionesTable.deleteWhere { SesionesTable.idUsuario eq id }
+
+                    if (otrosActivosEnOrg == 0L) {
+                        // Cascade: eliminar todo lo relacionado con la organización
+                        val tableroIds = TablerosTable.selectAll()
+                            .where { TablerosTable.idOrganizacion eq orgId }
+                            .map { it[TablerosTable.id] }
+
+                        if (tableroIds.isNotEmpty()) {
+                            val tareaIds = TareasTable.selectAll()
+                                .where { TareasTable.idTablero inList tableroIds }
+                                .map { it[TareasTable.id] }
+
+                            if (tareaIds.isNotEmpty()) {
+                                SubtareasTable.update({ SubtareasTable.idTarea inList tareaIds }) {
+                                    it[isDeleted] = true
+                                    it[updatedAt] = now
+                                }
+                            }
+
+                            TareasTable.update({ TareasTable.idTablero inList tableroIds }) {
+                                it[isDeleted] = true
+                                it[updatedAt] = now
+                            }
+                        }
+
+                        TablerosTable.update({ TablerosTable.idOrganizacion eq orgId }) {
+                            it[isDeleted] = true
+                            it[updatedAt] = now
+                        }
+
+                        val equipoIds = EquiposTable.selectAll()
+                            .where { EquiposTable.idOrganizacion eq orgId }
+                            .map { it[EquiposTable.id] }
+
+                        if (equipoIds.isNotEmpty()) {
+                            EquipoMiembrosTable.update({ EquipoMiembrosTable.idEquipo inList equipoIds }) {
+                                it[isDeleted] = true
+                                it[updatedAt] = now
+                            }
+                        }
+
+                        EquiposTable.update({ EquiposTable.idOrganizacion eq orgId }) {
+                            it[isDeleted] = true
+                            it[updatedAt] = now
+                        }
+
+                        val preguntaIds = PreguntasTable.selectAll()
+                            .where { PreguntasTable.idOrganizacion eq orgId }
+                            .map { it[PreguntasTable.id] }
+
+                        if (preguntaIds.isNotEmpty()) {
+                            RespuestasTable.update({ RespuestasTable.idPregunta inList preguntaIds }) {
+                                it[isDeleted] = true
+                                it[updatedAt] = now
+                            }
+                        }
+
+                        PreguntasTable.update({ PreguntasTable.idOrganizacion eq orgId }) {
+                            it[isDeleted] = true
+                            it[updatedAt] = now
+                        }
+
+                        val allUserIds = UsuariosTable.selectAll()
+                            .where { UsuariosTable.idOrganizacion eq orgId }
+                            .map { it[UsuariosTable.id] }
+
+                        if (allUserIds.isNotEmpty()) {
+                            AjustesTable.update({ AjustesTable.idUsuario inList allUserIds }) {
+                                it[isDeleted] = true
+                                it[updatedAt] = now
+                            }
+                            SesionesTable.deleteWhere { SesionesTable.idUsuario inList allUserIds }
+                            UsuariosTable.update({ UsuariosTable.idOrganizacion eq orgId }) {
+                                it[isDeleted] = true
+                                it[updatedAt] = now
+                            }
+                        }
+
+                        InvitacionesTable.deleteWhere { InvitacionesTable.idOrganizacion eq orgId }
+
+                        OrganizacionesTable.update({ OrganizacionesTable.id eq orgId }) {
+                            it[isDeleted] = true
+                            it[updatedAt] = now
+                        }
+                    }
+
+                    HttpStatusCode.NoContent to ""
                 }
 
-                if (deletedCount == 0) return@delete call.respond(HttpStatusCode.NotFound)
-
-                call.respond(HttpStatusCode.NoContent)
+                if (result.first == HttpStatusCode.NoContent) {
+                    call.respond(HttpStatusCode.NoContent)
+                } else {
+                    call.respond(result.first, result.second)
+                }
             }
         }
 
@@ -292,6 +430,16 @@ private suspend fun crearSesion(idUsuario: Long): String = dbQuery {
 
 private suspend fun crearUsuarioConOrg(request: RegistroRequest, nombreOrg: String): Usuario = dbQuery {
     println("[SERVER] Creando organización: $nombreOrg")
+
+    // Liberar username si lo ocupa un usuario eliminado sin renombrar
+    UsuariosTable.selectAll()
+        .where { (UsuariosTable.username.lowerCase() eq request.username.lowercase()) and (UsuariosTable.isDeleted eq true) }
+        .forEach { row ->
+            val deletedId = row[UsuariosTable.id]
+            UsuariosTable.update({ UsuariosTable.id eq deletedId }) {
+                it[username] = "__deleted_${deletedId}"
+            }
+        }
 
     val idOrg = OrganizacionesTable.insert {
         it[OrganizacionesTable.nombre] = nombreOrg
@@ -384,6 +532,16 @@ private suspend fun unirseConCodigo(request: RegistroRequest, codigo: String): U
     val hashedPassword = hashPassword(request.password)
 
     return dbQuery {
+        // Liberar username si lo ocupa un usuario eliminado sin renombrar
+        UsuariosTable.selectAll()
+            .where { (UsuariosTable.username.lowerCase() eq request.username.lowercase()) and (UsuariosTable.isDeleted eq true) }
+            .forEach { row ->
+                val deletedId = row[UsuariosTable.id]
+                UsuariosTable.update({ UsuariosTable.id eq deletedId }) {
+                    it[username] = "__deleted_${deletedId}"
+                }
+            }
+
         val idEquipo = EquiposTable.insert {
             it[EquiposTable.titulo] = "Equipo de ${request.nombre}"
             it[EquiposTable.puntuacion] = 0L

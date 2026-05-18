@@ -4,7 +4,13 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
@@ -31,10 +37,13 @@ import dev.wdona.burntout.presentation.ui.components.common.FilaTextoPlaceholder
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import dev.wdona.burntout.presentation.ui.components.equipo.AnadirUsuarioDialog
+import dev.wdona.burntout.shared.domain.Usuario
 import dev.wdona.burntout.shared.utils.SettingsManager
 
 class EquipoScreen(val factory: EquipoViewModelFactory, val perfilFactory: MiPerfilViewModelFactory, val ajustesFactory: AjustesViewModelFactory, val onVolver: (() -> Unit)? = null, val idEquipo: Long? = null) : Screen {
@@ -53,18 +62,32 @@ class EquipoScreen(val factory: EquipoViewModelFactory, val perfilFactory: MiPer
         val esMiEquipo = targetIdEquipo == idEquipoActual && !SettingsManager.isUsuarioInvitado()
 
         var mostrarAnadirUsuarioDialog by remember { mutableStateOf(false) }
+        var miembroAEliminar by remember { mutableStateOf<Usuario?>(null) }
+        var mostrarConfirmacion1 by remember { mutableStateOf(false) }
+        var mostrarConfirmacion2 by remember { mutableStateOf(false) }
+        var textoConfirmacion by remember { mutableStateOf("") }
 
         LaunchedEffect(targetIdEquipo) {
             viewModel.cargarEquipoPorId(targetIdEquipo)
             viewModel.cargarMiembrosEquipo(targetIdEquipo)
         }
-        
+
         val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
         LaunchedEffect(uiState.userAddedSuccess) {
             if (uiState.userAddedSuccess) {
                 mostrarAnadirUsuarioDialog = false
                 viewModel.resetUserAddedSuccess()
+            }
+        }
+
+        LaunchedEffect(uiState.usuarioEliminadoExitoso) {
+            if (uiState.usuarioEliminadoExitoso) {
+                miembroAEliminar = null
+                mostrarConfirmacion1 = false
+                mostrarConfirmacion2 = false
+                textoConfirmacion = ""
+                viewModel.resetUsuarioEliminadoExitoso()
             }
         }
 
@@ -82,7 +105,78 @@ class EquipoScreen(val factory: EquipoViewModelFactory, val perfilFactory: MiPer
             )
         }
 
+        if (mostrarConfirmacion1 && miembroAEliminar != null) {
+            AlertDialog(
+                onDismissRequest = {
+                    mostrarConfirmacion1 = false
+                    miembroAEliminar = null
+                },
+                title = { Text("¿Eliminar usuario?") },
+                text = { Text("¿Seguro que lo quieres eliminar? Esta acción es irrecuperable. Toda su información se perderá.") },
+                confirmButton = {
+                    TextButton(onClick = {
+                        mostrarConfirmacion1 = false
+                        mostrarConfirmacion2 = true
+                    }) { Text("Continuar", color = MaterialTheme.colorScheme.error) }
+                },
+                dismissButton = {
+                    TextButton(onClick = {
+                        mostrarConfirmacion1 = false
+                        miembroAEliminar = null
+                    }) { Text("Cancelar") }
+                }
+            )
+        }
+
+        if (mostrarConfirmacion2 && miembroAEliminar != null) {
+            val username = miembroAEliminar!!.username
+            val textoEsperado = "eliminar $username"
+            AlertDialog(
+                onDismissRequest = {
+                    mostrarConfirmacion2 = false
+                    miembroAEliminar = null
+                    textoConfirmacion = ""
+                },
+                title = { Text("Confirmar eliminación") },
+                text = {
+                    Column {
+                        Text("Escribe \"eliminar $username\" para confirmar:")
+                        OutlinedTextField(
+                            value = textoConfirmacion,
+                            onValueChange = { textoConfirmacion = it },
+                            singleLine = true,
+                            modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                            keyboardActions = KeyboardActions(onDone = {
+                                if (textoConfirmacion == textoEsperado) {
+                                    miembroAEliminar?.let { viewModel.eliminarUsuario(it.idUsuario) }
+                                    textoConfirmacion = ""
+                                }
+                            })
+                        )
+                    }
+                },
+                confirmButton = {
+                    TextButton(
+                        enabled = textoConfirmacion == textoEsperado,
+                        onClick = {
+                            miembroAEliminar?.let { viewModel.eliminarUsuario(it.idUsuario) }
+                            textoConfirmacion = ""
+                        }
+                    ) { Text("Eliminar", color = MaterialTheme.colorScheme.error) }
+                },
+                dismissButton = {
+                    TextButton(onClick = {
+                        mostrarConfirmacion2 = false
+                        miembroAEliminar = null
+                        textoConfirmacion = ""
+                    }) { Text("Cancelar") }
+                }
+            )
+        }
+
         val esAdminOrOwner = SettingsManager.isAdminOrOwner()
+        val puedeEliminarUsuarios = esAdminOrOwner && !SettingsManager.isUsuarioInvitado()
 
         EquipoContent(
             viewModel,
@@ -95,6 +189,10 @@ class EquipoScreen(val factory: EquipoViewModelFactory, val perfilFactory: MiPer
             onClickUsuario = {
                 navigator.push(PerfilScreen(perfilFactory, ajustesFactory, onVolver = { navigator.pop() }, idUsuario = it))
             },
+            onEliminarUsuario = if (puedeEliminarUsuarios) { miembro ->
+                miembroAEliminar = miembro
+                mostrarConfirmacion1 = true
+            } else null,
             perfilViewModel
         )
     }
@@ -102,7 +200,7 @@ class EquipoScreen(val factory: EquipoViewModelFactory, val perfilFactory: MiPer
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EquipoContent(viewModel: EquipoViewModel, esMiEquipo: Boolean, esAdminOrOwner: Boolean = false, onVolver: (() -> Unit)? = null, onClickAddUsuario: () -> Unit, onClickUsuario: (Long) -> Unit, perfilViewModel: PerfilViewModel) {
+fun EquipoContent(viewModel: EquipoViewModel, esMiEquipo: Boolean, esAdminOrOwner: Boolean = false, onVolver: (() -> Unit)? = null, onClickAddUsuario: () -> Unit, onClickUsuario: (Long) -> Unit, onEliminarUsuario: ((Usuario) -> Unit)? = null, perfilViewModel: PerfilViewModel) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     val titulo = if (uiState.isLoading) "" else (uiState.equipo?.titulo ?: "Offline")
@@ -144,6 +242,9 @@ fun EquipoContent(viewModel: EquipoViewModel, esMiEquipo: Boolean, esAdminOrOwne
                             esAdminOrOwner = esAdminOrOwner,
                             onCambiarRol = if (esAdminOrOwner) { nuevoRol ->
                                 viewModel.cambiarRol(miembro.idUsuario, nuevoRol)
+                            } else null,
+                            onEliminar = if (onEliminarUsuario != null) {
+                                { onEliminarUsuario(miembro) }
                             } else null
                         )
                     }

@@ -21,7 +21,8 @@ data class EquipoUiState(
     val miembros: List<Usuario> = emptyList(),
     val isLoading: Boolean = false,
     val error: String? = null,
-    val userAddedSuccess: Boolean = false
+    val userAddedSuccess: Boolean = false,
+    val usuarioEliminadoExitoso: Boolean = false
 )
 
 class EquipoViewModel(
@@ -65,24 +66,6 @@ class EquipoViewModel(
             } catch (e: Exception) {
                  println("Error cargando miembros: ${e.message}")
                  _uiState.update { it.copy(isLoading = false, error = e.message) }
-            }
-        }
-    }
-
-    fun addUsuarioAlEquipo(idEquipo: Long, idUsuario: Long) {
-        screenModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, userAddedSuccess = false, error = null) }
-            try {
-                val success = addUsuarioAlEquipoUseCase(idEquipo, idUsuario)
-
-                if (success) {
-                    cargarMiembrosEquipo(idEquipo)
-                    _uiState.update { it.copy(userAddedSuccess = true, isLoading = false) }
-                } else {
-                    _uiState.update { it.copy(isLoading = false, error = "Error al añadir usuario") }
-                }
-            } catch (e: Exception) {
-                _uiState.update { it.copy(isLoading = false, error = e.message) }
             }
         }
     }
@@ -138,21 +121,21 @@ class EquipoViewModel(
         }
     }
 
-    fun salirDelEquipo(idEquipo: Long, idUsuario: Long) {
+    fun eliminarUsuario(idUsuario: Long) {
         screenModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, error = null) }
-            try {
-                val success = repository.removeUsuarioDelEquipo(idEquipo, idUsuario)
-                if (success) {
-                    cargarMiembrosEquipo(idEquipo)
-                    _uiState.update { it.copy(isLoading = false) }
-                } else {
-                    _uiState.update { it.copy(isLoading = false, error = "Error al salir del equipo") }
-                }
-            } catch (e: Exception) {
-                _uiState.update { it.copy(isLoading = false, error = e.message) }
+            val idAdmin = SettingsManager.getIdUsuarioActual()
+            val success = usuarioRepository.eliminarUsuarioComoAdmin(idAdmin, idUsuario)
+            if (success) {
+                val idEquipo = _uiState.value.equipo?.idEquipo ?: return@launch
+                cargarMiembrosEquipo(idEquipo)
+                _uiState.update { it.copy(usuarioEliminadoExitoso = true) }
+            } else {
+                _uiState.update { it.copy(error = "Error al eliminar el usuario") }
             }
         }
     }
 
+    fun resetUsuarioEliminadoExitoso() {
+        _uiState.update { it.copy(usuarioEliminadoExitoso = false) }
+    }
 }

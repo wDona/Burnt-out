@@ -174,6 +174,20 @@ class UsuarioRepositoryImpl(
         }
     }
 
+    override suspend fun eliminarUsuarioComoAdmin(idAdmin: Long, idUsuario: Long): Boolean =
+        withContext(NonCancellable + Dispatchers.IO) {
+            try {
+                val success = remote.eliminarUsuarioComoAdmin(idAdmin, idUsuario)
+                if (success) {
+                    try { local.eliminarUsuario(idUsuario) } catch (_: Exception) { }
+                }
+                success
+            } catch (e: Exception) {
+                println("Error al eliminar usuario como admin: ${e.message}")
+                false
+            }
+        }
+
     override suspend fun updateRiesgoBurnout(idUsuario: Long, riesgo: Double) {
         withContext(NonCancellable + Dispatchers.IO) {
             val usuario = getUserById(idUsuario)
